@@ -204,18 +204,18 @@ function WeaponSelectionGui:_layout_category_tabs()
 		on_click_callback = callback(self, self, "on_click_filter_equippable"),
 		tabs_params = {
 			{
-				name = "tab_equippable",
-				callback_param = "equippable",
-				text = self:translate("menu_weapons_filter_equippable", true)
-			},
-			{
 				name = "tab_all",
 				callback_param = "all",
 				text = self:translate("menu_filter_all", true)
+			},
+			{
+				name = "tab_equippable",
+				callback_param = "equippable",
+				text = self:translate("menu_weapons_filter_equippable", true)
 			}
 		}
 	})
-	self._selected_filter = "equippable"
+	self._selected_filter = "all"
 end
 
 -- Lines 257-285

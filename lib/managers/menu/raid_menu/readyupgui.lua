@@ -488,7 +488,7 @@ function ReadyUpGui:_players_inventory_processed(params)
 	self:_set_card_selection_controls()
 end
 
--- Lines 456-517
+-- Lines 456-522
 function ReadyUpGui:_on_player_click_callback(control, params)
 	Application:trace("[ReadyUpGui:_on_player_click_callback]")
 
@@ -507,7 +507,6 @@ function ReadyUpGui:_on_player_click_callback(control, params)
 
 		self._suggest_card_button:hide()
 		self._leave_lobby_button:hide()
-		self._ready_up_button:hide()
 	else
 		if self._is_host then
 			if not params.is_current_player then
@@ -522,7 +521,7 @@ function ReadyUpGui:_on_player_click_callback(control, params)
 				self._suggest_card_button:show()
 			end
 
-			if self._leave_lobby_button:enabled() then
+			if self._leave_lobby_button:enabled() and not managers.challenge_cards:did_everyone_locked_sugested_card() then
 				self._leave_lobby_button:show()
 			end
 
@@ -535,8 +534,16 @@ function ReadyUpGui:_on_player_click_callback(control, params)
 			self._local_player_selected = true
 		else
 			self._suggest_card_button:hide()
-			self._leave_lobby_button:hide()
-			self._ready_up_button:hide()
+
+			if self._leave_lobby_button:enabled() and not managers.challenge_cards:did_everyone_locked_sugested_card() then
+				self._leave_lobby_button:show()
+			end
+
+			self._ready_up_button:show()
+
+			if self._ready then
+				self._ready_up_button:disable()
+			end
 
 			self._local_player_selected = false
 		end
@@ -546,7 +553,7 @@ function ReadyUpGui:_on_player_click_callback(control, params)
 	self._current_list_index = params.list_index
 end
 
--- Lines 520-557
+-- Lines 525-562
 function ReadyUpGui:_show_characters()
 	if not self._spawned_character_units then
 		return
@@ -587,7 +594,7 @@ function ReadyUpGui:_show_characters()
 	end
 end
 
--- Lines 559-592
+-- Lines 564-597
 function ReadyUpGui:_show_player_challenge_card_info()
 	local challenge_cards = managers.challenge_cards:get_suggested_cards()
 
@@ -632,7 +639,7 @@ function ReadyUpGui:_show_player_challenge_card_info()
 	end
 end
 
--- Lines 595-600
+-- Lines 600-605
 function ReadyUpGui:_update_challenge_card_selected_icon()
 	local challenge_cards = managers.challenge_cards:get_suggested_cards()
 
@@ -641,7 +648,7 @@ function ReadyUpGui:_update_challenge_card_selected_icon()
 	end
 end
 
--- Lines 602-637
+-- Lines 607-642
 function ReadyUpGui:_update_status()
 	local challenge_cards = managers.challenge_cards:get_suggested_cards()
 
@@ -683,7 +690,7 @@ function ReadyUpGui:_update_status()
 	end
 end
 
--- Lines 639-646
+-- Lines 644-651
 function ReadyUpGui:_on_select_card_button()
 	if not self._suggest_card_button:enabled() then
 		return
@@ -692,7 +699,7 @@ function ReadyUpGui:_on_select_card_button()
 	managers.raid_menu:open_menu("challenge_cards_menu")
 end
 
--- Lines 648-678
+-- Lines 653-683
 function ReadyUpGui:_on_ready_up_button()
 	if not self._ready_up_button:enabled() then
 		return
@@ -723,7 +730,7 @@ function ReadyUpGui:_on_ready_up_button()
 	self:bind_controller_inputs(true, true)
 end
 
--- Lines 680-686
+-- Lines 685-691
 function ReadyUpGui:_on_kick_button()
 	local params = {
 		yes_callback = callback(self, self, "_on_kick_confirmed"),
@@ -733,22 +740,22 @@ function ReadyUpGui:_on_kick_button()
 	managers.menu:show_kick_peer_dialog(params)
 end
 
--- Lines 688-690
+-- Lines 693-695
 function ReadyUpGui:_on_kick_confirmed()
 	managers.vote:host_kick(self._current_peer)
 end
 
--- Lines 692-694
+-- Lines 697-699
 function ReadyUpGui:_on_peer_kicked(params)
 	self:_peer_no_longer_in_lobby(params.peer, "kicked")
 end
 
--- Lines 696-698
+-- Lines 701-703
 function ReadyUpGui:_on_peer_left(params)
 	self:_peer_no_longer_in_lobby(params.peer, "left")
 end
 
--- Lines 700-724
+-- Lines 705-729
 function ReadyUpGui:_peer_no_longer_in_lobby(peer, state)
 	local peer_control = self._player_control_list[peer]
 
@@ -778,7 +785,7 @@ function ReadyUpGui:_peer_no_longer_in_lobby(peer, state)
 	self._spawned_character_units[peer] = nil
 end
 
--- Lines 726-732
+-- Lines 731-737
 function ReadyUpGui:_on_leave_lobby_button()
 	if not self._leave_lobby_button:enabled() then
 		return
@@ -787,7 +794,7 @@ function ReadyUpGui:_on_leave_lobby_button()
 	self._callback_handler:end_game()
 end
 
--- Lines 734-763
+-- Lines 739-768
 function ReadyUpGui:close()
 	managers.challenge_cards:set_automatic_steam_inventory_refresh(false)
 	self:_enable_dof()
@@ -818,7 +825,7 @@ function ReadyUpGui:close()
 	ReadyUpGui.super.close(self)
 end
 
--- Lines 765-798
+-- Lines 770-803
 function ReadyUpGui:_update_controls_contining_mission()
 	if self._continuing_mission then
 		self._suggest_card_button:hide()
@@ -853,7 +860,7 @@ function ReadyUpGui:_update_controls_contining_mission()
 	end
 end
 
--- Lines 800-814
+-- Lines 805-819
 function ReadyUpGui:_update_peers()
 	for control_peer, control in pairs(self._player_control_list) do
 		local peer_present = false
@@ -872,7 +879,7 @@ function ReadyUpGui:_update_peers()
 	end
 end
 
--- Lines 816-877
+-- Lines 821-882
 function ReadyUpGui:update(t, dt)
 	self:_show_characters()
 	self:_show_player_challenge_card_info()
@@ -930,7 +937,7 @@ function ReadyUpGui:update(t, dt)
 	end
 end
 
--- Lines 882-888
+-- Lines 887-893
 function ReadyUpGui:_ct_players()
 	local ct_players = 0
 
@@ -941,7 +948,7 @@ function ReadyUpGui:_ct_players()
 	return ct_players
 end
 
--- Lines 890-903
+-- Lines 895-908
 function ReadyUpGui:_on_tab_right()
 	local ct_players = self:_ct_players()
 	local next_list_idx = (self._current_list_index + 1) % (ct_players + 1)
@@ -959,7 +966,7 @@ function ReadyUpGui:_on_tab_right()
 	end
 end
 
--- Lines 905-917
+-- Lines 910-922
 function ReadyUpGui:_on_tab_left()
 	local next_list_idx = self._current_list_index - 1
 
@@ -976,14 +983,14 @@ function ReadyUpGui:_on_tab_left()
 	end
 end
 
--- Lines 919-924
+-- Lines 924-929
 function ReadyUpGui:show_gamercard()
 	Application:trace("[ReadyUpGui:show_gamercard] showing gamercard for peer " .. tostring(self._current_peer:name()))
 	Application:debug("[ReadyUpGui:show_gamercard]", inspect(self._current_peer))
 	self._callback_handler:view_gamer_card(self._current_peer:xuid())
 end
 
--- Lines 926-1017
+-- Lines 931-1022
 function ReadyUpGui:bind_controller_inputs(is_current_player, can_leave)
 	if managers.menu:is_pc_controller() then
 		if is_current_player and not self._ready then
@@ -1031,47 +1038,45 @@ function ReadyUpGui:bind_controller_inputs(is_current_player, can_leave)
 
 	if self._is_host and not is_current_player and not self._is_single_player then
 		table.insert(bindings, {
-			key = Idstring("menu_controller_face_left"),
+			key = Idstring("menu_controller_face_right"),
 			callback = callback(self, self, "_on_kick_button")
 		})
 		table.insert(controler_legend, "menu_legend_ready_up_kick")
 	end
 
-	if is_current_player then
-		if not self._ready and (managers.raid_job:selected_job() and managers.raid_job:selected_job().job_type == OperationsTweakData.JOB_TYPE_RAID and self._raid_card_count and self._raid_card_count > 0 or managers.raid_job:selected_job() and managers.raid_job:selected_job().job_type == OperationsTweakData.JOB_TYPE_OPERATION and self._operation_card_count and self._operation_card_count > 0) then
-			table.insert(bindings, {
-				key = Idstring("menu_controller_face_top"),
-				callback = callback(self, self, "_on_select_card_button")
-			})
+	if not self._ready and is_current_player and (managers.raid_job:selected_job() and managers.raid_job:selected_job().job_type == OperationsTweakData.JOB_TYPE_RAID and self._raid_card_count and self._raid_card_count > 0 or managers.raid_job:selected_job() and managers.raid_job:selected_job().job_type == OperationsTweakData.JOB_TYPE_OPERATION and self._operation_card_count and self._operation_card_count > 0) then
+		table.insert(bindings, {
+			key = Idstring("menu_controller_face_top"),
+			callback = callback(self, self, "_on_select_card_button")
+		})
 
-			if not self._continuing_mission then
-				if self._is_single_player then
-					table.insert(controler_legend, "menu_legend_ready_up_select_card")
-				else
-					table.insert(controler_legend, "menu_legend_ready_up_suggest_card")
-				end
-			end
-		end
-
-		if can_leave then
-			table.insert(bindings, {
-				key = Idstring("menu_controller_face_left"),
-				callback = callback(self, self, "_on_leave_lobby_button")
-			})
-			table.insert(controler_legend, "menu_legend_ready_up_leave")
-		end
-
-		if not self._ready then
-			table.insert(bindings, {
-				key = Idstring("menu_controller_face_bottom"),
-				callback = callback(self, self, "_on_ready_up_button")
-			})
-
+		if not self._continuing_mission then
 			if self._is_single_player then
-				table.insert(controler_legend, "menu_legend_ready_up_start")
+				table.insert(controler_legend, "menu_legend_ready_up_select_card")
 			else
-				table.insert(controler_legend, "menu_legend_ready_up_ready")
+				table.insert(controler_legend, "menu_legend_ready_up_suggest_card")
 			end
+		end
+	end
+
+	if can_leave then
+		table.insert(bindings, {
+			key = Idstring("menu_controller_face_left"),
+			callback = callback(self, self, "_on_leave_lobby_button")
+		})
+		table.insert(controler_legend, "menu_legend_ready_up_leave")
+	end
+
+	if not self._ready then
+		table.insert(bindings, {
+			key = Idstring("menu_controller_face_bottom"),
+			callback = callback(self, self, "_on_ready_up_button")
+		})
+
+		if self._is_single_player then
+			table.insert(controler_legend, "menu_legend_ready_up_start")
+		else
+			table.insert(controler_legend, "menu_legend_ready_up_ready")
 		end
 	end
 
@@ -1095,7 +1100,7 @@ function ReadyUpGui:bind_controller_inputs(is_current_player, can_leave)
 	self:set_legend(legend)
 end
 
--- Lines 1019-1021
+-- Lines 1024-1026
 function ReadyUpGui:back_pressed()
 	return true
 end
