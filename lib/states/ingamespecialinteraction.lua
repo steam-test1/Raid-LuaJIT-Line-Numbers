@@ -25,9 +25,13 @@ function IngameSpecialInteraction:_setup_controller()
 	self._controller:set_enabled(true)
 end
 
--- Lines 31-40
+-- Lines 31-44
 function IngameSpecialInteraction:_clear_controller()
-	managers.menu:get_controller():enable()
+	local menu_controller = managers.menu:get_controller()
+
+	if menu_controller then
+		menu_controller:enable()
+	end
 
 	if self._controller then
 		self._controller:remove_trigger("cancel_lockpick", self._leave_cb)
@@ -39,14 +43,14 @@ function IngameSpecialInteraction:_clear_controller()
 	end
 end
 
--- Lines 42-46
+-- Lines 46-50
 function IngameSpecialInteraction:set_controller_enabled(enabled)
 	if self._controller then
 		self._controller:set_enabled(enabled)
 	end
 end
 
--- Lines 48-54
+-- Lines 52-58
 function IngameSpecialInteraction:cb_leave()
 	Application:debug("[IngameSpecialInteraction:cb_leave()]")
 
@@ -57,7 +61,7 @@ function IngameSpecialInteraction:cb_leave()
 	game_state_machine:change_state_by_name(self._old_state)
 end
 
--- Lines 56-63
+-- Lines 60-67
 function IngameSpecialInteraction:cb_interact()
 	if self._cooldown > 0 or self._completed then
 		return
@@ -67,11 +71,11 @@ function IngameSpecialInteraction:cb_interact()
 	self:_check_all_complete()
 end
 
--- Lines 65-66
+-- Lines 69-70
 function IngameSpecialInteraction:on_destroyed()
 end
 
--- Lines 68-106
+-- Lines 72-110
 function IngameSpecialInteraction:update(t, dt)
 	if not self._hud then
 		return
@@ -117,7 +121,7 @@ function IngameSpecialInteraction:update(t, dt)
 	end
 end
 
--- Lines 108-114
+-- Lines 112-118
 function IngameSpecialInteraction:update_player_stamina(t, dt)
 	local player = managers.player:player_unit()
 
@@ -126,11 +130,11 @@ function IngameSpecialInteraction:update_player_stamina(t, dt)
 	end
 end
 
--- Lines 116-118
+-- Lines 120-122
 function IngameSpecialInteraction:_player_damage(info)
 end
 
--- Lines 120-172
+-- Lines 124-176
 function IngameSpecialInteraction:at_enter(old_state, params)
 	local player = managers.player:player_unit()
 
@@ -176,7 +180,7 @@ function IngameSpecialInteraction:at_enter(old_state, params)
 	managers.network:session():send_to_peers("enter_lockpicking_state")
 end
 
--- Lines 175-212
+-- Lines 179-215
 function IngameSpecialInteraction:at_exit()
 	self._sound_source:stop()
 
@@ -205,7 +209,7 @@ function IngameSpecialInteraction:at_exit()
 
 	managers.hud:hide_special_interaction(self._completed)
 
-	if not self._completed and not self._completed_by_other and self._tweak_data.target_unit:interaction() and self._tweak_data.target_unit:interaction():active() then
+	if not self._completed and not self._completed_by_other and alive(self._tweak_data.target_unit) and self._tweak_data.target_unit:interaction() and self._tweak_data.target_unit:interaction():active() then
 		managers.hud:show_interact()
 	end
 
@@ -216,7 +220,7 @@ function IngameSpecialInteraction:at_exit()
 	managers.network:session():send_to_peers("exit_lockpicking_state")
 end
 
--- Lines 214-259
+-- Lines 217-262
 function IngameSpecialInteraction:_check_stage_complete()
 	local current_stage_data, current_stage = nil
 
@@ -273,7 +277,7 @@ function IngameSpecialInteraction:_check_stage_complete()
 	end
 end
 
--- Lines 261-273
+-- Lines 264-276
 function IngameSpecialInteraction:_check_all_complete(t, dt)
 	local completed = true
 
@@ -292,7 +296,7 @@ function IngameSpecialInteraction:_check_all_complete(t, dt)
 	end
 end
 
--- Lines 275-283
+-- Lines 278-286
 function IngameSpecialInteraction:_play_sound(event, no_stop)
 	if event then
 		if not no_stop then

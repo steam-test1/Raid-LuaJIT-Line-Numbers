@@ -733,7 +733,7 @@ function EventCompleteState:is_success()
 	return self._success
 end
 
--- Lines 808-865
+-- Lines 808-867
 function EventCompleteState:at_exit(next_state)
 	Application:trace("[EventCompleteState:at_exit()]")
 	managers.briefing:stop_event(true)
@@ -754,6 +754,7 @@ function EventCompleteState:at_exit(next_state)
 	self.loot_data = {}
 
 	managers.statistics:clear_peer_statistics()
+	managers.savefile:save_game(SavefileManager.SETTING_SLOT)
 
 	local player = managers.player:player_unit()
 
@@ -780,7 +781,7 @@ function EventCompleteState:at_exit(next_state)
 	Overlay:gui():destroy_workspace(self._safe_rect_workspace)
 end
 
--- Lines 868-873
+-- Lines 870-875
 function EventCompleteState:_shut_down_network()
 	Network:set_multiplayer(false)
 	managers.network:queue_stop_network()
@@ -788,7 +789,7 @@ function EventCompleteState:_shut_down_network()
 	managers.network.voice_chat:destroy_voice()
 end
 
--- Lines 876-899
+-- Lines 878-901
 function EventCompleteState:_continue_blocked()
 	local in_focus = managers.menu:active_menu() == self._mission_end_menu
 
@@ -815,12 +816,12 @@ function EventCompleteState:_continue_blocked()
 	return false
 end
 
--- Lines 901-903
+-- Lines 903-905
 function EventCompleteState:continue()
 	self:_continue()
 end
 
--- Lines 905-992
+-- Lines 907-994
 function EventCompleteState:_continue()
 	Application:trace("[EventCompleteState:_continue()]")
 
@@ -898,7 +899,7 @@ function EventCompleteState:_continue()
 	end
 end
 
--- Lines 994-1004
+-- Lines 996-1006
 function EventCompleteState:_clear_controller()
 	managers.controller:remove_hotswap_callback("event_complete_state")
 
@@ -912,12 +913,12 @@ function EventCompleteState:_clear_controller()
 	self._controller = nil
 end
 
--- Lines 1006-1008
+-- Lines 1008-1010
 function EventCompleteState:game_ended()
 	return true
 end
 
--- Lines 1010-1018
+-- Lines 1012-1020
 function EventCompleteState:check_complete_achievements()
 	if self:is_success() then
 		managers.achievment:check_achievement_complete_raid_with_4_different_classes()
@@ -926,7 +927,7 @@ function EventCompleteState:check_complete_achievements()
 	end
 end
 
--- Lines 1020-1033
+-- Lines 1022-1035
 function EventCompleteState:set_statistics_values()
 	local usingChallengeCard = false
 
@@ -939,7 +940,7 @@ function EventCompleteState:set_statistics_values()
 	end
 end
 
--- Lines 1036-1038
+-- Lines 1038-1040
 function EventCompleteState:is_joinable()
 	return false
 end

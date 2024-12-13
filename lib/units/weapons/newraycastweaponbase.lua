@@ -1382,7 +1382,7 @@ function NewRaycastWeaponBase:fire_rate_multiplier()
 	return self:_convert_add_to_mul(multiplier)
 end
 
--- Lines 1500-1532
+-- Lines 1500-1533
 function NewRaycastWeaponBase:reload_speed_multiplier()
 	local multiplier = 1
 	multiplier = multiplier + 1 - managers.player:upgrade_value(self:weapon_tweak_data().category, "reload_speed_multiplier", 1)
@@ -1403,16 +1403,16 @@ function NewRaycastWeaponBase:reload_speed_multiplier()
 		end
 	end
 
-	local raid_multiplier = self:_convert_add_to_mul(multiplier)
-
 	if managers.buff_effect:is_effect_active(BuffEffectManager.EFFECT_PLAYER_RELOAD_SPEED) then
-		raid_multiplier = (managers.buff_effect:get_effect_value(BuffEffectManager.EFFECT_PLAYER_RELOAD_SPEED) or 1) / raid_multiplier
+		multiplier = multiplier + 1 - (managers.buff_effect:get_effect_value(BuffEffectManager.EFFECT_PLAYER_RELOAD_SPEED) or 1)
 	end
+
+	local raid_multiplier = self:_convert_add_to_mul(multiplier)
 
 	return raid_multiplier
 end
 
--- Lines 1570-1603
+-- Lines 1572-1605
 function NewRaycastWeaponBase:_debug_bipod()
 	local gadgets = managers.weapon_factory:get_parts_from_weapon_by_type_or_perk("gadget", self._factory_id, self._blueprint)
 
@@ -1451,7 +1451,7 @@ function NewRaycastWeaponBase:_debug_bipod()
 	end
 end
 
--- Lines 1607-1613
+-- Lines 1609-1615
 function NewRaycastWeaponBase:reload_expire_t()
 	if self._use_shotgun_reload then
 		local ammo_remaining_in_clip = self:get_ammo_remaining_in_clip()
@@ -1462,7 +1462,7 @@ function NewRaycastWeaponBase:reload_expire_t()
 	return nil
 end
 
--- Lines 1615-1620
+-- Lines 1617-1622
 function NewRaycastWeaponBase:reload_enter_expire_t()
 	if self._use_shotgun_reload then
 		return self:weapon_tweak_data().timers.shotgun_reload_enter or 0.3
@@ -1471,7 +1471,7 @@ function NewRaycastWeaponBase:reload_enter_expire_t()
 	return nil
 end
 
--- Lines 1622-1627
+-- Lines 1624-1629
 function NewRaycastWeaponBase:reload_exit_expire_t()
 	if self._use_shotgun_reload then
 		return self:weapon_tweak_data().timers.shotgun_reload_exit_empty or 0.7
@@ -1480,7 +1480,7 @@ function NewRaycastWeaponBase:reload_exit_expire_t()
 	return nil
 end
 
--- Lines 1629-1634
+-- Lines 1631-1636
 function NewRaycastWeaponBase:reload_not_empty_exit_expire_t()
 	if self._use_shotgun_reload then
 		return self:weapon_tweak_data().timers.shotgun_reload_exit_not_empty or 0.3
@@ -1489,7 +1489,7 @@ function NewRaycastWeaponBase:reload_not_empty_exit_expire_t()
 	return nil
 end
 
--- Lines 1636-1641
+-- Lines 1638-1643
 function NewRaycastWeaponBase:reload_shell_expire_t()
 	if self._use_shotgun_reload then
 		return self:weapon_tweak_data().timers.shotgun_reload_shell or 0.5666666666666667
@@ -1498,7 +1498,7 @@ function NewRaycastWeaponBase:reload_shell_expire_t()
 	return nil
 end
 
--- Lines 1643-1648
+-- Lines 1645-1650
 function NewRaycastWeaponBase:_first_shell_reload_expire_t()
 	if self._use_shotgun_reload then
 		return self:reload_shell_expire_t() - (self:weapon_tweak_data().timers.shotgun_reload_first_shell_offset or 0.33)
@@ -1507,7 +1507,7 @@ function NewRaycastWeaponBase:_first_shell_reload_expire_t()
 	return nil
 end
 
--- Lines 1651-1659
+-- Lines 1653-1661
 function NewRaycastWeaponBase:start_reload(...)
 	NewRaycastWeaponBase.super.start_reload(self, ...)
 
@@ -1518,7 +1518,7 @@ function NewRaycastWeaponBase:start_reload(...)
 	end
 end
 
--- Lines 1661-1666
+-- Lines 1663-1668
 function NewRaycastWeaponBase:started_reload_empty()
 	if self._use_shotgun_reload then
 		return self._started_reload_empty
@@ -1527,7 +1527,7 @@ function NewRaycastWeaponBase:started_reload_empty()
 	return nil
 end
 
--- Lines 1669-1680
+-- Lines 1671-1682
 function NewRaycastWeaponBase:update_reloading(t, dt, time_left)
 	if self._use_shotgun_reload and self._next_shell_reloded_t and self._next_shell_reloded_t < t then
 		local speed_multiplier = self:reload_speed_multiplier()
@@ -1540,7 +1540,7 @@ function NewRaycastWeaponBase:update_reloading(t, dt, time_left)
 	end
 end
 
--- Lines 1683-1688
+-- Lines 1685-1690
 function NewRaycastWeaponBase:reload_interuptable()
 	if self._use_shotgun_reload then
 		return true
@@ -1549,7 +1549,7 @@ function NewRaycastWeaponBase:reload_interuptable()
 	return false
 end
 
--- Lines 1690-1698
+-- Lines 1692-1700
 function NewRaycastWeaponBase:shotgun_shell_data()
 	if self._use_shotgun_reload then
 		local reload_shell_data = self:weapon_tweak_data().animations.reload_shell_data
@@ -1565,7 +1565,7 @@ function NewRaycastWeaponBase:shotgun_shell_data()
 	return nil
 end
 
--- Lines 1702-1714
+-- Lines 1704-1716
 function NewRaycastWeaponBase:set_timer(timer, ...)
 	NewRaycastWeaponBase.super.set_timer(self, timer)
 
@@ -1581,7 +1581,7 @@ function NewRaycastWeaponBase:set_timer(timer, ...)
 	end
 end
 
--- Lines 1718-1745
+-- Lines 1720-1747
 function NewRaycastWeaponBase:destroy(unit)
 	NewRaycastWeaponBase.super.destroy(self, unit)
 
@@ -1608,7 +1608,7 @@ local mvec_to = Vector3()
 local mvec_spread_direction = Vector3()
 local mvec1 = Vector3()
 
--- Lines 1754-1868
+-- Lines 1756-1870
 function NewRaycastWeaponBase:update_debug(t, dt)
 	if not Global.show_weapon_spread then
 		return

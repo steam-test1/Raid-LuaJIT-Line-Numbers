@@ -124,26 +124,31 @@ function PlayerBase:_setup_controller()
 	managers.controller:add_hotswap_callback("player_base", callback(self, self, "controller_hotswap_triggered"))
 end
 
--- Lines 127-138
+-- Lines 127-139
 function PlayerBase:controller_hotswap_triggered()
 	self._controller = managers.controller:create_controller("player_" .. tostring(self._id), nil, false)
 
 	managers.rumble:register_controller(self._controller, self._rumble_pos_callback)
 	managers.controller:set_ingame_mode("main")
-	self:set_controller_enabled(true)
+
+	if managers.raid_menu:is_any_menu_open() then
+		self:set_controller_enabled(false)
+	else
+		self:set_controller_enabled(true)
+	end
 end
 
--- Lines 142-144
+-- Lines 143-145
 function PlayerBase:id()
 	return self._id
 end
 
--- Lines 148-150
+-- Lines 149-151
 function PlayerBase:nick_name()
 	return managers.network:session():local_peer():name()
 end
 
--- Lines 154-167
+-- Lines 155-168
 function PlayerBase:set_controller_enabled(enabled)
 	if not self._controller then
 		return
@@ -162,14 +167,14 @@ function PlayerBase:set_controller_enabled(enabled)
 	end
 end
 
--- Lines 169-171
+-- Lines 170-172
 function PlayerBase:controller()
 	return self._controller
 end
 
 local on_ladder_footstep_material = Idstring("metal")
 
--- Lines 176-191
+-- Lines 177-192
 function PlayerBase:anim_data_clbk_footstep(foot)
 	local obj = self._unit:orientation_object()
 	local proj_dir = math.UP
@@ -186,12 +191,12 @@ function PlayerBase:anim_data_clbk_footstep(foot)
 	self._unit:sound():play_footstep(foot, material_name)
 end
 
--- Lines 195-197
+-- Lines 196-198
 function PlayerBase:get_rumble_position()
 	return self._unit:position() + math.UP * 100
 end
 
--- Lines 201-213
+-- Lines 202-214
 function PlayerBase:replenish()
 	for id, weapon in pairs(self._unit:inventory():available_selections()) do
 		if alive(weapon.unit) then
@@ -203,17 +208,17 @@ function PlayerBase:replenish()
 	self._unit:character_damage():replenish()
 end
 
--- Lines 217-219
+-- Lines 218-220
 function PlayerBase:suspicion_settings()
 	return self._suspicion_settings
 end
 
--- Lines 223-225
+-- Lines 224-226
 function PlayerBase:detection_settings()
 	return self._detection_settings
 end
 
--- Lines 229-242
+-- Lines 230-243
 function PlayerBase:set_suspicion_multiplier(reason, multiplier)
 	self._suspicion_settings.multipliers[reason] = multiplier
 	local buildup_mul = self._suspicion_settings.init_buildup_mul
@@ -231,7 +236,7 @@ function PlayerBase:set_suspicion_multiplier(reason, multiplier)
 	self._suspicion_settings.range_mul = range_mul
 end
 
--- Lines 246-257
+-- Lines 247-258
 function PlayerBase:set_detection_multiplier(reason, multiplier)
 	self._detection_settings.multipliers[reason] = multiplier
 	local delay_mul = self._detection_settings.init_delay_mul
@@ -246,12 +251,12 @@ function PlayerBase:set_detection_multiplier(reason, multiplier)
 	self._detection_settings.range_mul = range_mul
 end
 
--- Lines 261-263
+-- Lines 262-264
 function PlayerBase:arrest_settings()
 	return tweak_data.player.arrest
 end
 
--- Lines 267-274
+-- Lines 268-275
 function PlayerBase:_unregister()
 	if not self._unregistered then
 		self._unit:movement():attention_handler():set_attention(nil)
@@ -261,7 +266,7 @@ function PlayerBase:_unregister()
 	end
 end
 
--- Lines 278-301
+-- Lines 279-302
 function PlayerBase:pre_destroy(unit)
 	self:_unregister()
 	UnitBase.pre_destroy(self, unit)
