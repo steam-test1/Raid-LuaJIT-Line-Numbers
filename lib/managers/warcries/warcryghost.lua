@@ -64,6 +64,21 @@ function WarcryGhost:duration()
 	return self._tweak_data.base_duration * managers.player:upgrade_value("player", "warcry_duration", 1)
 end
 
+-- Lines 74-82
+function WarcryGhost:get_level_description(level)
+	level = math.clamp(level, 1, #self._tweak_data.buffs)
+
+	if level >= 2 then
+		local percentage = tostring(tweak_data.upgrades.values.player.warcry_dodge[level] * 100) .. "%"
+
+		return managers.localization:text("skill_warcry_ghost_level_" .. tostring(level) .. "_desc", {
+			PERCENTAGE = percentage
+		})
+	end
+
+	return "warcry_ghost_team_desc"
+end
+
 local ids_desaturation = Idstring("desaturation")
 local ids_contour_post_processor = Idstring("contour_post_processor")
 local ids_contour = Idstring("contour")
@@ -71,7 +86,7 @@ local ids_empty = Idstring("empty")
 local ids_tint = Idstring("tint")
 local ids_noise_strength = Idstring("noise_strength")
 
--- Lines 80-93
+-- Lines 90-103
 function WarcryGhost:activate()
 	WarcryGhost.super.activate(self)
 
@@ -88,7 +103,7 @@ function WarcryGhost:activate()
 	end
 end
 
--- Lines 95-103
+-- Lines 105-113
 function WarcryGhost:deactivate()
 	WarcryGhost.super.deactivate(self)
 
@@ -99,7 +114,7 @@ function WarcryGhost:deactivate()
 	end
 end
 
--- Lines 105-124
+-- Lines 115-134
 function WarcryGhost:_on_enemy_killed(params)
 	local unit = managers.player:player_unit()
 
@@ -122,7 +137,7 @@ function WarcryGhost:_on_enemy_killed(params)
 	managers.warcry:fill_meter_by_value(base_fill_value * multiplier, true)
 end
 
--- Lines 126-128
+-- Lines 136-138
 function WarcryGhost:cleanup()
 	managers.system_event_listener:remove_listener("warcry_ghost_enemy_killed")
 end

@@ -25,6 +25,7 @@ function ProgressBarGuiObject:init(panel, config)
 	})
 	self._progress_bar = self._panel:rect({
 		blend_mode = "normal",
+		name = "progress_bar",
 		h = 0,
 		w = 0,
 		layer = 3,
@@ -38,12 +39,13 @@ function ProgressBarGuiObject:init(panel, config)
 	end
 end
 
--- Lines 26-39
+-- Lines 26-40
 function ProgressBarGuiObject:_create_description(description)
 	local description_params = {
+		name = "progress_bar_description",
 		h = 32,
-		align = "center",
 		w = 256,
+		align = "center",
 		valign = "bottom",
 		font = tweak_data.gui.fonts.din_compressed_outlined_24,
 		font_size = tweak_data.gui.font_sizes.size_24,
@@ -56,7 +58,7 @@ function ProgressBarGuiObject:_create_description(description)
 	self._description:set_bottom(self._y - 10)
 end
 
--- Lines 41-48
+-- Lines 42-49
 function ProgressBarGuiObject:set_progress(current, total)
 	if not self._progress_bar then
 		return
@@ -67,13 +69,13 @@ function ProgressBarGuiObject:set_progress(current, total)
 	self._progress_bar:set_width(progress * self._width)
 end
 
--- Lines 50-54
+-- Lines 51-55
 function ProgressBarGuiObject:show()
 	self._progress_bar_bg:animate(callback(self, self, "_animate_interaction_start"), 0.25)
 	self._progress_bar:animate(callback(self, self, "_animate_interaction_start"), 0.25)
 end
 
--- Lines 56-86
+-- Lines 57-87
 function ProgressBarGuiObject:hide(complete)
 	if complete then
 		self._progress_bar_bg:animate(callback(self, self, "_animate_interaction_complete"))
@@ -98,12 +100,12 @@ function ProgressBarGuiObject:hide(complete)
 	end
 end
 
--- Lines 91-93
+-- Lines 92-94
 function ProgressBarGuiObject:animate_progress(duration)
 	self._auto_animation = self._progress_bar:animate(callback(self, self, "_animate_interaction_duration"), duration)
 end
 
--- Lines 95-110
+-- Lines 96-111
 function ProgressBarGuiObject:set_position(x, y)
 	if not self._progress_bar then
 		return
@@ -121,7 +123,7 @@ function ProgressBarGuiObject:set_position(x, y)
 	self._y = y
 end
 
--- Lines 112-126
+-- Lines 113-127
 function ProgressBarGuiObject:set_x(x)
 	if not self._progress_bar then
 		return
@@ -138,7 +140,7 @@ function ProgressBarGuiObject:set_x(x)
 	self._x = x
 end
 
--- Lines 128-142
+-- Lines 129-143
 function ProgressBarGuiObject:set_top(y)
 	if not self._progress_bar then
 		return
@@ -155,7 +157,7 @@ function ProgressBarGuiObject:set_top(y)
 	self._y = y + self._height / 2
 end
 
--- Lines 144-158
+-- Lines 145-159
 function ProgressBarGuiObject:set_bottom(y)
 	if not self._progress_bar then
 		return
@@ -172,7 +174,7 @@ function ProgressBarGuiObject:set_bottom(y)
 	self._y = y - self._height / 2
 end
 
--- Lines 160-174
+-- Lines 161-175
 function ProgressBarGuiObject:set_center_y(y)
 	if not self._progress_bar then
 		return
@@ -189,7 +191,7 @@ function ProgressBarGuiObject:set_center_y(y)
 	self._y = y
 end
 
--- Lines 177-184
+-- Lines 178-185
 function ProgressBarGuiObject:set_layer(layer)
 	if not self._progress_bar then
 		return
@@ -199,22 +201,22 @@ function ProgressBarGuiObject:set_layer(layer)
 	self._progress_bar:set_layer(layer + 1)
 end
 
--- Lines 186-188
+-- Lines 187-189
 function ProgressBarGuiObject:width()
 	return self._width
 end
 
--- Lines 190-192
+-- Lines 191-193
 function ProgressBarGuiObject:height()
 	return self._height
 end
 
--- Lines 194-196
+-- Lines 195-197
 function ProgressBarGuiObject:layer()
 	return self._progress_bar_bg:layer()
 end
 
--- Lines 198-210
+-- Lines 199-211
 function ProgressBarGuiObject:remove()
 	if not self._progress_bar then
 		return
@@ -230,7 +232,7 @@ function ProgressBarGuiObject:remove()
 	end
 end
 
--- Lines 217-234
+-- Lines 218-235
 function ProgressBarGuiObject:_animate_interaction_start(progress_bar, duration)
 	local t = 0
 
@@ -252,7 +254,7 @@ function ProgressBarGuiObject:_animate_interaction_start(progress_bar, duration)
 	self._is_being_animated = false
 end
 
--- Lines 236-252
+-- Lines 237-253
 function ProgressBarGuiObject:_animate_interaction_cancel(progress_bar, duration)
 	local t = 0
 	local start_height = progress_bar:h()
@@ -270,7 +272,7 @@ function ProgressBarGuiObject:_animate_interaction_cancel(progress_bar, duration
 	progress_bar:set_visible(false)
 end
 
--- Lines 254-271
+-- Lines 255-272
 function ProgressBarGuiObject:_animate_interaction_complete(progress_bar)
 	local duration = 0.3
 	local t = 0
@@ -288,7 +290,7 @@ function ProgressBarGuiObject:_animate_interaction_complete(progress_bar)
 	progress_bar:set_visible(false)
 end
 
--- Lines 273-298
+-- Lines 274-299
 function ProgressBarGuiObject:_animate_interaction_duration(progress_bar, duration)
 	local t = 0
 	self._is_being_animated = true
@@ -307,14 +309,14 @@ function ProgressBarGuiObject:_animate_interaction_duration(progress_bar, durati
 	self._is_being_animated = false
 end
 
--- Lines 300-303
+-- Lines 301-304
 function ProgressBarGuiObject:_ease_in_quint(t, starting_value, change, duration)
 	t = t / duration
 
 	return change * t * t * t * t * t + starting_value
 end
 
--- Lines 306-310
+-- Lines 307-311
 function ProgressBarGuiObject:_ease_out_quint(t, starting_value, change, duration)
 	t = t / duration
 	t = t - 1

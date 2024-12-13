@@ -159,7 +159,7 @@ function BarrageManager:update(t, dt)
 	self:_check_flare_start_barrage(t)
 end
 
--- Lines 146-161
+-- Lines 146-162
 function BarrageManager:_check_flare_start_barrage(t)
 	for _, data in ipairs(self._flares) do
 		if alive(data.unit) and data.unit:interaction():active() and not data.called and data.barrage_time < t then
@@ -169,6 +169,7 @@ function BarrageManager:_check_flare_start_barrage(t)
 			data.called = true
 
 			data.unit:damage():run_sequence_simple("state_interaction_disabled")
+			managers.network:session():send_to_peers_synched("sync_spotter_flare_disabled", data.unit)
 		end
 
 		if alive(data.unit) and t > data.barrage_time + 20 then
@@ -177,19 +178,19 @@ function BarrageManager:_check_flare_start_barrage(t)
 	end
 end
 
--- Lines 163-166
+-- Lines 164-167
 function BarrageManager:is_barrage_running()
 	local barrage_running = #self._running_barrages > 0
 
 	return barrage_running
 end
 
--- Lines 169-171
+-- Lines 170-172
 function BarrageManager:_call_listeners(event, params)
 	self._listener_holder:call(event, params)
 end
 
--- Lines 175-180
+-- Lines 176-181
 function BarrageManager:add_listener(key, events, clbk)
 	if not Network:is_server() then
 		return
@@ -198,7 +199,7 @@ function BarrageManager:add_listener(key, events, clbk)
 	self._listener_holder:add(key, events, clbk)
 end
 
--- Lines 183-188
+-- Lines 184-189
 function BarrageManager:remove_listener(key)
 	if not Network:is_server() then
 		return
@@ -207,7 +208,7 @@ function BarrageManager:remove_listener(key)
 	self._listener_holder:remove(key)
 end
 
--- Lines 191-206
+-- Lines 192-207
 function BarrageManager:start_barrage(params)
 	local barrage_params = params
 
@@ -228,7 +229,7 @@ function BarrageManager:start_barrage(params)
 	self:_start_barrage(barrage_params)
 end
 
--- Lines 209-235
+-- Lines 210-236
 function BarrageManager:_start_barrage(barrage_params)
 	if managers.buff_effect:is_effect_active(BuffEffectManager.EFFECT_NO_BARRAGE) then
 		return
@@ -258,17 +259,17 @@ function BarrageManager:_start_barrage(barrage_params)
 	self:_call_listeners("barrage_started")
 end
 
--- Lines 238-240
+-- Lines 239-241
 function BarrageManager:sync_airplane_barrage(airplane_unit, sequence_name)
 	airplane_unit:damage():run_sequence_simple(sequence_name)
 end
 
--- Lines 242-244
+-- Lines 243-245
 function BarrageManager:stop_barrages()
 	self:on_simulation_ended()
 end
 
--- Lines 247-254
+-- Lines 248-255
 function BarrageManager:_get_barrage_position()
 	local pos_rot = managers.criminals:get_valid_player_spawn_pos_rot()
 
@@ -279,7 +280,7 @@ function BarrageManager:_get_barrage_position()
 	return nil
 end
 
--- Lines 256-267
+-- Lines 257-268
 function BarrageManager:_set_barrage_position(barrage_params, target_pos)
 	if barrage_params.type == BarrageType.ARTILLERY then
 		barrage_params.direction = barrage_params.direction:normalized()
@@ -293,7 +294,7 @@ function BarrageManager:_set_barrage_position(barrage_params, target_pos)
 	end
 end
 
--- Lines 270-287
+-- Lines 271-288
 function BarrageManager:_get_next_projectile_time(barrage_params)
 	local now = TimerManager:game():time()
 	local next_projectile_time = 0
@@ -311,7 +312,7 @@ function BarrageManager:_get_next_projectile_time(barrage_params)
 	return next_projectile_time
 end
 
--- Lines 290-298
+-- Lines 291-299
 function BarrageManager:_queue_projectile(barrage_params)
 	local queued_projectile = {
 		barrage_params = barrage_params,
@@ -326,12 +327,12 @@ function BarrageManager:_queue_projectile(barrage_params)
 	table.insert(self._queued_projectiles, queued_projectile)
 end
 
--- Lines 301-303
+-- Lines 302-304
 function BarrageManager:play_barrage_launch_sound(event_name)
 	self._soundsource:post_event(event_name)
 end
 
--- Lines 306-327
+-- Lines 307-328
 function BarrageManager:_spawn_projectile(barrage_params)
 	local x, y = self:_uniform_sample_circle(barrage_params.radius)
 	local delta_x = x * barrage_params.ortho_x
@@ -356,7 +357,7 @@ function BarrageManager:_spawn_projectile(barrage_params)
 	ProjectileBase.throw_projectile(barrage_params.projectile_index, pos, barrage_params.direction * barrage_params.lauch_power)
 end
 
--- Lines 330-341
+-- Lines 331-342
 function BarrageManager:_uniform_sample_circle(radius)
 	local t = math.lerp(0, 360, math.random())
 	local r = math.lerp(0, 1, math.random()) + math.lerp(0, 1, math.random())
@@ -372,7 +373,7 @@ function BarrageManager:_uniform_sample_circle(radius)
 	return x, y
 end
 
--- Lines 344-378
+-- Lines 345-379
 function BarrageManager:_prepare_barrage_params(barrage_params)
 	local prepared_params = clone(barrage_params or BarrageManager.default_params)
 
@@ -408,7 +409,7 @@ function BarrageManager:_prepare_barrage_params(barrage_params)
 	return prepared_params
 end
 
--- Lines 381-408
+-- Lines 382-409
 function BarrageManager:_choose_random_type(barrage_params)
 	if not barrage_params.type_table then
 		Application:error("[BarrageManager] Barrage params for random type don't have a table of options")
@@ -446,22 +447,22 @@ function BarrageManager:_choose_random_type(barrage_params)
 	return nil
 end
 
--- Lines 414-416
+-- Lines 415-417
 function BarrageManager:set_spotter_barrage_type(barrage_params)
 	self._spotter_barrage_type = clone(barrage_params)
 end
 
--- Lines 419-421
+-- Lines 420-422
 function BarrageManager:get_spotter_barrage_type()
 	return self._spotter_barrage_type
 end
 
--- Lines 424-433
+-- Lines 425-434
 function BarrageManager:register_spotter(spotter_unit)
 	table.insert(self._spotters, spotter_unit)
 end
 
--- Lines 436-466
+-- Lines 437-467
 function BarrageManager:start_spotter_barrage(spotter, target_pos)
 	local t = TimerManager:game():time()
 
@@ -499,7 +500,7 @@ function BarrageManager:start_spotter_barrage(spotter, target_pos)
 	return true
 end
 
--- Lines 469-480
+-- Lines 470-481
 function BarrageManager:_is_spotter_barrage_off_cooldown(t)
 	return true
 
@@ -512,7 +513,7 @@ function BarrageManager:_is_spotter_barrage_off_cooldown(t)
 	return off_cooldown
 end
 
--- Lines 483-491
+-- Lines 484-492
 function BarrageManager:_remove_dead_spotters()
 	local ct_spotters = #self._spotters
 

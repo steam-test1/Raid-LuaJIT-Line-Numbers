@@ -24,21 +24,21 @@ LootDropTweakData.POINT_REQUIREMENTS = {
 	LootDropTweakData.GOLD_POINT_REQUIREMENT
 }
 
--- Lines 36-48
+-- Lines 45-57
 function LootDropTweakData:init(tweak_data)
 	self:_payday_init(tweak_data)
-	self:_init_xp_packs(tweak_data)
-	self:_init_card_packs(tweak_data)
-	self:_init_customization_rewards(tweak_data)
-	self:_init_gold_bar_rewards(tweak_data)
-	self:_init_categories(tweak_data)
-	self:_init_groups(tweak_data)
-	self:_init_loot_values(tweak_data)
+	self:_init_xp_packs()
+	self:_init_card_packs()
+	self:_init_customization_rewards()
+	self:_init_gold_bar_rewards()
+	self:_init_categories()
+	self:_init_groups()
+	self:_init_loot_values()
 	self:_init_dog_tag_stats()
 end
 
--- Lines 50-76
-function LootDropTweakData:_init_xp_packs(tweak_data)
+-- Lines 59-85
+function LootDropTweakData:_init_xp_packs()
 	self.xp_packs = {
 		tiny = {
 			xp_min = 40,
@@ -63,8 +63,8 @@ function LootDropTweakData:_init_xp_packs(tweak_data)
 	}
 end
 
--- Lines 78-85
-function LootDropTweakData:_init_card_packs(tweak_data)
+-- Lines 87-94
+function LootDropTweakData:_init_card_packs()
 	self.card_packs = {
 		regular = {
 			reward_type = LootDropTweakData.REWARD_CARD_PACK,
@@ -73,8 +73,8 @@ function LootDropTweakData:_init_card_packs(tweak_data)
 	}
 end
 
--- Lines 87-104
-function LootDropTweakData:_init_customization_rewards(tweak_data)
+-- Lines 96-113
+function LootDropTweakData:_init_customization_rewards()
 	self.customization_rewards = {
 		common = {
 			reward_type = LootDropTweakData.REWARD_CUSTOMIZATION,
@@ -91,8 +91,8 @@ function LootDropTweakData:_init_customization_rewards(tweak_data)
 	}
 end
 
--- Lines 106-126
-function LootDropTweakData:_init_gold_bar_rewards(tweak_data)
+-- Lines 115-135
+function LootDropTweakData:_init_gold_bar_rewards()
 	self.gold_bar_rewards = {
 		small = {
 			gold_bars_max = 2,
@@ -112,8 +112,8 @@ function LootDropTweakData:_init_gold_bar_rewards(tweak_data)
 	}
 end
 
--- Lines 128-264
-function LootDropTweakData:_init_categories(tweak_data)
+-- Lines 137-486
+function LootDropTweakData:_init_categories()
 	self.loot_categories = {
 		category_xp_min = {}
 	}
@@ -235,8 +235,8 @@ function LootDropTweakData:_init_categories(tweak_data)
 	}
 end
 
--- Lines 266-439
-function LootDropTweakData:_init_groups(tweak_data)
+-- Lines 488-662
+function LootDropTweakData:_init_groups()
 	self.loot_groups = {
 		loot_group_basic = {}
 	}
@@ -397,8 +397,8 @@ function LootDropTweakData:_init_groups(tweak_data)
 	}
 end
 
--- Lines 441-467
-function LootDropTweakData:_init_loot_values(tweak_data)
+-- Lines 664-690
+function LootDropTweakData:_init_loot_values()
 	self.loot_groups.loot_group_basic.min_loot_value = -1000000
 	self.loot_groups.loot_group_basic.max_loot_value = LootDropTweakData.BRONZE_POINT_REQUIREMENT
 	self.loot_groups.loot_group_bronze.min_loot_value = LootDropTweakData.BRONZE_POINT_REQUIREMENT
@@ -417,14 +417,14 @@ function LootDropTweakData:_init_loot_values(tweak_data)
 	self.loot_groups_doubles_fallback.loot_group_gold.max_loot_value = self.loot_groups.loot_group_gold.max_loot_value
 end
 
--- Lines 469-472
+-- Lines 691-694
 function LootDropTweakData:_init_dog_tag_stats()
 	self.dog_tag = {
 		loot_value = 50
 	}
 end
 
--- Lines 474-681
+-- Lines 696-903
 function LootDropTweakData:_payday_init(tweak_data)
 	self.PC_STEP = 10
 	self.no_drop = {
@@ -731,7 +731,7 @@ function LootDropTweakData:_payday_init(tweak_data)
 	self:_create_global_value_list_map()
 end
 
--- Lines 683-688
+-- Lines 905-910
 function LootDropTweakData:_create_global_value_list_map()
 	self.global_value_list_map = {}
 

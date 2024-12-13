@@ -12,15 +12,16 @@ local temp_vec2 = Vector3()
 local temp_vec3 = Vector3()
 FlamerLogicAttack = class(CopLogicAttack)
 
--- Lines 20-96
+-- Lines 20-95
 function FlamerLogicAttack.enter(data, new_logic_name, enter_params)
-	CopLogicBase.enter(data, new_logic_name, enter_params)
-	data.unit:brain():cancel_all_pathing_searches()
-
-	local old_internal_data = data.internal_data
 	local my_data = {
 		unit = data.unit
 	}
+
+	CopLogicBase.enter(data, new_logic_name, enter_params, my_data)
+	data.unit:brain():cancel_all_pathing_searches()
+
+	local old_internal_data = data.internal_data
 	data.internal_data = my_data
 	my_data.detection = data.char_tweak.detection.combat
 	my_data.vision = data.char_tweak.vision.combat
@@ -73,7 +74,7 @@ function FlamerLogicAttack.enter(data, new_logic_name, enter_params)
 	})
 end
 
--- Lines 100-112
+-- Lines 99-111
 function FlamerLogicAttack.exit(data, new_logic_name, enter_params)
 	CopLogicBase.exit(data, new_logic_name, enter_params)
 
@@ -86,7 +87,7 @@ function FlamerLogicAttack.exit(data, new_logic_name, enter_params)
 	data.unit:brain():set_update_enabled_state(true)
 end
 
--- Lines 116-204
+-- Lines 115-203
 function FlamerLogicAttack.update(data)
 	local t = data.t
 	local unit = data.unit
@@ -189,7 +190,7 @@ function FlamerLogicAttack.update(data)
 	end
 end
 
--- Lines 208-216
+-- Lines 207-215
 function FlamerLogicAttack.queued_update(data)
 	local my_data = data.internal_data
 	my_data.update_queued = false
@@ -202,7 +203,7 @@ function FlamerLogicAttack.queued_update(data)
 	end
 end
 
--- Lines 220-236
+-- Lines 219-235
 function FlamerLogicAttack._process_pathing_results(data, my_data)
 	if data.pathing_results then
 		local pathing_results = data.pathing_results
@@ -222,7 +223,7 @@ function FlamerLogicAttack._process_pathing_results(data, my_data)
 	end
 end
 
--- Lines 240-260
+-- Lines 239-259
 function FlamerLogicAttack._cancel_chase_attempt(data, my_data)
 	my_data.chase_path = nil
 
@@ -253,7 +254,7 @@ function FlamerLogicAttack._cancel_chase_attempt(data, my_data)
 	end
 end
 
--- Lines 265-283
+-- Lines 264-282
 function FlamerLogicAttack.on_action_completed(data, action)
 	local action_type = action:type()
 	local my_data = data.internal_data
@@ -273,19 +274,19 @@ function FlamerLogicAttack.on_action_completed(data, action)
 	end
 end
 
--- Lines 285-287
+-- Lines 284-286
 function FlamerLogicAttack.chk_should_turn(data, my_data)
 	return not my_data.turning and not data.unit:movement():chk_action_forbidden("walk") and not my_data.retreating and not my_data.walking_to_chase_pos
 end
 
--- Lines 291-294
+-- Lines 290-293
 function FlamerLogicAttack.queue_update(data, my_data)
 	my_data.update_queued = true
 
 	CopLogicBase.queue_task(my_data, my_data.update_queue_id, FlamerLogicAttack.queued_update, data, data.t + 1.5, data.important)
 end
 
--- Lines 298-316
+-- Lines 297-315
 function FlamerLogicAttack._chk_request_action_walk_to_chase_pos(data, my_data, speed, end_rot)
 	if not data.unit:movement():chk_action_forbidden("walk") then
 		local new_action_data = {
@@ -305,21 +306,21 @@ function FlamerLogicAttack._chk_request_action_walk_to_chase_pos(data, my_data, 
 	end
 end
 
--- Lines 320-324
+-- Lines 319-323
 function FlamerLogicAttack.is_advancing(data)
 	if data.internal_data.walking_to_chase_pos and data.pos_rsrv.move_dest then
 		return data.pos_rsrv.move_dest.position
 	end
 end
 
--- Lines 328-332
+-- Lines 327-331
 function FlamerLogicAttack._get_all_paths(data)
 	return {
 		chase_path = data.internal_data.chase_path
 	}
 end
 
--- Lines 336-338
+-- Lines 335-337
 function FlamerLogicAttack._set_verified_paths(data, verified_paths)
 	data.internal_data.chase_path = verified_paths.chase_path
 end

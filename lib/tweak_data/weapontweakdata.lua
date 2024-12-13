@@ -14,7 +14,7 @@ WeaponTweakData.DAMAGE_TYPE_EXPLOSION = "explosion"
 WeaponTweakData.HIT_INDICATOR_PERCENT = 0.05
 WeaponTweakData.HIT_INDICATOR_ABSOLUTE = 2.5
 
--- Lines 21-85
+-- Lines 21-88
 function WeaponTweakData:init(tweak_data)
 	local difficulty = Global.game_settings and Global.game_settings.difficulty or Global.DEFAULT_DIFFICULTY
 	local difficulty_index = tweak_data:difficulty_to_index(difficulty)
@@ -29,6 +29,7 @@ function WeaponTweakData:init(tweak_data)
 	self:_init_data_thompson_npc()
 	self:_init_data_sten_npc()
 	self:_init_data_garand_npc()
+	self:_init_data_garand_golden_npc()
 	self:_init_data_m1918_npc()
 	self:_init_data_m1903_npc()
 	self:_init_data_m1912_npc()
@@ -39,11 +40,7 @@ function WeaponTweakData:init(tweak_data)
 	self:_init_data_tiger_machinegun_module_npc(difficulty_index)
 	self:_init_data_junker_machinegun_module_npc(difficulty_index)
 	self:_init_data_m24()
-	self:_init_data_mills()
-	self:_init_data_d343()
-	self:_init_data_concrete()
 	self:_init_data_molotov()
-	self:_init_data_coin_peace()
 	self:_init_data_kar98_npc()
 	self:_init_data_sniper_kar98_npc()
 	self:_init_data_ger_luger_npc()
@@ -60,11 +57,11 @@ function WeaponTweakData:init(tweak_data)
 	self:_init_data_mosin_npc()
 	self:_init_data_sterling_npc()
 	self:_init_data_spotting_optics_npc()
-	self:_init_data_m42_flammenwerfer_npc()
+	self:_init_data_m42_flammenwerfer_npc(difficulty_index)
 	self:_init_data_panzerfaust_60_npc()
 end
 
--- Lines 87-96
+-- Lines 90-99
 function WeaponTweakData:_set_difficulty_1()
 	self.tiger_main_gun_module.HEALTH_INIT = 7000
 	self.tiger_main_gun_module.SHIELD_HEALTH_INIT = 100
@@ -74,7 +71,7 @@ function WeaponTweakData:_set_difficulty_1()
 	self.tiger_machinegun_module.DAMAGE = 2
 end
 
--- Lines 98-107
+-- Lines 101-110
 function WeaponTweakData:_set_difficulty_2()
 	self.tiger_main_gun_module.HEALTH_INIT = 7000
 	self.tiger_main_gun_module.SHIELD_HEALTH_INIT = 100
@@ -84,7 +81,7 @@ function WeaponTweakData:_set_difficulty_2()
 	self.tiger_machinegun_module.DAMAGE = 4
 end
 
--- Lines 109-118
+-- Lines 112-121
 function WeaponTweakData:_set_difficulty_3()
 	self.tiger_main_gun_module.HEALTH_INIT = 27500
 	self.tiger_main_gun_module.SHIELD_HEALTH_INIT = 400
@@ -94,7 +91,7 @@ function WeaponTweakData:_set_difficulty_3()
 	self.tiger_machinegun_module.DAMAGE = 1.5
 end
 
--- Lines 120-129
+-- Lines 123-132
 function WeaponTweakData:_set_difficulty_4()
 	self.tiger_main_gun_module.HEALTH_INIT = 50000
 	self.tiger_main_gun_module.SHIELD_HEALTH_INIT = 750
@@ -104,7 +101,7 @@ function WeaponTweakData:_set_difficulty_4()
 	self.tiger_machinegun_module.DAMAGE = 2.5
 end
 
--- Lines 132-142
+-- Lines 135-145
 function WeaponTweakData:_init_data_npc_melee()
 	self.npc_melee = {
 		fists = {}
@@ -115,14 +112,14 @@ function WeaponTweakData:_init_data_npc_melee()
 	self.npc_melee.fists.player_blood_effect = true
 end
 
--- Lines 144-148
+-- Lines 147-151
 function WeaponTweakData:_set_npc_weapon_damage_multiplier(mul)
 	for name, data in pairs(self.npc_melee) do
 		data.damage = data.damage * mul
 	end
 end
 
--- Lines 154-181
+-- Lines 157-184
 function WeaponTweakData:_init_data_m1911_npc()
 	self.m1911_npc = {
 		sounds = {},
@@ -147,7 +144,7 @@ function WeaponTweakData:_init_data_m1911_npc()
 	self.m1911_npc.suppression = 1
 end
 
--- Lines 183-215
+-- Lines 186-218
 function WeaponTweakData:_init_data_sten_npc()
 	self.sten_npc = {
 		sounds = {},
@@ -175,7 +172,7 @@ function WeaponTweakData:_init_data_sten_npc()
 	self.sten_npc.suppression = 1
 end
 
--- Lines 217-246
+-- Lines 220-249
 function WeaponTweakData:_init_data_garand_npc()
 	self.garand_npc = {
 		sounds = {},
@@ -202,7 +199,34 @@ function WeaponTweakData:_init_data_garand_npc()
 	self.garand_npc.suppression = 1
 end
 
--- Lines 248-277
+-- Lines 251-280
+function WeaponTweakData:_init_data_garand_golden_npc()
+	self.garand_golden_npc = {
+		sounds = {},
+		use_data = {},
+		usage = "garand",
+		usage_anim = "garand"
+	}
+	self.garand_golden_npc.sounds.prefix = ""
+	self.garand_golden_npc.sounds.single = "m1garand_fire_npc"
+	self.garand_golden_npc.sounds.autofire_start = nil
+	self.garand_golden_npc.sounds.autofire_stop = nil
+	self.garand_golden_npc.use_data.selection_index = 2
+	self.garand_golden_npc.DAMAGE = 2
+	self.garand_golden_npc.muzzleflash = "effects/vanilla/weapons/556_auto"
+	self.garand_golden_npc.shell_ejection = "effects/vanilla/weapons/shells/shell_556"
+	self.garand_golden_npc.CLIP_AMMO_MAX = 8
+	self.garand_golden_npc.NR_CLIPS_MAX = 4
+	self.garand_golden_npc.AMMO_MAX = self.garand_golden_npc.CLIP_AMMO_MAX * self.garand_golden_npc.NR_CLIPS_MAX
+	self.garand_golden_npc.auto = {
+		fire_rate = 0.2
+	}
+	self.garand_golden_npc.hold = "garand"
+	self.garand_golden_npc.alert_size = 5000
+	self.garand_golden_npc.suppression = 1
+end
+
+-- Lines 282-311
 function WeaponTweakData:_init_data_m1918_npc()
 	self.m1918_npc = {
 		sounds = {},
@@ -229,7 +253,7 @@ function WeaponTweakData:_init_data_m1918_npc()
 	self.m1918_npc.suppression = 1
 end
 
--- Lines 279-327
+-- Lines 313-361
 function WeaponTweakData:_init_data_m24()
 	self.m24 = {
 		sounds = {},
@@ -269,7 +293,7 @@ function WeaponTweakData:_init_data_m24()
 		}
 	}
 	self.m24.sound_event = "grenade_near"
-	self.m24.damage_melee = 2
+	self.m24.damage_melee = 66
 	self.m24.damage_melee_effect_mul = 1
 	self.m24.hud = {
 		icon = "weapon_panel_gre_m24",
@@ -277,139 +301,7 @@ function WeaponTweakData:_init_data_m24()
 	}
 end
 
--- Lines 329-372
-function WeaponTweakData:_init_data_mills()
-	self.mills = {
-		sounds = {},
-		use_data = {},
-		usage = "c45",
-		usage_anim = "c45"
-	}
-	self.mills.sounds.prefix = ""
-	self.mills.sounds.single = "grenade_explode"
-	self.mills.sounds.autofire_start = nil
-	self.mills.sounds.autofire_stop = nil
-	self.mills.use_data.selection_index = 3
-	self.mills.auto = {
-		fire_rate = 0.4
-	}
-	self.mills.hold = "grenade"
-	self.mills.alert_size = 5000
-	self.mills.suppression = 1
-	self.mills.timers = {
-		reload_not_empty = 1.25,
-		reload_empty = 1.65,
-		unequip = 0.25,
-		equip = 0.3
-	}
-	self.mills.weapon_movement_penalty = 1
-	self.mills.exit_run_speed_multiplier = 1
-	self.mills.transition_duration = 0
-	self.mills.stance = "m24"
-	self.mills.weapon_hold = "m24"
-	self.mills.use_data = {
-		equip = {
-			align_place = "right_hand"
-		},
-		selection_index = 3,
-		unequip = {
-			align_place = "back"
-		}
-	}
-	self.mills.sound_event = "grenade_near"
-	self.mills.damage_melee = 1
-	self.mills.damage_melee_effect_mul = 1
-end
-
--- Lines 374-417
-function WeaponTweakData:_init_data_d343()
-	self.d343 = {
-		sounds = {},
-		use_data = {},
-		usage = "c45",
-		usage_anim = "c45"
-	}
-	self.d343.sounds.prefix = ""
-	self.d343.sounds.single = "grenade_explode"
-	self.d343.sounds.autofire_start = nil
-	self.d343.sounds.autofire_stop = nil
-	self.d343.use_data.selection_index = 3
-	self.d343.auto = {
-		fire_rate = 0.4
-	}
-	self.d343.hold = "grenade"
-	self.d343.alert_size = 5000
-	self.d343.suppression = 1
-	self.d343.timers = {
-		reload_not_empty = 1.25,
-		reload_empty = 1.65,
-		unequip = 0.25,
-		equip = 0.3
-	}
-	self.d343.weapon_movement_penalty = 1
-	self.d343.exit_run_speed_multiplier = 1
-	self.d343.transition_duration = 0
-	self.d343.stance = "m24"
-	self.d343.weapon_hold = "m24"
-	self.d343.use_data = {
-		equip = {
-			align_place = "right_hand"
-		},
-		selection_index = 3,
-		unequip = {
-			align_place = "back"
-		}
-	}
-	self.d343.sound_event = "grenade_near"
-	self.d343.damage_melee = 1
-	self.d343.damage_melee_effect_mul = 1
-end
-
--- Lines 419-462
-function WeaponTweakData:_init_data_concrete()
-	self.concrete = {
-		sounds = {},
-		use_data = {},
-		usage = "c45",
-		usage_anim = "c45"
-	}
-	self.concrete.sounds.prefix = ""
-	self.concrete.sounds.single = "grenade_explode"
-	self.concrete.sounds.autofire_start = nil
-	self.concrete.sounds.autofire_stop = nil
-	self.concrete.use_data.selection_index = 3
-	self.concrete.auto = {
-		fire_rate = 0.4
-	}
-	self.concrete.hold = "grenade"
-	self.concrete.alert_size = 5000
-	self.concrete.suppression = 1
-	self.concrete.timers = {
-		reload_not_empty = 1.25,
-		reload_empty = 1.65,
-		unequip = 0.25,
-		equip = 0.3
-	}
-	self.concrete.weapon_movement_penalty = 1
-	self.concrete.exit_run_speed_multiplier = 1
-	self.concrete.transition_duration = 0
-	self.concrete.stance = "m24"
-	self.concrete.weapon_hold = "m24"
-	self.concrete.use_data = {
-		equip = {
-			align_place = "right_hand"
-		},
-		selection_index = 3,
-		unequip = {
-			align_place = "back"
-		}
-	}
-	self.concrete.sound_event = "grenade_near"
-	self.concrete.damage_melee = 1
-	self.concrete.damage_melee_effect_mul = 1
-end
-
--- Lines 464-501
+-- Lines 543-580
 function WeaponTweakData:_init_data_molotov()
 	self.molotov = {
 		sounds = {},
@@ -450,48 +342,7 @@ function WeaponTweakData:_init_data_molotov()
 	}
 end
 
--- Lines 503-541
-function WeaponTweakData:_init_data_coin_peace()
-	self.coin_peace = {
-		sounds = {},
-		use_data = {},
-		usage = "c45",
-		usage_anim = "c45"
-	}
-	self.coin_peace.sounds.prefix = ""
-	self.coin_peace.sounds.single = ""
-	self.coin_peace.sounds.autofire_start = nil
-	self.coin_peace.sounds.autofire_stop = nil
-	self.coin_peace.use_data.selection_index = 3
-	self.coin_peace.auto = {
-		fire_rate = 0.4
-	}
-	self.coin_peace.hold = "grenade"
-	self.coin_peace.alert_size = 5000
-	self.coin_peace.suppression = 1
-	self.coin_peace.timers = {
-		reload_not_empty = 1.25,
-		reload_empty = 1.65,
-		unequip = 0.5,
-		equip = 0.25
-	}
-	self.coin_peace.weapon_movement_penalty = 1
-	self.coin_peace.exit_run_speed_multiplier = 1
-	self.coin_peace.transition_duration = 0
-	self.coin_peace.stance = "m1911"
-	self.coin_peace.weapon_hold = "m1911"
-	self.coin_peace.use_data = {
-		equip = {
-			align_place = "right_hand"
-		},
-		selection_index = 3,
-		unequip = {
-			align_place = "back"
-		}
-	}
-end
-
--- Lines 543-572
+-- Lines 582-611
 function WeaponTweakData:_init_data_m1903_npc()
 	self.m1903_npc = {
 		sounds = {},
@@ -518,7 +369,7 @@ function WeaponTweakData:_init_data_m1903_npc()
 	self.m1903_npc.suppression = 1
 end
 
--- Lines 574-603
+-- Lines 613-642
 function WeaponTweakData:_init_data_m1912_npc()
 	self.m1912_npc = {
 		sounds = {},
@@ -545,7 +396,7 @@ function WeaponTweakData:_init_data_m1912_npc()
 	self.m1912_npc.suppression = 1
 end
 
--- Lines 605-637
+-- Lines 644-676
 function WeaponTweakData:_init_data_mp38_npc()
 	self.mp38_npc = {
 		sounds = {},
@@ -574,7 +425,7 @@ function WeaponTweakData:_init_data_mp38_npc()
 	self.mp38_npc.suppression = 1
 end
 
--- Lines 639-671
+-- Lines 678-710
 function WeaponTweakData:_init_data_mp44_npc()
 	self.mp44_npc = {
 		sounds = {},
@@ -603,7 +454,7 @@ function WeaponTweakData:_init_data_mp44_npc()
 	self.mp44_npc.suppression = 1
 end
 
--- Lines 673-706
+-- Lines 712-745
 function WeaponTweakData:_init_data_mg42_npc()
 	self.mg42_npc = {
 		sounds = {},
@@ -633,7 +484,7 @@ function WeaponTweakData:_init_data_mg42_npc()
 	self.mg42_secondary_npc.armor_piercing = true
 end
 
--- Lines 710-737
+-- Lines 749-776
 function WeaponTweakData:_init_data_c96_npc()
 	self.c96_npc = {}
 	self.c96_npc = {
@@ -659,7 +510,7 @@ function WeaponTweakData:_init_data_c96_npc()
 	self.c96_npc.suppression = 1
 end
 
--- Lines 739-765
+-- Lines 778-804
 function WeaponTweakData:_init_data_webley_npc()
 	self.webley_npc = {}
 	self.webley_npc = {
@@ -684,7 +535,7 @@ function WeaponTweakData:_init_data_webley_npc()
 	self.webley_npc.suppression = 1
 end
 
--- Lines 767-795
+-- Lines 806-834
 function WeaponTweakData:_init_data_mosin_npc()
 	self.mosin_npc = {
 		sounds = {},
@@ -711,7 +562,7 @@ function WeaponTweakData:_init_data_mosin_npc()
 	self.mosin_npc.suppression = 1
 end
 
--- Lines 797-827
+-- Lines 836-866
 function WeaponTweakData:_init_data_sterling_npc()
 	self.sterling_npc = {
 		sounds = {},
@@ -739,7 +590,7 @@ function WeaponTweakData:_init_data_sterling_npc()
 	self.sterling_npc.suppression = 1
 end
 
--- Lines 829-855
+-- Lines 868-894
 function WeaponTweakData:_init_data_welrod_npc()
 	self.welrod_npc = {
 		sounds = {},
@@ -764,7 +615,7 @@ function WeaponTweakData:_init_data_welrod_npc()
 	self.welrod_npc.suppression = 1
 end
 
--- Lines 859-889
+-- Lines 898-928
 function WeaponTweakData:_init_data_c45_npc()
 	self.c45_npc = {
 		sounds = {},
@@ -791,7 +642,7 @@ function WeaponTweakData:_init_data_c45_npc()
 	self.c45_primary_npc.use_data.selection_index = 2
 end
 
--- Lines 894-924
+-- Lines 933-963
 function WeaponTweakData:_init_data_m4_npc()
 	self.m4_npc = {
 		sounds = {},
@@ -818,7 +669,7 @@ function WeaponTweakData:_init_data_m4_npc()
 	self.m4_secondary_npc.use_data.selection_index = 1
 end
 
--- Lines 929-961
+-- Lines 968-1000
 function WeaponTweakData:_init_data_mp5_npc()
 	self.mp5_npc = {
 		sounds = {},
@@ -846,7 +697,7 @@ function WeaponTweakData:_init_data_mp5_npc()
 	self.ump_npc = deep_clone(self.mp5_npc)
 end
 
--- Lines 965-1076
+-- Lines 1004-1115
 function WeaponTweakData:_init_data_tiger_main_gun_module_npc(difficulty_index)
 	self.tiger_main_gun_module = {
 		sounds = {},
@@ -877,7 +728,7 @@ function WeaponTweakData:_init_data_tiger_main_gun_module_npc(difficulty_index)
 			OVERCOMPENSATION = 50,
 			SNAPSHOT_INTERVAL = 0.3
 		},
-		muzzleflash = "effects/vanilla/explosions/vehicle_explosion",
+		muzzleflash = nil,
 		shell_ejection = "effects/vanilla/weapons/shells/shell_556_lmg"
 	}
 	self.tiger_main_gun_module.auto.fire_rate = 0.01
@@ -890,6 +741,7 @@ function WeaponTweakData:_init_data_tiger_main_gun_module_npc(difficulty_index)
 	self.tiger_main_gun_module.HEALTH_INIT = 5000
 	self.tiger_main_gun_module.SHIELD_HEALTH_INIT = 1000
 	self.tiger_main_gun_module.SHIELD_DAMAGE_CLAMP = 10000
+	self.tiger_main_gun_module.LOST_SIGHT_VERIFICATION = 0.1
 	self.tiger_main_gun_module.DEATH_VERIFICATION = {
 		0.4,
 		0.75
@@ -906,11 +758,11 @@ function WeaponTweakData:_init_data_tiger_main_gun_module_npc(difficulty_index)
 		}
 	}
 	self.tiger_main_gun_module.KEEP_FIRE_ANGLE = 0.999
-	self.tiger_main_gun_module.MAX_VEL_SPIN = 10
-	self.tiger_main_gun_module.MIN_VEL_SPIN = self.tiger_main_gun_module.MAX_VEL_SPIN * 0.05
+	self.tiger_main_gun_module.MAX_VEL_SPIN = 20
+	self.tiger_main_gun_module.MIN_VEL_SPIN = self.tiger_main_gun_module.MAX_VEL_SPIN * 0.5
 	self.tiger_main_gun_module.SLOWDOWN_ANGLE_SPIN = 1
 	self.tiger_main_gun_module.ACC_SPIN = self.tiger_main_gun_module.MAX_VEL_SPIN * 5
-	self.tiger_main_gun_module.MAX_TARGETING_PITCH = 15
+	self.tiger_main_gun_module.MAX_TARGETING_PITCH = 20
 	self.tiger_main_gun_module.MAX_TARGETING_SPIN = 360
 	self.tiger_main_gun_module.MAX_VEL_PITCH = 10
 	self.tiger_main_gun_module.MIN_VEL_PITCH = self.tiger_main_gun_module.MAX_VEL_PITCH * 0.05
@@ -958,15 +810,15 @@ function WeaponTweakData:_init_data_tiger_main_gun_module_npc(difficulty_index)
 		main_cannon_lock_on = "tiger_npc_canon_reload"
 	}
 	self.tiger_main_gun_module.effect = {
-		main_cannon_fire = "effects/vanilla/explosions/vehicle_explosion",
-		main_cannon_fire_hit = "effects/vanilla/explosions/vehicle_explosion"
+		main_cannon_fire = "effects/vanilla/explosions/flak_88_fire_explosion",
+		main_cannon_fire_hit = "effects/vanilla/explosions/exp_airbomb_explosion_002"
 	}
 	self.tiger_main_gun_module.turret = {
 		gun_locator = "anim_gun",
 		range = 20000,
 		damage = 50,
 		locator = "anim_turret",
-		time_before_taking_shot = 2,
+		time_before_taking_shot = 1,
 		traverse_time = 10,
 		player_damage = 10,
 		armor_piercing = true,
@@ -976,7 +828,7 @@ function WeaponTweakData:_init_data_tiger_main_gun_module_npc(difficulty_index)
 	self.tiger_main_gun_module.fire_anim_sequence = "fire"
 end
 
--- Lines 1080-1163
+-- Lines 1119-1202
 function WeaponTweakData:_init_data_tiger_machinegun_module_npc(difficulty_index)
 	self.tiger_machinegun_module = {
 		sounds = {},
@@ -1084,7 +936,7 @@ function WeaponTweakData:_init_data_tiger_machinegun_module_npc(difficulty_index
 	end
 end
 
--- Lines 1167-1247
+-- Lines 1206-1286
 function WeaponTweakData:_init_data_junker_machinegun_module_npc(difficulty_index)
 	self.junker_machinegun_module = {
 		sounds = {},
@@ -1192,7 +1044,7 @@ function WeaponTweakData:_init_data_junker_machinegun_module_npc(difficulty_inde
 	end
 end
 
--- Lines 1253-1281
+-- Lines 1292-1320
 function WeaponTweakData:_init_data_ger_luger_npc()
 	self.ger_luger_npc = {
 		sounds = {},
@@ -1217,7 +1069,7 @@ function WeaponTweakData:_init_data_ger_luger_npc()
 	self.ger_luger_npc.suppression = 1
 end
 
--- Lines 1286-1314
+-- Lines 1325-1353
 function WeaponTweakData:_init_data_ger_stg44_npc()
 	self.ger_stg44_npc = {
 		sounds = {},
@@ -1244,7 +1096,7 @@ function WeaponTweakData:_init_data_ger_stg44_npc()
 	self.ger_stg44_npc.suppression = 1
 end
 
--- Lines 1320-1346
+-- Lines 1359-1385
 function WeaponTweakData:_init_data_usa_garand_npc()
 	self.usa_garand_npc = {
 		sounds = {},
@@ -1268,7 +1120,7 @@ function WeaponTweakData:_init_data_usa_garand_npc()
 	self.usa_garand_npc.suppression = 1
 end
 
--- Lines 1350-1377
+-- Lines 1389-1416
 function WeaponTweakData:_init_data_usa_m1911_npc()
 	self.usa_m1911_npc = {
 		sounds = {},
@@ -1293,7 +1145,7 @@ function WeaponTweakData:_init_data_usa_m1911_npc()
 	self.usa_m1911_npc.suppression = 1
 end
 
--- Lines 1381-1412
+-- Lines 1420-1451
 function WeaponTweakData:_init_data_thompson_npc()
 	self.thompson_npc = {
 		sounds = {},
@@ -1322,7 +1174,7 @@ function WeaponTweakData:_init_data_thompson_npc()
 	self.thompson_npc.suppression = 1
 end
 
--- Lines 1416-1445
+-- Lines 1455-1484
 function WeaponTweakData:_init_data_usa_sten_npc()
 	self.usa_sten_npc = {
 		sounds = {},
@@ -1350,7 +1202,7 @@ function WeaponTweakData:_init_data_usa_sten_npc()
 	self.usa_sten_npc.suppression = 1
 end
 
--- Lines 1449-1475
+-- Lines 1488-1514
 function WeaponTweakData:_init_data_ger_geco_npc()
 	self.ger_geco_npc = {
 		sounds = {},
@@ -1374,7 +1226,7 @@ function WeaponTweakData:_init_data_ger_geco_npc()
 	self.ger_geco_npc.is_shotgun = true
 end
 
--- Lines 1479-1512
+-- Lines 1518-1551
 function WeaponTweakData:_init_data_ger_mp38_npc()
 	self.ger_mp38_npc = {
 		sounds = {}
@@ -1404,7 +1256,7 @@ function WeaponTweakData:_init_data_ger_mp38_npc()
 	self.ger_mp38_npc.suppression = 1
 end
 
--- Lines 1514-1543
+-- Lines 1553-1582
 function WeaponTweakData:_init_data_carbine_npc()
 	self.carbine_npc = {
 		sounds = {},
@@ -1430,7 +1282,7 @@ function WeaponTweakData:_init_data_carbine_npc()
 	self.carbine_npc.suppression = 1
 end
 
--- Lines 1546-1572
+-- Lines 1585-1611
 function WeaponTweakData:_init_data_kar98_npc()
 	self.ger_kar98_npc = {
 		sounds = {},
@@ -1453,7 +1305,7 @@ function WeaponTweakData:_init_data_kar98_npc()
 	self.ger_kar98_npc.armor_piercing = true
 end
 
--- Lines 1575-1601
+-- Lines 1614-1640
 function WeaponTweakData:_init_data_sniper_kar98_npc()
 	self.sniper_kar98_npc = {
 		sounds = {},
@@ -1464,7 +1316,7 @@ function WeaponTweakData:_init_data_sniper_kar98_npc()
 	self.sniper_kar98_npc.sounds.prefix = ""
 	self.sniper_kar98_npc.sounds.single = "sniper_enemy_fire"
 	self.sniper_kar98_npc.use_data.selection_index = 2
-	self.sniper_kar98_npc.DAMAGE = 2
+	self.sniper_kar98_npc.DAMAGE = 10
 	self.sniper_kar98_npc.muzzleflash = "effects/vanilla/weapons/762_auto"
 	self.sniper_kar98_npc.shell_ejection = "effects/vanilla/weapons/shells/shell_sniper"
 	self.sniper_kar98_npc.CLIP_AMMO_MAX = 1
@@ -1476,7 +1328,7 @@ function WeaponTweakData:_init_data_sniper_kar98_npc()
 	self.sniper_kar98_npc.armor_piercing = true
 end
 
--- Lines 1604-1628
+-- Lines 1643-1667
 function WeaponTweakData:_init_data_spotting_optics_npc()
 	self.spotting_optics_npc = {
 		sounds = {},
@@ -1498,8 +1350,8 @@ function WeaponTweakData:_init_data_spotting_optics_npc()
 	self.spotting_optics_npc.armor_piercing = true
 end
 
--- Lines 1631-1665
-function WeaponTweakData:_init_data_m42_flammenwerfer_npc()
+-- Lines 1670-1723
+function WeaponTweakData:_init_data_m42_flammenwerfer_npc(difficulty_index)
 	self.m42_flammenwerfer_npc = {
 		sounds = {},
 		use_data = {},
@@ -1527,15 +1379,24 @@ function WeaponTweakData:_init_data_m42_flammenwerfer_npc()
 	self.m42_flammenwerfer_npc.NR_CLIPS_MAX = 1
 	self.m42_flammenwerfer_npc.AMMO_MAX = self.m42_flammenwerfer_npc.CLIP_AMMO_MAX * self.m42_flammenwerfer_npc.NR_CLIPS_MAX
 	self.m42_flammenwerfer_npc.hold = "rifle"
-	self.m42_flammenwerfer_npc.auto = {
-		fire_rate = 0.12
-	}
+	self.m42_flammenwerfer_npc.auto = {}
+
+	if difficulty_index <= TweakData.DIFFICULTY_1 then
+		self.m42_flammenwerfer_npc.auto.fire_rate = 0.5
+	elseif difficulty_index == TweakData.DIFFICULTY_2 then
+		self.m42_flammenwerfer_npc.auto.fire_rate = 0.25
+	elseif difficulty_index == TweakData.DIFFICULTY_3 then
+		self.m42_flammenwerfer_npc.auto.fire_rate = 0.12
+	elseif difficulty_index == TweakData.DIFFICULTY_4 then
+		self.m42_flammenwerfer_npc.auto.fire_rate = 0.1
+	end
+
 	self.m42_flammenwerfer_npc.hud_icon = "rifle"
 	self.m42_flammenwerfer_npc.alert_size = 5000
 	self.m42_flammenwerfer_npc.suppression = 0.45
 end
 
--- Lines 1668-1699
+-- Lines 1726-1757
 function WeaponTweakData:_init_data_panzerfaust_60_npc()
 	self.panzerfaust_60_npc = {
 		sounds = {},
@@ -1563,7 +1424,7 @@ function WeaponTweakData:_init_data_panzerfaust_60_npc()
 	self.panzerfaust_60_npc.suppression = 2
 end
 
--- Lines 1702-1886
+-- Lines 1760-1944
 function WeaponTweakData:_init_data_player_weapons(tweak_data)
 	local autohit_rifle_default, autohit_pistol_default, autohit_shotgun_default, autohit_lmg_default, autohit_snp_default, autohit_smg_default, autohit_minigun_default, aim_assist_rifle_default, aim_assist_pistol_default, aim_assist_shotgun_default, aim_assist_lmg_default, aim_assist_snp_default, aim_assist_smg_default, aim_assist_minigun_default = nil
 
@@ -1739,7 +1600,7 @@ function WeaponTweakData:_init_data_player_weapons(tweak_data)
 	self:_init_new_weapons(autohit_data)
 end
 
--- Lines 1888-2242
+-- Lines 1946-2300
 function WeaponTweakData:_init_data_turrets()
 	self.turret_m2 = {
 		heat_material = "blinn2",
@@ -2176,7 +2037,7 @@ function WeaponTweakData:_init_data_turrets()
 	}
 end
 
--- Lines 2245-2293
+-- Lines 2303-2351
 function WeaponTweakData:_init_stats()
 	self.stats = {
 		alert_size = {
@@ -2339,7 +2200,7 @@ function WeaponTweakData:_init_stats()
 	end
 end
 
--- Lines 2295-2307
+-- Lines 2353-2365
 function WeaponTweakData:_pickup_chance(max_ammo, selection_index)
 	local low, high = nil
 
@@ -2357,7 +2218,7 @@ function WeaponTweakData:_pickup_chance(max_ammo, selection_index)
 	}
 end
 
--- Lines 2309-2400
+-- Lines 2367-2458
 function WeaponTweakData:_init_new_weapons(weapon_data)
 	local total_damage_primary = 300
 	local total_damage_secondary = 150
@@ -2445,7 +2306,7 @@ function WeaponTweakData:_init_new_weapons(weapon_data)
 	self:_init_sterling(weapon_data)
 end
 
--- Lines 2402-2526
+-- Lines 2460-2584
 function WeaponTweakData:_init_flamethrower_mk2(weapon_data)
 	self.flamethrower_mk2 = {
 		inventory_texture = "ui/temp/customization_temp_df",
@@ -2558,7 +2419,7 @@ function WeaponTweakData:_init_flamethrower_mk2(weapon_data)
 	}
 end
 
--- Lines 2528-2674
+-- Lines 2586-2732
 function WeaponTweakData:_init_m1911(weapon_data)
 	self.m1911 = {
 		inventory_texture = "ui/temp/customization_temp_df",
@@ -2600,25 +2461,25 @@ function WeaponTweakData:_init_m1911(weapon_data)
 			range = 1000
 		},
 		{
-			damage = 43,
+			damage = 31,
 			range = 2500
 		}
 	}
-	self.m1911.headshot_multiplier = 2
+	self.m1911.headshot_multiplier = 3.5
 	self.m1911.CLIP_AMMO_MAX = 7
-	self.m1911.NR_CLIPS_MAX = 5
+	self.m1911.NR_CLIPS_MAX = 7
 	self.m1911.AMMO_MAX = self.m1911.CLIP_AMMO_MAX * self.m1911.NR_CLIPS_MAX
 	self.m1911.AMMO_PICKUP = self:_pickup_chance(self.m1911.AMMO_MAX, 1)
-	self.m1911.ammo_pickup_base = 7
+	self.m1911.ammo_pickup_base = 10
 	self.m1911.spread = {
-		standing = 4,
-		crouching = 3,
-		steelsight = 0.2,
-		moving_standing = 4.5,
-		moving_crouching = 3.4,
-		moving_steelsight = 0.25,
-		per_shot = 0.2,
-		per_shot_steelsight = 0.3,
+		standing = 2.5,
+		crouching = 2.25,
+		steelsight = 1.25,
+		moving_standing = 3.75,
+		moving_crouching = 3.38,
+		moving_steelsight = 1.56,
+		per_shot = 0.24,
+		per_shot_steelsight = 0.16,
 		recovery = 8,
 		recovery_wait_multiplier = 1
 	}
@@ -2708,9 +2569,9 @@ function WeaponTweakData:_init_m1911(weapon_data)
 	self.m1911.stats = {
 		zoom = 3,
 		total_ammo_mod = 21,
-		spread_moving = 5,
+		spread_moving = 9,
 		alert_size = 7,
-		spread = 7,
+		spread = 6,
 		recoil = 4,
 		value = 1,
 		extra_ammo = 6,
@@ -2719,7 +2580,7 @@ function WeaponTweakData:_init_m1911(weapon_data)
 	}
 end
 
--- Lines 2676-2821
+-- Lines 2734-2879
 function WeaponTweakData:_init_c96(weapon_data)
 	self.c96 = {
 		inventory_texture = "ui/temp/customization_temp_df",
@@ -2750,19 +2611,19 @@ function WeaponTweakData:_init_c96(weapon_data)
 	self.c96.damage_profile = {
 		{
 			damage = 52,
-			range = 1000
+			range = 1500
 		},
 		{
-			damage = 33,
-			range = 2500
+			damage = 31,
+			range = 3000
 		}
 	}
-	self.c96.headshot_multiplier = 1.7
+	self.c96.headshot_multiplier = 3.5
 	self.c96.CLIP_AMMO_MAX = 10
 	self.c96.NR_CLIPS_MAX = 5
 	self.c96.AMMO_MAX = self.c96.CLIP_AMMO_MAX * self.c96.NR_CLIPS_MAX
 	self.c96.AMMO_PICKUP = self:_pickup_chance(self.c96.AMMO_MAX, 1)
-	self.c96.ammo_pickup_base = 5
+	self.c96.ammo_pickup_base = 10
 	self.c96.FIRE_MODE = "single"
 	self.c96.fire_mode_data = {
 		fire_rate = 0.125
@@ -2771,17 +2632,17 @@ function WeaponTweakData:_init_c96(weapon_data)
 		fire_rate = 0.125
 	}
 	self.c96.spread = {
-		standing = 4,
-		crouching = 2.625,
-		steelsight = 1,
-		moving_standing = 4
+		standing = 2.14,
+		crouching = 1.93,
+		steelsight = 1.07,
+		moving_standing = 3.21,
+		moving_crouching = 2.89,
+		moving_steelsight = 1.24,
+		per_shot = 0.25,
+		per_shot_steelsight = 0.2,
+		recovery = 10,
+		recovery_wait_multiplier = 2
 	}
-	self.c96.spread.moving_crouching = self.c96.spread.crouching * 0.85
-	self.c96.spread.moving_steelsight = self.c96.spread.steelsight * 0.7
-	self.c96.spread.per_shot = 0.25
-	self.c96.spread.per_shot_steelsight = 0.2
-	self.c96.spread.recovery = 10
-	self.c96.spread.recovery_wait_multiplier = 2
 	self.c96.kick = {
 		standing = {
 			1.1,
@@ -2872,7 +2733,7 @@ function WeaponTweakData:_init_c96(weapon_data)
 		alert_size = 7,
 		spread = 6,
 		recoil = 5,
-		spread_moving = 5,
+		spread_moving = 9,
 		value = 1,
 		extra_ammo = 6,
 		suppression = 14,
@@ -2880,7 +2741,7 @@ function WeaponTweakData:_init_c96(weapon_data)
 	}
 end
 
--- Lines 2823-2968
+-- Lines 2881-3024
 function WeaponTweakData:_init_webley(weapon_data)
 	self.webley = {
 		inventory_texture = "ui/temp/customization_temp_df",
@@ -2910,28 +2771,20 @@ function WeaponTweakData:_init_webley(weapon_data)
 	}
 	self.webley.damage_profile = {
 		{
-			damage = 116,
+			damage = 85,
+			range = 1000
+		},
+		{
+			damage = 34,
 			range = 2500
-		},
-		{
-			damage = 83,
-			range = 3500
-		},
-		{
-			damage = 83,
-			range = 4000
-		},
-		{
-			damage = 52,
-			range = 5500
 		}
 	}
-	self.webley.headshot_multiplier = 2
+	self.webley.headshot_multiplier = 4
 	self.webley.CLIP_AMMO_MAX = 6
-	self.webley.NR_CLIPS_MAX = 3
+	self.webley.NR_CLIPS_MAX = 8
 	self.webley.AMMO_MAX = self.webley.CLIP_AMMO_MAX * self.webley.NR_CLIPS_MAX
 	self.webley.AMMO_PICKUP = self:_pickup_chance(self.webley.AMMO_MAX, 1)
-	self.webley.ammo_pickup_base = 6
+	self.webley.ammo_pickup_base = 10
 	self.webley.FIRE_MODE = "single"
 	self.webley.fire_mode_data = {
 		fire_rate = 0.33
@@ -2940,14 +2793,14 @@ function WeaponTweakData:_init_webley(weapon_data)
 		fire_rate = 0.33
 	}
 	self.webley.spread = {
-		standing = 10,
-		crouching = 7,
-		steelsight = 0,
-		moving_standing = 14,
-		moving_crouching = 9,
-		moving_steelsight = 0.1,
-		per_shot = 1,
-		per_shot_steelsight = 0.4,
+		standing = 2.14,
+		crouching = 1.93,
+		steelsight = 1.07,
+		moving_standing = 3.21,
+		moving_crouching = 2.89,
+		moving_steelsight = 1.34,
+		per_shot = 0.4,
+		per_shot_steelsight = 0.16,
 		recovery = 10,
 		recovery_wait_multiplier = 1.2
 	}
@@ -3038,9 +2891,9 @@ function WeaponTweakData:_init_webley(weapon_data)
 		total_ammo_mod = 21,
 		damage = 27,
 		alert_size = 7,
-		spread = 9,
+		spread = 6,
 		recoil = 2,
-		spread_moving = 6,
+		spread_moving = 9,
 		value = 1,
 		extra_ammo = 6,
 		suppression = 14,
@@ -3048,7 +2901,7 @@ function WeaponTweakData:_init_webley(weapon_data)
 	}
 end
 
--- Lines 2970-3129
+-- Lines 3026-3185
 function WeaponTweakData:_init_thompson(weapon_data)
 	self.thompson = {
 		inventory_texture = "ui/temp/customization_temp_df",
@@ -3080,16 +2933,16 @@ function WeaponTweakData:_init_thompson(weapon_data)
 	self.thompson.damage_profile = {
 		{
 			damage = 83,
-			range = 1700
+			range = 1000
 		},
 		{
-			damage = 32,
+			damage = 42,
 			range = 2500
 		}
 	}
-	self.thompson.headshot_multiplier = 1.5
+	self.thompson.headshot_multiplier = 3.5
 	self.thompson.CLIP_AMMO_MAX = 20
-	self.thompson.NR_CLIPS_MAX = 6
+	self.thompson.NR_CLIPS_MAX = 10
 	self.thompson.AMMO_MAX = self.thompson.CLIP_AMMO_MAX * self.thompson.NR_CLIPS_MAX
 	self.thompson.AMMO_PICKUP = self:_pickup_chance(self.thompson.AMMO_MAX, 2)
 	self.thompson.ammo_pickup_base = 20
@@ -3102,12 +2955,12 @@ function WeaponTweakData:_init_thompson(weapon_data)
 		fire_rate = 0.1
 	}
 	self.thompson.spread = {
-		standing = 4,
-		crouching = 3.2,
-		steelsight = 0.3,
-		moving_standing = 4.2,
-		moving_crouching = 3.5,
-		moving_steelsight = 0.4,
+		standing = 4.5,
+		crouching = 3.6,
+		steelsight = 2.25,
+		moving_standing = 5.63,
+		moving_crouching = 4.5,
+		moving_steelsight = 2.53,
 		per_shot = 0.09,
 		per_shot_steelsight = 0.05,
 		recovery = 10,
@@ -3216,7 +3069,7 @@ function WeaponTweakData:_init_thompson(weapon_data)
 	self.thompson.stats = {
 		zoom = 4,
 		total_ammo_mod = 21,
-		spread_moving = 5,
+		spread_moving = 9,
 		alert_size = 7,
 		spread = 6,
 		recoil = 4,
@@ -3227,7 +3080,7 @@ function WeaponTweakData:_init_thompson(weapon_data)
 	}
 end
 
--- Lines 3131-3293
+-- Lines 3187-3348
 function WeaponTweakData:_init_sten_mk2(weapon_data)
 	self.sten = {
 		inventory_texture = "ui/temp/customization_temp_df",
@@ -3259,20 +3112,16 @@ function WeaponTweakData:_init_sten_mk2(weapon_data)
 	self.sten.damage_profile = {
 		{
 			damage = 58,
-			range = 1000
+			range = 1500
 		},
 		{
-			damage = 48,
-			range = 1600
-		},
-		{
-			damage = 26,
-			range = 2800
+			damage = 35,
+			range = 2500
 		}
 	}
-	self.sten.headshot_multiplier = 1.5
+	self.sten.headshot_multiplier = 3.5
 	self.sten.CLIP_AMMO_MAX = 32
-	self.sten.NR_CLIPS_MAX = 7
+	self.sten.NR_CLIPS_MAX = 6
 	self.sten.AMMO_MAX = self.sten.CLIP_AMMO_MAX * self.sten.NR_CLIPS_MAX
 	self.sten.AMMO_PICKUP = self:_pickup_chance(self.sten.AMMO_MAX, 2)
 	self.sten.ammo_pickup_base = 19
@@ -3285,12 +3134,12 @@ function WeaponTweakData:_init_sten_mk2(weapon_data)
 		fire_rate = 0.125
 	}
 	self.sten.spread = {
-		standing = 3,
-		crouching = 2.8,
-		steelsight = 0.5,
-		moving_standing = 3,
-		moving_crouching = 2.85,
-		moving_steelsight = 0.3,
+		standing = 4,
+		crouching = 3.2,
+		steelsight = 2,
+		moving_standing = 5,
+		moving_crouching = 4,
+		moving_steelsight = 2.25,
 		per_shot = 0.08,
 		per_shot_steelsight = 0.05,
 		recovery = 8,
@@ -3401,7 +3250,7 @@ function WeaponTweakData:_init_sten_mk2(weapon_data)
 	self.sten.stats = {
 		zoom = 4,
 		total_ammo_mod = 21,
-		spread_moving = 6,
+		spread_moving = 9,
 		alert_size = 7,
 		spread = 6,
 		recoil = 5,
@@ -3412,7 +3261,7 @@ function WeaponTweakData:_init_sten_mk2(weapon_data)
 	}
 end
 
--- Lines 3295-3460
+-- Lines 3350-3521
 function WeaponTweakData:_init_m1_garand(weapon_data)
 	self.garand = {
 		inventory_texture = "ui/temp/customization_temp_df",
@@ -3445,11 +3294,11 @@ function WeaponTweakData:_init_m1_garand(weapon_data)
 			range = 3000
 		},
 		{
-			damage = 85,
-			range = 4600
+			damage = 94,
+			range = 6000
 		}
 	}
-	self.garand.headshot_multiplier = 2
+	self.garand.headshot_multiplier = 4
 	self.garand.CLIP_AMMO_MAX = 8
 	self.garand.NR_CLIPS_MAX = 10
 	self.garand.AMMO_MAX = self.garand.CLIP_AMMO_MAX * self.garand.NR_CLIPS_MAX
@@ -3467,14 +3316,14 @@ function WeaponTweakData:_init_m1_garand(weapon_data)
 		fire_rate = 0.15
 	}
 	self.garand.spread = {
-		standing = 3,
-		crouching = 2.6,
-		steelsight = 0,
-		moving_standing = 3,
-		moving_crouching = 2.7,
-		moving_steelsight = 0.15,
-		per_shot = 0.6,
-		per_shot_steelsight = 0.1,
+		standing = 5,
+		crouching = 3.5,
+		steelsight = 0.5,
+		moving_standing = 7.5,
+		moving_crouching = 5.25,
+		moving_steelsight = 0.63,
+		per_shot = 0.48,
+		per_shot_steelsight = 0.08,
 		recovery = 8,
 		recovery_wait_multiplier = 2
 	}
@@ -3583,16 +3432,21 @@ function WeaponTweakData:_init_m1_garand(weapon_data)
 		total_ammo_mod = 21,
 		recoil = 7,
 		alert_size = 7,
-		spread = 7,
-		spread_moving = 5,
+		spread = 6,
+		spread_moving = 9,
 		value = 1,
 		extra_ammo = 6,
 		suppression = 8,
 		concealment = 10
 	}
+	self.garand_golden = deep_clone(self.garand)
+	self.garand_golden.name_id = "bm_w_garand_golden"
+	self.garand_golden.desc_id = "bm_w_garand_golden_desc"
+	self.garand_golden.description_id = "des_garand_golden"
+	self.garand_golden.dlc = DLCTweakData.DLC_NAME_PREORDER
 end
 
--- Lines 3462-3622
+-- Lines 3523-3683
 function WeaponTweakData:_init_m1918_bar(weapon_data)
 	self.m1918 = {
 		inventory_texture = "ui/temp/customization_temp_df",
@@ -3623,16 +3477,16 @@ function WeaponTweakData:_init_m1918_bar(weapon_data)
 	self.m1918.damage_profile = {
 		{
 			damage = 105,
-			range = 3200
+			range = 2500
 		},
 		{
-			damage = 72,
-			range = 4100
+			damage = 63,
+			range = 5000
 		}
 	}
-	self.m1918.headshot_multiplier = 2
+	self.m1918.headshot_multiplier = 3
 	self.m1918.CLIP_AMMO_MAX = 20
-	self.m1918.NR_CLIPS_MAX = 8
+	self.m1918.NR_CLIPS_MAX = 10
 	self.m1918.AMMO_MAX = self.m1918.CLIP_AMMO_MAX * self.m1918.NR_CLIPS_MAX
 	self.m1918.AMMO_PICKUP = {
 		10,
@@ -3648,14 +3502,14 @@ function WeaponTweakData:_init_m1918_bar(weapon_data)
 		fire_rate = 0.16
 	}
 	self.m1918.spread = {
-		standing = 4,
-		crouching = 3.2,
-		steelsight = 0.5,
-		moving_standing = 5,
-		moving_crouching = 2.8,
-		moving_steelsight = 0.6,
-		per_shot = 0.34,
-		per_shot_steelsight = 0.065,
+		standing = 5,
+		crouching = 2.5,
+		steelsight = 1.79,
+		moving_standing = 10,
+		moving_crouching = 5,
+		moving_steelsight = 2.68,
+		per_shot = 0.27,
+		per_shot_steelsight = 0.052,
 		recovery = 10,
 		recovery_wait_multiplier = 1
 	}
@@ -3754,9 +3608,9 @@ function WeaponTweakData:_init_m1918_bar(weapon_data)
 	self.m1918.stats = {
 		zoom = 2,
 		total_ammo_mod = 21,
-		spread_moving = 6,
+		spread_moving = 9,
 		alert_size = 8,
-		spread = 7,
+		spread = 6,
 		recoil = 4,
 		value = 9,
 		extra_ammo = 6,
@@ -3765,7 +3619,7 @@ function WeaponTweakData:_init_m1918_bar(weapon_data)
 	}
 end
 
--- Lines 3624-3788
+-- Lines 3685-3849
 function WeaponTweakData:_init_m1903_springfield(weapon_data)
 	self.m1903 = {
 		inventory_texture = "ui/temp/customization_temp_df",
@@ -3801,7 +3655,7 @@ function WeaponTweakData:_init_m1903_springfield(weapon_data)
 			range = 1000
 		}
 	}
-	self.m1903.headshot_multiplier = 2
+	self.m1903.headshot_multiplier = 3.5
 	self.m1903.CLIP_AMMO_MAX = 5
 	self.m1903.NR_CLIPS_MAX = 10
 	self.m1903.AMMO_MAX = self.m1903.CLIP_AMMO_MAX * self.m1903.NR_CLIPS_MAX
@@ -3819,14 +3673,14 @@ function WeaponTweakData:_init_m1903_springfield(weapon_data)
 		fire_rate = 1.2
 	}
 	self.m1903.spread = {
-		standing = 20,
-		crouching = 18,
-		steelsight = 0,
-		moving_standing = 32,
-		moving_crouching = 26,
-		moving_steelsight = 1,
-		per_shot = 4,
-		per_shot_steelsight = 0.5,
+		standing = 4.29,
+		crouching = 3,
+		steelsight = 0.07,
+		moving_standing = 8.57,
+		moving_crouching = 6,
+		moving_steelsight = 0.11,
+		per_shot = 0.8,
+		per_shot_steelsight = 0.1,
 		recovery = 16,
 		recovery_wait_multiplier = 0.9
 	}
@@ -3855,7 +3709,7 @@ function WeaponTweakData:_init_m1903_springfield(weapon_data)
 			-1.9,
 			1.9
 		},
-		recenter_speed = 400,
+		recenter_speed = 500,
 		recenter_speed_steelsight = 400
 	}
 	self.m1903.minimum_view_kick = {
@@ -3916,7 +3770,7 @@ function WeaponTweakData:_init_m1903_springfield(weapon_data)
 		equip_id = "equip_m4",
 		recoil_steelsight = true
 	}
-	self.m1903.can_shoot_through_enemy = false
+	self.m1903.can_shoot_through_enemy = true
 	self.m1903.can_shoot_through_shield = false
 	self.m1903.can_shoot_through_wall = false
 	self.m1903.armor_piercing_chance = 1
@@ -3937,9 +3791,9 @@ function WeaponTweakData:_init_m1903_springfield(weapon_data)
 	self.m1903.stats = {
 		zoom = 1,
 		total_ammo_mod = 21,
-		spread_moving = 5,
+		spread_moving = 9,
 		alert_size = 7,
-		spread = 10,
+		spread = 6,
 		recoil = 2,
 		value = 1,
 		extra_ammo = 6,
@@ -3948,7 +3802,7 @@ function WeaponTweakData:_init_m1903_springfield(weapon_data)
 	}
 end
 
--- Lines 3790-3945
+-- Lines 3851-4005
 function WeaponTweakData:_init_m1912_winchester(weapon_data)
 	self.m1912 = {
 		inventory_texture = "ui/temp/customization_temp_df",
@@ -3981,19 +3835,15 @@ function WeaponTweakData:_init_m1912_winchester(weapon_data)
 	}
 	self.m1912.damage_profile = {
 		{
-			damage = 184,
-			range = 1100
+			damage = 200,
+			range = 1000
 		},
 		{
-			damage = 64,
+			damage = 20,
 			range = 2000
-		},
-		{
-			damage = 12,
-			range = 2400
 		}
 	}
-	self.m1912.headshot_multiplier = 1.4
+	self.m1912.headshot_multiplier = 3
 	self.m1912.rays = 12
 	self.m1912.CLIP_AMMO_MAX = 6
 	self.m1912.NR_CLIPS_MAX = 5
@@ -4009,14 +3859,14 @@ function WeaponTweakData:_init_m1912_winchester(weapon_data)
 		fire_rate = 0.8
 	}
 	self.m1912.spread = {
-		standing = 6,
-		crouching = 6,
-		steelsight = 4,
-		moving_standing = 5,
-		moving_crouching = 5,
-		moving_steelsight = 4,
-		per_shot = 6,
-		per_shot_steelsight = 5,
+		standing = 3,
+		crouching = 3,
+		steelsight = 3,
+		moving_standing = 3,
+		moving_crouching = 3,
+		moving_steelsight = 3,
+		per_shot = 0,
+		per_shot_steelsight = 0,
 		recovery = 12,
 		recovery_wait_multiplier = 0.5
 	}
@@ -4105,9 +3955,9 @@ function WeaponTweakData:_init_m1912_winchester(weapon_data)
 	self.m1912.stats = {
 		zoom = 3,
 		total_ammo_mod = 21,
-		spread_moving = 4,
+		spread_moving = 9,
 		alert_size = 7,
-		spread = 4,
+		spread = 6,
 		recoil = 4,
 		value = 1,
 		extra_ammo = 6,
@@ -4116,7 +3966,7 @@ function WeaponTweakData:_init_m1912_winchester(weapon_data)
 	}
 end
 
--- Lines 3947-4100
+-- Lines 4007-4159
 function WeaponTweakData:_init_mp38(weapon_data)
 	self.mp38 = {
 		inventory_texture = "ui/temp/customization_temp_df",
@@ -4148,18 +3998,14 @@ function WeaponTweakData:_init_mp38(weapon_data)
 	self.mp38.damage_profile = {
 		{
 			damage = 75,
-			range = 1400
+			range = 1500
 		},
 		{
-			damage = 62,
-			range = 2200
-		},
-		{
-			damage = 43,
+			damage = 45,
 			range = 3000
 		}
 	}
-	self.mp38.headshot_multiplier = 1.5
+	self.mp38.headshot_multiplier = 3.5
 	self.mp38.CLIP_AMMO_MAX = 32
 	self.mp38.NR_CLIPS_MAX = 6
 	self.mp38.AMMO_MAX = self.mp38.CLIP_AMMO_MAX * self.mp38.NR_CLIPS_MAX
@@ -4174,14 +4020,14 @@ function WeaponTweakData:_init_mp38(weapon_data)
 		fire_rate = 0.125
 	}
 	self.mp38.spread = {
-		standing = 2.8,
-		crouching = 2.6,
-		steelsight = 0.4,
-		moving_standing = 4.2,
-		moving_crouching = 3.6,
-		moving_steelsight = 0.4,
-		per_shot = 0.1,
-		per_shot_steelsight = 0.04,
+		standing = 2.86,
+		crouching = 2.29,
+		steelsight = 1.43,
+		moving_standing = 3.57,
+		moving_crouching = 2.86,
+		moving_steelsight = 1.61,
+		per_shot = 0.12,
+		per_shot_steelsight = 0.048,
 		recovery = 10,
 		recovery_wait_multiplier = 2
 	}
@@ -4269,9 +4115,9 @@ function WeaponTweakData:_init_mp38(weapon_data)
 	self.mp38.stats = {
 		zoom = 4,
 		total_ammo_mod = 21,
-		spread_moving = 4,
+		spread_moving = 9,
 		alert_size = 7,
-		spread = 5,
+		spread = 6,
 		recoil = 10,
 		value = 1,
 		extra_ammo = 6,
@@ -4280,7 +4126,7 @@ function WeaponTweakData:_init_mp38(weapon_data)
 	}
 end
 
--- Lines 4102-4258
+-- Lines 4161-4317
 function WeaponTweakData:_init_m1_carbine(weapon_data)
 	self.carbine = {
 		inventory_texture = "ui/temp/customization_temp_df",
@@ -4310,14 +4156,14 @@ function WeaponTweakData:_init_m1_carbine(weapon_data)
 	self.carbine.damage_profile = {
 		{
 			damage = 92,
-			range = 1800
+			range = 2000
 		},
 		{
-			damage = 48,
-			range = 4900
+			damage = 55,
+			range = 4000
 		}
 	}
-	self.carbine.headshot_multiplier = 2
+	self.carbine.headshot_multiplier = 4
 	self.carbine.CLIP_AMMO_MAX = 15
 	self.carbine.NR_CLIPS_MAX = 10
 	self.carbine.AMMO_MAX = self.carbine.CLIP_AMMO_MAX * self.carbine.NR_CLIPS_MAX
@@ -4329,14 +4175,14 @@ function WeaponTweakData:_init_m1_carbine(weapon_data)
 	}
 	self.carbine.CAN_TOGGLE_FIREMODE = false
 	self.carbine.spread = {
-		standing = 3.7,
-		crouching = 3.2,
-		steelsight = 0.2,
-		moving_standing = 4,
-		moving_crouching = 3.5,
-		moving_steelsight = 0.2,
-		per_shot = 0.25,
-		per_shot_steelsight = 0.1,
+		standing = 2.5,
+		crouching = 1.75,
+		steelsight = 0.5,
+		moving_standing = 3.75,
+		moving_crouching = 2.63,
+		moving_steelsight = 0.63,
+		per_shot = 0.2,
+		per_shot_steelsight = 0.08,
 		recovery = 7,
 		recovery_wait_multiplier = 1.5
 	}
@@ -4445,9 +4291,9 @@ function WeaponTweakData:_init_m1_carbine(weapon_data)
 	self.carbine.stats = {
 		zoom = 4,
 		total_ammo_mod = 21,
-		spread_moving = 5,
+		spread_moving = 9,
 		alert_size = 7,
-		spread = 7,
+		spread = 6,
 		recoil = 9,
 		value = 1,
 		extra_ammo = 6,
@@ -4456,7 +4302,7 @@ function WeaponTweakData:_init_m1_carbine(weapon_data)
 	}
 end
 
--- Lines 4260-4418
+-- Lines 4319-4477
 function WeaponTweakData:_init_mp44(weapon_data)
 	self.mp44 = {
 		inventory_texture = "ui/temp/customization_temp_df",
@@ -4488,14 +4334,14 @@ function WeaponTweakData:_init_mp44(weapon_data)
 	self.mp44.damage_profile = {
 		{
 			damage = 99,
-			range = 2900
+			range = 2500
 		},
 		{
-			damage = 52,
-			range = 4400
+			damage = 64,
+			range = 5000
 		}
 	}
-	self.mp44.headshot_multiplier = 2
+	self.mp44.headshot_multiplier = 3.5
 	self.mp44.CLIP_AMMO_MAX = 15
 	self.mp44.NR_CLIPS_MAX = 10
 	self.mp44.AMMO_MAX = self.mp44.CLIP_AMMO_MAX * self.mp44.NR_CLIPS_MAX
@@ -4510,14 +4356,14 @@ function WeaponTweakData:_init_mp44(weapon_data)
 		fire_rate = 0.11
 	}
 	self.mp44.spread = {
-		standing = 5,
-		crouching = 3.5,
-		steelsight = 0.05,
-		moving_standing = 5,
-		moving_crouching = 3.6,
-		moving_steelsight = 0.05,
-		per_shot = 0.16,
-		per_shot_steelsight = 0.027,
+		standing = 3.57,
+		crouching = 2.5,
+		steelsight = 0.71,
+		moving_standing = 5.36,
+		moving_crouching = 3.75,
+		moving_steelsight = 0.89,
+		per_shot = 0.096,
+		per_shot_steelsight = 0.016,
 		recovery = 10,
 		recovery_wait_multiplier = 2
 	}
@@ -4625,8 +4471,8 @@ function WeaponTweakData:_init_mp44(weapon_data)
 		total_ammo_mod = 21,
 		recoil = 9,
 		alert_size = 7,
-		spread = 8,
-		spread_moving = 6,
+		spread = 6,
+		spread_moving = 9,
 		value = 1,
 		extra_ammo = 6,
 		suppression = 10,
@@ -4634,7 +4480,7 @@ function WeaponTweakData:_init_mp44(weapon_data)
 	}
 end
 
--- Lines 4420-4575
+-- Lines 4479-4636
 function WeaponTweakData:_init_mg42(weapon_data)
 	self.mg42 = {
 		inventory_texture = "ui/temp/customization_temp_df",
@@ -4669,14 +4515,14 @@ function WeaponTweakData:_init_mg42(weapon_data)
 	self.mg42.damage_profile = {
 		{
 			damage = 100,
-			range = 2400
+			range = 2500
 		},
 		{
-			damage = 68,
-			range = 4300
+			damage = 60,
+			range = 5000
 		}
 	}
-	self.mg42.headshot_multiplier = 2
+	self.mg42.headshot_multiplier = 3
 	self.mg42.CLIP_AMMO_MAX = 50
 	self.mg42.NR_CLIPS_MAX = 4
 	self.mg42.AMMO_MAX = self.mg42.CLIP_AMMO_MAX * self.mg42.NR_CLIPS_MAX
@@ -4691,12 +4537,14 @@ function WeaponTweakData:_init_mg42(weapon_data)
 		fire_rate = 0.05
 	}
 	self.mg42.spread = {
-		standing = 8,
-		crouching = 6.2,
-		steelsight = 0.3,
-		moving_standing = 8,
-		moving_crouching = 6.4,
-		moving_steelsight = 0.3
+		standing = 5.83,
+		crouching = 2.92,
+		steelsight = 2.08,
+		moving_standing = 11.67,
+		moving_crouching = 5.83,
+		moving_steelsight = 3.13,
+		per_shot = 0.12,
+		per_shot_steelsight = 0.036
 	}
 	self.mg42.kick = {
 		standing = {
@@ -4791,8 +4639,8 @@ function WeaponTweakData:_init_mg42(weapon_data)
 		total_ammo_mod = 21,
 		recoil = 5,
 		alert_size = 8,
-		spread = 8,
-		spread_moving = 3,
+		spread = 6,
+		spread_moving = 9,
 		value = 9,
 		extra_ammo = 6,
 		suppression = 4,
@@ -4800,7 +4648,7 @@ function WeaponTweakData:_init_mg42(weapon_data)
 	}
 end
 
--- Lines 4577-4733
+-- Lines 4638-4796
 function WeaponTweakData:_init_mosin(weapon_data)
 	self.mosin = {
 		inventory_texture = "ui/temp/customization_temp_df",
@@ -4835,11 +4683,11 @@ function WeaponTweakData:_init_mosin(weapon_data)
 	}
 	self.mosin.damage_profile = {
 		{
-			damage = 200,
+			damage = 250,
 			range = 1000
 		}
 	}
-	self.mosin.headshot_multiplier = 2
+	self.mosin.headshot_multiplier = 4
 	self.mosin.CLIP_AMMO_MAX = 5
 	self.mosin.NR_CLIPS_MAX = 10
 	self.mosin.AMMO_MAX = self.mosin.CLIP_AMMO_MAX * self.mosin.NR_CLIPS_MAX
@@ -4857,12 +4705,14 @@ function WeaponTweakData:_init_mosin(weapon_data)
 		fire_rate = 20
 	}
 	self.mosin.spread = {
-		standing = 25,
-		crouching = 18,
-		steelsight = 0,
-		moving_standing = 40,
-		moving_crouching = 30,
-		moving_steelsight = 1
+		standing = 4.29,
+		crouching = 3,
+		steelsight = 0.07,
+		moving_standing = 8.57,
+		moving_crouching = 6,
+		moving_steelsight = 0.11,
+		per_shot = 0.8,
+		per_shot_steelsight = 0.5
 	}
 	self.mosin.kick = {
 		standing = {
@@ -4950,7 +4800,7 @@ function WeaponTweakData:_init_mosin(weapon_data)
 		equip_id = "equip_mosin",
 		recoil_steelsight = true
 	}
-	self.mosin.can_shoot_through_enemy = false
+	self.mosin.can_shoot_through_enemy = true
 	self.mosin.can_shoot_through_shield = false
 	self.mosin.can_shoot_through_wall = false
 	self.mosin.armor_piercing_chance = 1
@@ -4974,8 +4824,8 @@ function WeaponTweakData:_init_mosin(weapon_data)
 		total_ammo_mod = 21,
 		recoil = 4,
 		alert_size = 7,
-		spread = 10,
-		spread_moving = 5,
+		spread = 6,
+		spread_moving = 9,
 		value = 9,
 		extra_ammo = 6,
 		suppression = 5,
@@ -4983,7 +4833,7 @@ function WeaponTweakData:_init_mosin(weapon_data)
 	}
 end
 
--- Lines 4735-4886
+-- Lines 4798-4949
 function WeaponTweakData:_init_sterling(weapon_data)
 	self.sterling = {
 		inventory_texture = "ui/temp/customization_temp_df",
@@ -5014,14 +4864,14 @@ function WeaponTweakData:_init_sterling(weapon_data)
 	self.sterling.damage_profile = {
 		{
 			damage = 74,
-			range = 1200
+			range = 1500
 		},
 		{
-			damage = 65,
-			range = 2800
+			damage = 48,
+			range = 3000
 		}
 	}
-	self.sterling.headshot_multiplier = 1.5
+	self.sterling.headshot_multiplier = 3.25
 	self.sterling.CLIP_AMMO_MAX = 20
 	self.sterling.NR_CLIPS_MAX = 10
 	self.sterling.AMMO_MAX = self.sterling.CLIP_AMMO_MAX * self.sterling.NR_CLIPS_MAX
@@ -5036,14 +4886,14 @@ function WeaponTweakData:_init_sterling(weapon_data)
 		fire_rate = 0.11
 	}
 	self.sterling.spread = {
-		standing = 3,
-		crouching = 2.8,
-		steelsight = 0.2,
-		moving_standing = 3.4,
-		moving_crouching = 3.05,
-		moving_steelsight = 0.2,
-		per_shot = 0.12,
-		per_shot_steelsight = 0.04,
+		standing = 2.86,
+		crouching = 2.29,
+		steelsight = 1.43,
+		moving_standing = 3.57,
+		moving_crouching = 2.86,
+		moving_steelsight = 1.61,
+		per_shot = 0.096,
+		per_shot_steelsight = 0.032,
 		recovery = 8,
 		recovery_wait_multiplier = 1.25
 	}
@@ -5135,9 +4985,9 @@ function WeaponTweakData:_init_sterling(weapon_data)
 	self.sterling.stats = {
 		zoom = 1,
 		total_ammo_mod = 21,
-		spread_moving = 6,
+		spread_moving = 9,
 		alert_size = 7,
-		spread = 7,
+		spread = 6,
 		recoil = 4,
 		value = 7,
 		extra_ammo = 6,
@@ -5146,6 +4996,6 @@ function WeaponTweakData:_init_sterling(weapon_data)
 	}
 end
 
--- Lines 4890-4899
+-- Lines 4953-4962
 function WeaponTweakData:_init_data_offhand_weapons()
 end

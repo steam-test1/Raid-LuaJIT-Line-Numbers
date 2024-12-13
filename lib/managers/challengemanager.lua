@@ -53,7 +53,7 @@ function ChallengeManager:create_challenge(challenge_category, challenge_id, tas
 	self._challenges[challenge_category][challenge_id] = challenge
 end
 
--- Lines 53-60
+-- Lines 53-61
 function ChallengeManager:activate_challenge(challenge_category, challenge_id)
 	if not self._challenges[challenge_category] or not self._challenges[challenge_category][challenge_id] then
 		debug_pause("CANNOT ACTIVATE CHALLENGE", challenge_category, challenge_id)
@@ -64,7 +64,7 @@ function ChallengeManager:activate_challenge(challenge_category, challenge_id)
 	self._challenges[challenge_category][challenge_id]:activate()
 end
 
--- Lines 62-69
+-- Lines 63-71
 function ChallengeManager:deactivate_challenge(challenge_category, challenge_id)
 	if not self._challenges[challenge_category] or not self._challenges[challenge_category][challenge_id] then
 		debug_pause("CANNOT DEACTIVATE CHALLENGE", challenge_category, challenge_id)
@@ -75,7 +75,16 @@ function ChallengeManager:deactivate_challenge(challenge_category, challenge_id)
 	self._challenges[challenge_category][challenge_id]:deactivate()
 end
 
--- Lines 71-78
+-- Lines 73-79
+function ChallengeManager:deactivate_all_challenges()
+	for category_index, category in pairs(self._challenges) do
+		for challenge_id, challenge in pairs(category) do
+			self:deactivate_challenge(category_index, challenge_id)
+		end
+	end
+end
+
+-- Lines 81-89
 function ChallengeManager:reset_challenge(challenge_category, challenge_id)
 	if not self._challenges[challenge_category] or not self._challenges[challenge_category][challenge_id] then
 		debug_pause("CANNOT RESET CHALLENGE", challenge_category, challenge_id)
@@ -86,7 +95,7 @@ function ChallengeManager:reset_challenge(challenge_category, challenge_id)
 	self._challenges[challenge_category][challenge_id]:reset()
 end
 
--- Lines 80-86
+-- Lines 91-97
 function ChallengeManager:reset_all_challenges()
 	for category_index, category in pairs(self._challenges) do
 		for challenge_id, challenge in pairs(category) do
@@ -95,7 +104,7 @@ function ChallengeManager:reset_all_challenges()
 	end
 end
 
--- Lines 88-94
+-- Lines 99-105
 function ChallengeManager:get_challenge(challenge_category, challenge_id)
 	if not self._challenges[challenge_category] or not self._challenges[challenge_category][challenge_id] then
 		return
@@ -104,20 +113,20 @@ function ChallengeManager:get_challenge(challenge_category, challenge_id)
 	return self._challenges[challenge_category][challenge_id]
 end
 
--- Lines 96-98
+-- Lines 107-109
 function ChallengeManager:challenge_exists(challenge_category, challenge_id)
 	return self._challenges[challenge_category] and self._challenges[challenge_category][challenge_id] and true or false
 end
 
--- Lines 109-110
+-- Lines 133-134
 function ChallengeManager:save_character_slot(data)
 end
 
--- Lines 113-114
+-- Lines 137-138
 function ChallengeManager:load_character_slot(data, version)
 end
 
--- Lines 117-123
+-- Lines 141-147
 function ChallengeManager:save_profile_slot(data)
 	local state = {
 		version = ChallengeManager.VERSION,
@@ -126,7 +135,7 @@ function ChallengeManager:save_profile_slot(data)
 	data.ChallengeManager = state
 end
 
--- Lines 126-141
+-- Lines 150-165
 function ChallengeManager:load_profile_slot(data, version)
 	local state = data.ChallengeManager
 

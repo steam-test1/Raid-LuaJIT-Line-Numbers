@@ -3,25 +3,20 @@ TeamAILogicSurrender.on_cop_neutralized = TeamAILogicIdle.on_cop_neutralized
 TeamAILogicSurrender.on_alert = TeamAILogicIdle.on_alert
 TeamAILogicSurrender.on_recovered = TeamAILogicDisabled.on_recovered
 
--- Lines 12-62
+-- Lines 12-57
 function TeamAILogicSurrender.enter(data, new_logic_name, enter_params)
-	TeamAILogicBase.enter(data, new_logic_name, enter_params)
+	local my_data = {
+		unit = data.unit
+	}
+
+	TeamAILogicBase.enter(data, new_logic_name, enter_params, my_data)
 	data.unit:brain():cancel_all_pathing_searches()
 
 	local old_internal_data = data.internal_data
-	local my_data = {
-		unit = data.unit,
-		enemy_detect_slotmask = managers.slot:get_mask("enemies"),
-		vision = data.char_tweak.vision.idle
-	}
+	my_data.enemy_detect_slotmask = managers.slot:get_mask("enemies")
+	my_data.vision = data.char_tweak.vision.idle
 
 	if old_internal_data then
-		if old_internal_data.nearest_cover then
-			my_data.nearest_cover = old_internal_data.nearest_cover
-
-			managers.navigation:reserve_cover(my_data.nearest_cover[1], data.pos_rsrv_id)
-		end
-
 		my_data.attention_unit = old_internal_data.attention_unit
 	end
 
@@ -51,16 +46,12 @@ function TeamAILogicSurrender.enter(data, new_logic_name, enter_params)
 	end
 end
 
--- Lines 66-88
+-- Lines 61-79
 function TeamAILogicSurrender.exit(data, new_logic_name, enter_params)
 	TeamAILogicBase.exit(data, new_logic_name, enter_params)
 
 	local my_data = data.internal_data
 	my_data.exiting = true
-
-	if my_data.nearest_cover then
-		managers.navigation:release_cover(my_data.nearest_cover[1])
-	end
 
 	TeamAILogicDisabled._unregister_revive_SO(my_data)
 
@@ -74,19 +65,19 @@ function TeamAILogicSurrender.exit(data, new_logic_name, enter_params)
 	data.unit:interaction():set_active(false, false)
 end
 
--- Lines 92-93
+-- Lines 83-84
 function TeamAILogicSurrender.on_action_completed(data, action)
 end
 
--- Lines 97-98
+-- Lines 88-89
 function TeamAILogicSurrender.can_activate()
 end
 
--- Lines 102-104
+-- Lines 93-95
 function TeamAILogicSurrender.on_detected_enemy_destroyed(data, enemy_unit)
 	TeamAILogicIdle.on_cop_neutralized(data, enemy_unit:key())
 end
 
--- Lines 108-109
+-- Lines 99-100
 function TeamAILogicSurrender.is_available_for_assignment(data)
 end

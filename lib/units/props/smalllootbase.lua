@@ -13,7 +13,7 @@ end
 function SmallLootBase:_setup()
 end
 
--- Lines 18-37
+-- Lines 18-39
 function SmallLootBase:take(unit)
 	if self._empty then
 		return
@@ -33,26 +33,34 @@ function SmallLootBase:take(unit)
 	local percentage_picked_up = math.clamp(math.ceil(100 * managers.lootdrop:picked_up_current_leg() / managers.lootdrop:loot_spawned_current_leg()), 0, 100)
 
 	managers.notification:add_notification({
+		id = "hud_hint_grabbed_nazi_gold",
 		duration = 2,
 		shelf_life = 5,
-		id = "hud_hint_grabbed_nazi_gold",
-		text = managers.localization:text("hud_hint_grabbed_nazi_gold", {
-			AMOUNT = string.format("%d", percentage_picked_up)
-		})
+		notification_type = HUDNotification.DOG_TAG,
+		acquired = managers.lootdrop:picked_up_current_leg(),
+		total = managers.lootdrop:loot_spawned_current_leg()
 	})
 end
 
--- Lines 39-46
+-- Lines 41-57
 function SmallLootBase:taken(skip_sync)
 	managers.lootdrop:pickup_loot(self._unit:loot_drop():value(), self._unit)
 
 	if Network:is_server() then
+		managers.notification:add_notification({
+			id = "hud_hint_grabbed_nazi_gold",
+			duration = 2,
+			shelf_life = 5,
+			notification_type = HUDNotification.DOG_TAG,
+			acquired = managers.lootdrop:picked_up_current_leg(),
+			total = managers.lootdrop:loot_spawned_current_leg()
+		})
 		self:_set_empty()
-		managers.network:session():send_to_peers_synched("sync_picked_up_loot_values", managers.lootdrop:picked_up_current_leg(), managers.lootdrop:picked_up_total())
+		managers.network:session():send_to_peers_synched("sync_picked_up_loot_values", managers.lootdrop:picked_up_current_leg(), managers.lootdrop:loot_spawned_current_leg())
 	end
 end
 
--- Lines 48-54
+-- Lines 59-65
 function SmallLootBase:_set_empty()
 	self._empty = true
 
@@ -61,16 +69,16 @@ function SmallLootBase:_set_empty()
 	end
 end
 
--- Lines 58-60
+-- Lines 69-71
 function SmallLootBase:save(data)
 	data.loot_value = self._unit:loot_drop():value()
 end
 
--- Lines 62-64
+-- Lines 73-75
 function SmallLootBase:load(data)
 	self._unit:loot_drop():set_value(data.loot_value)
 end
 
--- Lines 66-68
+-- Lines 77-79
 function SmallLootBase:destroy()
 end

@@ -145,24 +145,10 @@ function ReadyUpGui:_layout_buttons()
 	end
 end
 
--- Lines 134-182
+-- Lines 134-190
 function ReadyUpGui:_layout_header()
 	local selected_job = managers.raid_job:selected_job()
 	local current_job = managers.raid_job:current_job()
-
-	if current_job then
-		local name_id = current_job.name_id
-		local total_events = #current_job.events_index
-		local current_event = math.clamp(current_job.current_event, 1, total_events)
-		local mission_progress_fraction = " " .. current_event .. "/" .. total_events .. ": "
-		local event_name = self:translate(current_job.current_event_data.name_id, true)
-		local title_text = self:translate(name_id, true) .. mission_progress_fraction .. event_name
-
-		self._node.components.raid_menu_header:set_screen_name_raw(title_text)
-	else
-		self._node.components.raid_menu_header:set_screen_name(tweak_data.operations.missions[selected_job.job_id].name_id)
-	end
-
 	local selected_level_data = selected_job or current_job
 	local mission_data = tweak_data.operations:mission_data(selected_level_data.job_id)
 	local item_icon_name = mission_data.icon_menu
@@ -174,45 +160,50 @@ function ReadyUpGui:_layout_header()
 
 	self._node.components.raid_menu_header:set_header_icon(item_icon)
 
-	self._difficulty_label = self._root_panel:label({
-		name = "difficulty_label",
-		align = "right",
+	local mission_name = nil
+
+	if current_job then
+		local name_id = current_job.name_id
+		local total_events = #current_job.events_index
+		local current_event = math.clamp(current_job.current_event, 1, total_events)
+		local mission_progress_fraction = " " .. current_event .. "/" .. total_events .. ": "
+		local event_name = self:translate(current_job.current_event_data.name_id, true)
+		local title_text = self:translate(name_id, true) .. mission_progress_fraction .. event_name
+		mission_name = title_text
+	else
+		mission_name = utf8.to_upper(managers.localization:text(tweak_data.operations.missions[selected_job.job_id].name_id))
+	end
+
+	local mission_info_x = tweak_data.gui:icon_w(item_icon_name) + 16
+	local mission_name_params = {
+		vertical = "center",
+		name = "mission_name",
+		h = 32,
+		align = "left",
 		y = 0,
-		x = 0,
-		w = self._root_panel:w(),
-		h = RaidMenuHeader.HEIGHT,
-		text = self:translate("menu_" .. Global.game_settings.difficulty, true),
+		x = mission_info_x,
 		font = tweak_data.gui.fonts.din_compressed,
-		font_size = tweak_data.gui.font_sizes.size_56,
-		color = tweak_data.gui.colors.dirty_white
-	})
-	local x, y, w, h = self._difficulty_label:text_rect()
-
-	self._difficulty_label:set_w(w)
-	self._difficulty_label:set_h(h)
-	self._difficulty_label:set_x(x)
-	self._difficulty_label:set_y(y)
-
-	local item_icon_name = Global.game_settings.difficulty
-	local icon_data = {
-		texture = tweak_data.gui.icons[item_icon_name].texture,
-		tex_rect = tweak_data.gui.icons[item_icon_name].texture_rect
+		font_size = tweak_data.gui.font_sizes.small,
+		color = tweak_data.gui.colors.raid_red,
+		text = mission_name
 	}
-	self._difficulty_icon = self._root_panel:image({
-		name = "difficulty_icon",
-		y = 0,
-		x = 0,
-		w = icon_data.tex_rect[3],
-		h = icon_data.tex_rect[4],
-		texture = icon_data.texture,
-		texture_rect = icon_data.tex_rect,
-		color = tweak_data.gui.colors.dirty_white
-	})
+	local mission_name = self._root_panel:label(mission_name_params)
+	local difficulty_params = {
+		name = "mission_difficulty",
+		amount = tweak_data:number_of_difficulties()
+	}
+	self._difficulty_indicator = RaidGuiControlDifficultyStars:new(self._root_panel, difficulty_params)
 
-	self._difficulty_icon:set_right(self._difficulty_label:left() - 16)
+	self._difficulty_indicator:set_x(mission_name:x())
+	self._difficulty_indicator:set_center_y(45)
+
+	local current_difficulty = tweak_data:difficulty_to_index(Global.game_settings.difficulty)
+
+	self._difficulty_indicator:set_active_difficulty(current_difficulty)
+	self._node.components.raid_menu_header:set_screen_name_raw("")
 end
 
--- Lines 184-197
+-- Lines 192-205
 function ReadyUpGui:_get_list_index(peer_index)
 	local wanted_local_peer_list_index = 2
 
@@ -229,7 +220,7 @@ function ReadyUpGui:_get_list_index(peer_index)
 	return peer_index
 end
 
--- Lines 199-235
+-- Lines 207-243
 function ReadyUpGui:_layout_player_list()
 	self._player_control_list = {}
 	self._current_peer = nil
@@ -268,7 +259,7 @@ function ReadyUpGui:_layout_player_list()
 	end
 end
 
--- Lines 237-261
+-- Lines 245-270
 function ReadyUpGui:_layout_card_info()
 	local card_w = 160
 	local card_params = {
@@ -343,7 +334,7 @@ function ReadyUpGui:_layout_card_info()
 	self._negative_card_effect_label:set_visible(false)
 end
 
--- Lines 263-278
+-- Lines 272-287
 function ReadyUpGui:_get_character_spawn_locations()
 	local units = World:find_units_quick("all", managers.slot:get_mask("env_effect"))
 	local ids_ready_up_scene_name = Idstring("units/vanilla/characters/scenes/ready_up_scene")
@@ -360,7 +351,7 @@ function ReadyUpGui:_get_character_spawn_locations()
 	end
 end
 
--- Lines 280-289
+-- Lines 289-298
 function ReadyUpGui:_spawn_weapon(params)
 	local right_hand_locator = params.character_unit:get_object(Idstring("a_weapon_right_front"))
 	local weapon_unit = safe_spawn_unit(params.unit_path, right_hand_locator:position(), Rotation(0, 0, 0))
@@ -374,7 +365,7 @@ function ReadyUpGui:_spawn_weapon(params)
 	}), true)
 end
 
--- Lines 292-298
+-- Lines 301-307
 function ReadyUpGui:_assemble_completed(params, parts, blueprint)
 	self._spawned_weapon_parts[params.peer] = {}
 
@@ -385,12 +376,12 @@ function ReadyUpGui:_assemble_completed(params, parts, blueprint)
 	self._weapon_assembled[params.peer] = true
 end
 
--- Lines 301-304
+-- Lines 310-313
 function ReadyUpGui:_load_character_empty_skeleton()
 	managers.dyn_resource:load(Idstring("unit"), Idstring(CharacterCustomizationTweakData.CRIMINAL_MENU_SELECT_UNIT), DynamicResourceManager.DYN_RESOURCES_PACKAGE, callback(self, self, "_spawn_character_units"))
 end
 
--- Lines 307-319
+-- Lines 316-328
 function ReadyUpGui:_get_character_spawn_index(control_list_index)
 	if self._is_single_player then
 		return 1
@@ -405,7 +396,7 @@ function ReadyUpGui:_get_character_spawn_index(control_list_index)
 	return control_list_index
 end
 
--- Lines 321-362
+-- Lines 330-371
 function ReadyUpGui:_spawn_character_units()
 	self:_get_character_spawn_locations()
 
@@ -446,12 +437,30 @@ function ReadyUpGui:_spawn_character_units()
 	end
 end
 
--- Lines 366-409
+-- Lines 375-445
 function ReadyUpGui:_set_card_selection_controls()
 	self._raid_card_count, self._operation_card_count = managers.challenge_cards:get_cards_count_per_type(managers.challenge_cards:get_readyup_card_cache())
 
 	if not managers.raid_menu:is_pc_controller() then
 		self:bind_controller_inputs(self._current_peer == managers.network:session():local_peer(), true)
+	elseif managers.raid_menu:is_offline_mode() then
+		self._suggest_card_button:hide()
+		self._suggest_card_button:disable()
+		self._no_cards_warning_label:hide()
+		self._card_not_selected_label:set_text(self:translate("menu_no_cards_in_offline_mode", true))
+		self._card_not_selected_label:show()
+		self._card_not_selected_label:set_center_x(self._empty_card_slot:center_x())
+		self._card_not_selected_label:set_center_y(self._empty_card_slot:center_y())
+
+		local x1, y1, w1, h1 = self._card_not_selected_label:text_rect()
+
+		self._card_not_selected_label:set_h(h1)
+
+		if not self._local_player_selected then
+			self._card_not_selected_label:hide()
+		end
+
+		self._positive_card_effect_label:hide()
 	elseif managers.raid_job:selected_job() and managers.raid_job:selected_job().job_type == OperationsTweakData.JOB_TYPE_RAID and self._raid_card_count > 0 or managers.raid_job:selected_job() and managers.raid_job:selected_job().job_type == OperationsTweakData.JOB_TYPE_OPERATION and self._operation_card_count > 0 then
 		self._suggest_card_button:show()
 		self._suggest_card_button:enable()
@@ -474,12 +483,12 @@ function ReadyUpGui:_set_card_selection_controls()
 	end
 end
 
--- Lines 413-418
+-- Lines 449-454
 function ReadyUpGui:_players_inventory_processed(params)
 	self:_set_card_selection_controls()
 end
 
--- Lines 420-481
+-- Lines 456-517
 function ReadyUpGui:_on_player_click_callback(control, params)
 	Application:trace("[ReadyUpGui:_on_player_click_callback]")
 
@@ -537,7 +546,7 @@ function ReadyUpGui:_on_player_click_callback(control, params)
 	self._current_list_index = params.list_index
 end
 
--- Lines 484-521
+-- Lines 520-557
 function ReadyUpGui:_show_characters()
 	if not self._spawned_character_units then
 		return
@@ -569,7 +578,7 @@ function ReadyUpGui:_show_characters()
 		self._suggest_card_button:enable()
 		self._leave_lobby_button:enable()
 
-		if self._player_control_list[self._current_peer]:params().is_current_player and not managers.controller:is_xbox_controller_present() and managers.menu:is_pc_controller() then
+		if self._player_control_list[self._current_peer]:params().is_current_player and managers.menu:is_pc_controller() then
 			self._leave_lobby_button:show()
 			self._suggest_card_button:show()
 		end
@@ -578,7 +587,7 @@ function ReadyUpGui:_show_characters()
 	end
 end
 
--- Lines 523-556
+-- Lines 559-592
 function ReadyUpGui:_show_player_challenge_card_info()
 	local challenge_cards = managers.challenge_cards:get_suggested_cards()
 
@@ -623,7 +632,7 @@ function ReadyUpGui:_show_player_challenge_card_info()
 	end
 end
 
--- Lines 559-564
+-- Lines 595-600
 function ReadyUpGui:_update_challenge_card_selected_icon()
 	local challenge_cards = managers.challenge_cards:get_suggested_cards()
 
@@ -632,7 +641,7 @@ function ReadyUpGui:_update_challenge_card_selected_icon()
 	end
 end
 
--- Lines 566-601
+-- Lines 602-637
 function ReadyUpGui:_update_status()
 	local challenge_cards = managers.challenge_cards:get_suggested_cards()
 
@@ -674,7 +683,7 @@ function ReadyUpGui:_update_status()
 	end
 end
 
--- Lines 603-610
+-- Lines 639-646
 function ReadyUpGui:_on_select_card_button()
 	if not self._suggest_card_button:enabled() then
 		return
@@ -683,7 +692,7 @@ function ReadyUpGui:_on_select_card_button()
 	managers.raid_menu:open_menu("challenge_cards_menu")
 end
 
--- Lines 612-642
+-- Lines 648-678
 function ReadyUpGui:_on_ready_up_button()
 	if not self._ready_up_button:enabled() then
 		return
@@ -714,7 +723,7 @@ function ReadyUpGui:_on_ready_up_button()
 	self:bind_controller_inputs(true, true)
 end
 
--- Lines 644-650
+-- Lines 680-686
 function ReadyUpGui:_on_kick_button()
 	local params = {
 		yes_callback = callback(self, self, "_on_kick_confirmed"),
@@ -724,22 +733,22 @@ function ReadyUpGui:_on_kick_button()
 	managers.menu:show_kick_peer_dialog(params)
 end
 
--- Lines 652-654
+-- Lines 688-690
 function ReadyUpGui:_on_kick_confirmed()
 	managers.vote:host_kick(self._current_peer)
 end
 
--- Lines 656-658
+-- Lines 692-694
 function ReadyUpGui:_on_peer_kicked(params)
 	self:_peer_no_longer_in_lobby(params.peer, "kicked")
 end
 
--- Lines 660-662
+-- Lines 696-698
 function ReadyUpGui:_on_peer_left(params)
 	self:_peer_no_longer_in_lobby(params.peer, "left")
 end
 
--- Lines 664-688
+-- Lines 700-724
 function ReadyUpGui:_peer_no_longer_in_lobby(peer, state)
 	local peer_control = self._player_control_list[peer]
 
@@ -769,7 +778,7 @@ function ReadyUpGui:_peer_no_longer_in_lobby(peer, state)
 	self._spawned_character_units[peer] = nil
 end
 
--- Lines 690-696
+-- Lines 726-732
 function ReadyUpGui:_on_leave_lobby_button()
 	if not self._leave_lobby_button:enabled() then
 		return
@@ -778,7 +787,7 @@ function ReadyUpGui:_on_leave_lobby_button()
 	self._callback_handler:end_game()
 end
 
--- Lines 698-727
+-- Lines 734-763
 function ReadyUpGui:close()
 	managers.challenge_cards:set_automatic_steam_inventory_refresh(false)
 	self:_enable_dof()
@@ -809,7 +818,7 @@ function ReadyUpGui:close()
 	ReadyUpGui.super.close(self)
 end
 
--- Lines 729-762
+-- Lines 765-798
 function ReadyUpGui:_update_controls_contining_mission()
 	if self._continuing_mission then
 		self._suggest_card_button:hide()
@@ -844,13 +853,33 @@ function ReadyUpGui:_update_controls_contining_mission()
 	end
 end
 
--- Lines 764-824
+-- Lines 800-814
+function ReadyUpGui:_update_peers()
+	for control_peer, control in pairs(self._player_control_list) do
+		local peer_present = false
+
+		for _, peer in pairs(managers.network:session():all_peers()) do
+			if peer == control_peer then
+				peer_present = true
+			end
+		end
+
+		local control_enabled = control:enabled()
+
+		if not peer_present ~= not control_enabled then
+			self._peer_no_longer_in_lobby(control_peer, "left")
+		end
+	end
+end
+
+-- Lines 816-877
 function ReadyUpGui:update(t, dt)
 	self:_show_characters()
 	self:_show_player_challenge_card_info()
 	self:_update_challenge_card_selected_icon()
 	self:_update_status()
 	self:_update_controls_contining_mission()
+	self:_update_peers()
 
 	if managers.challenge_cards:did_everyone_locked_sugested_card() then
 		if not self._stinger_played then
@@ -901,7 +930,7 @@ function ReadyUpGui:update(t, dt)
 	end
 end
 
--- Lines 829-835
+-- Lines 882-888
 function ReadyUpGui:_ct_players()
 	local ct_players = 0
 
@@ -912,7 +941,7 @@ function ReadyUpGui:_ct_players()
 	return ct_players
 end
 
--- Lines 837-850
+-- Lines 890-903
 function ReadyUpGui:_on_tab_right()
 	local ct_players = self:_ct_players()
 	local next_list_idx = (self._current_list_index + 1) % (ct_players + 1)
@@ -930,7 +959,7 @@ function ReadyUpGui:_on_tab_right()
 	end
 end
 
--- Lines 852-864
+-- Lines 905-917
 function ReadyUpGui:_on_tab_left()
 	local next_list_idx = self._current_list_index - 1
 
@@ -947,16 +976,16 @@ function ReadyUpGui:_on_tab_left()
 	end
 end
 
--- Lines 866-871
+-- Lines 919-924
 function ReadyUpGui:show_gamercard()
 	Application:trace("[ReadyUpGui:show_gamercard] showing gamercard for peer " .. tostring(self._current_peer:name()))
 	Application:debug("[ReadyUpGui:show_gamercard]", inspect(self._current_peer))
 	self._callback_handler:view_gamer_card(self._current_peer:xuid())
 end
 
--- Lines 873-963
+-- Lines 926-1017
 function ReadyUpGui:bind_controller_inputs(is_current_player, can_leave)
-	if not managers.controller:is_xbox_controller_present() or managers.menu:is_pc_controller() then
+	if managers.menu:is_pc_controller() then
 		if is_current_player and not self._ready then
 			local bindings = {
 				{
@@ -1066,7 +1095,7 @@ function ReadyUpGui:bind_controller_inputs(is_current_player, can_leave)
 	self:set_legend(legend)
 end
 
--- Lines 965-967
+-- Lines 1019-1021
 function ReadyUpGui:back_pressed()
 	return true
 end

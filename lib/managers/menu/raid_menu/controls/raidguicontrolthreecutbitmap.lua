@@ -25,37 +25,52 @@ function RaidGUIControlThreeCutBitmap:_create_panel()
 	self._object = self._slider_panel
 end
 
--- Lines 27-91
+-- Lines 27-106
 function RaidGUIControlThreeCutBitmap:_layout_parts()
 	self._h = self:h()
+	local left_texture_rect = {
+		tweak_data.gui.icons[self._params.left].texture_rect[1],
+		tweak_data.gui.icons[self._params.left].texture_rect[2],
+		tweak_data.gui.icons[self._params.left].texture_rect[3] - 1,
+		tweak_data.gui.icons[self._params.left].texture_rect[4]
+	}
 	local left_params = {
 		x = 0,
 		name = self._name .. "_left",
 		y = self._h / 2 - tweak_data.gui.icons[self._params.left].texture_rect[4] / 2,
-		w = tweak_data.gui.icons[self._params.left].texture_rect[3],
+		w = tweak_data.gui.icons[self._params.left].texture_rect[3] - 1,
 		h = self._object:h(),
 		texture = tweak_data.gui.icons[self._params.left].texture,
-		texture_rect = tweak_data.gui.icons[self._params.left].texture_rect,
+		texture_rect = left_texture_rect,
 		color = self._params.color or Color.white,
 		layer = self._object:layer() + 2
 	}
 	self._left = self._object:bitmap(left_params)
+	local right_texture_rect = {
+		tweak_data.gui.icons[self._params.right].texture_rect[1] + 1,
+		tweak_data.gui.icons[self._params.right].texture_rect[2],
+		tweak_data.gui.icons[self._params.right].texture_rect[3] - 1,
+		tweak_data.gui.icons[self._params.right].texture_rect[4]
+	}
 	local right_params = {
 		name = self._name .. "_right",
 		x = self._object:w() - tweak_data.gui.icons[self._params.right].texture_rect[3],
 		y = self._h / 2 - tweak_data.gui.icons[self._params.right].texture_rect[4] / 2,
-		w = tweak_data.gui.icons[self._params.right].texture_rect[3],
+		w = tweak_data.gui.icons[self._params.right].texture_rect[3] - 1,
 		h = self._object:h(),
 		texture = tweak_data.gui.icons[self._params.right].texture,
-		texture_rect = tweak_data.gui.icons[self._params.right].texture_rect,
+		texture_rect = right_texture_rect,
 		color = self._params.color or Color.white,
 		layer = self._object:layer() + 2
 	}
 	self._right = self._object:bitmap(right_params)
+
+	self._right:set_right(self._object:right())
+
 	local center_texture_rect = {
-		tweak_data.gui.icons[self._params.center].texture_rect[1] + 1,
+		tweak_data.gui.icons[self._params.center].texture_rect[1] + 2,
 		tweak_data.gui.icons[self._params.center].texture_rect[2],
-		tweak_data.gui.icons[self._params.center].texture_rect[3] - 2,
+		tweak_data.gui.icons[self._params.center].texture_rect[3] - 4,
 		tweak_data.gui.icons[self._params.center].texture_rect[4]
 	}
 	local center_params = {
@@ -69,23 +84,21 @@ function RaidGUIControlThreeCutBitmap:_layout_parts()
 		color = self._params.color or Color.white
 	}
 	self._center = self._object:bitmap(center_params)
-
-	self._right:set_right(self._object:right())
 end
 
--- Lines 93-97
+-- Lines 108-112
 function RaidGUIControlThreeCutBitmap:set_color(color)
 	self._left:set_color(color)
 	self._center:set_color(color)
 	self._right:set_color(color)
 end
 
--- Lines 99-101
+-- Lines 114-116
 function RaidGUIControlThreeCutBitmap:color()
 	return self._left:color()
 end
 
--- Lines 111-129
+-- Lines 126-144
 function RaidGUIControlThreeCutBitmap:set_w(w)
 	self._object:set_w(w)
 	self._left:set_x(0)
@@ -108,12 +121,12 @@ function RaidGUIControlThreeCutBitmap:set_w(w)
 	self._right:set_x(self._center:x() + self._center:w() - RaidGUIControlThreeCutBitmap.CENTER_OVERFLOW)
 end
 
--- Lines 131-133
+-- Lines 146-148
 function RaidGUIControlThreeCutBitmap:mouse_released(o, button, x, y)
 	return false
 end
 
--- Lines 135-147
+-- Lines 150-162
 function RaidGUIControlThreeCutBitmap:h()
 	local height = tweak_data.gui.icons[self._params.left].texture_rect[4]
 

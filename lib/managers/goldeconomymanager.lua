@@ -1,12 +1,13 @@
 GoldEconomyManager = GoldEconomyManager or class()
 GoldEconomyManager.THOUSAND_SEPARATOR = "."
+GoldEconomyManager.VERSION = 7
 
--- Lines 4-6
+-- Lines 6-8
 function GoldEconomyManager:init()
 	self:_setup()
 end
 
--- Lines 8-23
+-- Lines 10-27
 function GoldEconomyManager:_setup()
 	if not Global.gold_economy_manager then
 		Global.gold_economy_manager = {
@@ -14,7 +15,9 @@ function GoldEconomyManager:_setup()
 			current = Application:digest_value(0, true),
 			respec_cost_multiplier = Application:digest_value(0, true),
 			respec_reset = Application:digest_value(10, true),
-			camp = tweak_data.camp_customization.default_camp
+			applied_upgrades = deep_clone(tweak_data.camp_customization.default_camp),
+			owned_upgrades = tweak_data.camp_customization:get_applyable_upgrades(),
+			gold_awards = {}
 		}
 	end
 
@@ -23,17 +26,13 @@ function GoldEconomyManager:_setup()
 	self._automatic_camp_units = {}
 end
 
--- Lines 26-28
+-- Lines 30-32
 function GoldEconomyManager:debug_add_gold(amount)
 	self:add_gold(amount, true)
 end
 
--- Lines 30-41
+-- Lines 34-42
 function GoldEconomyManager:spend_gold(amount, is_debug)
-	if not is_debug and managers.platform:presence() ~= "Playing" and managers.platform:presence() ~= "Mission_end" then
-		return
-	end
-
 	if amount <= 0 then
 		return
 	end
@@ -42,12 +41,8 @@ function GoldEconomyManager:spend_gold(amount, is_debug)
 	managers.raid_menu:refresh_footer_gold_amount()
 end
 
--- Lines 43-55
+-- Lines 44-53
 function GoldEconomyManager:add_gold(amount, is_debug)
-	if not is_debug and managers.platform:presence() ~= "Playing" and managers.platform:presence() ~= "Mission_end" then
-		return
-	end
-
 	if amount <= 0 then
 		return
 	end
@@ -57,27 +52,27 @@ function GoldEconomyManager:add_gold(amount, is_debug)
 	managers.raid_menu:refresh_footer_gold_amount()
 end
 
--- Lines 57-59
+-- Lines 55-57
 function GoldEconomyManager:total()
 	return Application:digest_value(self._global.total, false)
 end
 
--- Lines 61-63
+-- Lines 59-61
 function GoldEconomyManager:_set_total(value)
 	self._global.total = Application:digest_value(value, true)
 end
 
--- Lines 65-67
+-- Lines 63-65
 function GoldEconomyManager:current()
 	return Application:digest_value(self._global.current, false)
 end
 
--- Lines 69-71
+-- Lines 67-69
 function GoldEconomyManager:_set_current(value)
 	self._global.current = Application:digest_value(value, true)
 end
 
--- Lines 73-77
+-- Lines 71-75
 function GoldEconomyManager:respec()
 	self:spend_gold(self:respec_cost())
 
@@ -85,7 +80,7 @@ function GoldEconomyManager:respec()
 	self._global.respec_cost_multiplier = Application:digest_value(old + 1, true)
 end
 
--- Lines 79-92
+-- Lines 77-90
 function GoldEconomyManager:decrease_respec_reset()
 	local old = Application:digest_value(self._global.respec_reset, false)
 	local new = old - 1
@@ -105,12 +100,12 @@ function GoldEconomyManager:decrease_respec_reset()
 	self._global.respec_reset = Application:digest_value(new, true)
 end
 
--- Lines 94-96
+-- Lines 92-94
 function GoldEconomyManager:respec_reset_value()
 	return Application:digest_value(self._global.respec_reset, false)
 end
 
--- Lines 98-103
+-- Lines 96-101
 function GoldEconomyManager:respec_cost()
 	local multiplier = Application:digest_value(self._global.respec_cost_multiplier, false)
 	local char_level = managers.experience:current_level()
@@ -119,12 +114,12 @@ function GoldEconomyManager:respec_cost()
 	return cost
 end
 
--- Lines 105-107
+-- Lines 103-105
 function GoldEconomyManager:respec_cost_string()
 	return self:gold_string(self:respec_cost())
 end
 
--- Lines 109-123
+-- Lines 107-121
 function GoldEconomyManager:gold_string(amount)
 	local total = tostring(math.round(math.abs(amount)))
 	local reverse = string.reverse(total)
@@ -143,20 +138,22 @@ function GoldEconomyManager:gold_string(amount)
 	return s
 end
 
--- Lines 125-137
+-- Lines 123-135
 function GoldEconomyManager:save(data)
 	local state = {
+		version = GoldEconomyManager.VERSION,
 		total = self._global.total,
 		current = self._global.current,
 		respec_cost_multiplier = self._global.respec_cost_multiplier,
 		respec_reset = self._global.respec_reset,
-		camp = self._global.camp,
-		camp_version = CampCustomizationTweakData.VERSION
+		applied_upgrades = self._global.applied_upgrades,
+		owned_upgrades = self._global.owned_upgrades,
+		gold_awards = self._global.gold_awards
 	}
 	data.GoldEconomyManager = state
 end
 
--- Lines 139-165
+-- Lines 137-173
 function GoldEconomyManager:load(data)
 	self:reset()
 
@@ -173,29 +170,92 @@ function GoldEconomyManager:load(data)
 		if state.respec_reset then
 			self._global.respec_reset = state.respec_reset
 		end
+	end
 
-		if state.camp then
-			self._global.camp = state.camp
-		else
-			self._global.camp = tweak_data.camp_customization.default_camp
-		end
+	local needs_upgrade = false
 
-		if not state.camp_version or state.camp_version < CampCustomizationTweakData.VERSION then
-			self:upgrade_player_camp()
+	if not state or not state.version or state.version ~= GoldEconomyManager.VERSION then
+		needs_upgrade = true
 
-			state.camp_version = CampCustomizationTweakData.VERSION
+		managers.savefile:set_resave_required()
+	else
+		self._global.applied_upgrades = state.applied_upgrades
+		self._global.owned_upgrades = state.owned_upgrades
+	end
 
+	self:append_camp_upgrades()
+
+	needs_upgrade = needs_upgrade or self:filter_camp_upgrades()
+
+	if needs_upgrade then
+		self:upgrade_player_camp()
+	end
+
+	self._global.gold_awards = state and state.gold_awards or {}
+
+	self:get_gold_awards()
+end
+
+-- Lines 175-186
+function GoldEconomyManager:get_gold_awards()
+	local eligible_awards = tweak_data.dlc:get_eligible_gold_awards()
+
+	for _, award in pairs(eligible_awards) do
+		if not self._global.gold_awards[award.item] then
+			self._global.gold_awards[award.item] = true
+
+			self:add_gold(award.amount)
 			managers.savefile:set_resave_required()
 		end
 	end
 end
 
--- Lines 167-182
+-- Lines 188-196
+function GoldEconomyManager:append_camp_upgrades()
+	local applyable_upgrades = tweak_data.camp_customization:get_applyable_upgrades()
+
+	for _, upgrade in pairs(applyable_upgrades) do
+		if not self:is_upgrade_owned(upgrade.upgrade, upgrade.level) then
+			table.insert(self._global.owned_upgrades, upgrade)
+		end
+	end
+end
+
+-- Lines 198-222
+function GoldEconomyManager:filter_camp_upgrades()
+	for index = #self._global.owned_upgrades, 1, -1 do
+		local upgrade = self._global.owned_upgrades[index]
+		local upgrade_data = tweak_data.camp_customization.camp_upgrades[upgrade.upgrade].levels[upgrade.level]
+
+		if upgrade_data and not tweak_data.camp_customization:is_upgrade_unlocked(upgrade_data) then
+			table.remove(self._global.owned_upgrades, index)
+		end
+	end
+
+	local needs_layout = false
+
+	for index = #self._global.applied_upgrades, 1, -1 do
+		local upgrade = self._global.applied_upgrades[index]
+
+		if not self:is_upgrade_owned(upgrade.upgrade, upgrade.level) then
+			local default_level = tweak_data.camp_customization:get_default_upgrade_level(upgrade.upgrade)
+
+			if upgrade.level ~= default_level then
+				upgrade.level = default_level
+				needs_layout = true
+			end
+		end
+	end
+
+	return needs_layout
+end
+
+-- Lines 225-240
 function GoldEconomyManager:upgrade_player_camp()
 	for _, data in ipairs(tweak_data.camp_customization.default_camp) do
 		local found = false
 
-		for __, camp in ipairs(managers.gold_economy._global.camp) do
+		for __, camp in ipairs(self._global.applied_upgrades) do
 			if camp.upgrade == data.upgrade then
 				found = true
 
@@ -205,7 +265,7 @@ function GoldEconomyManager:upgrade_player_camp()
 
 		if not found then
 			Application:debug("[GoldEconomyManager:upgrade_player_camp()] Adding new camp asset", data.upgrade)
-			table.insert(managers.gold_economy._global.camp, {
+			table.insert(self._global.applied_upgrades, {
 				level = data.level,
 				upgrade = data.upgrade
 			})
@@ -213,7 +273,7 @@ function GoldEconomyManager:upgrade_player_camp()
 	end
 end
 
--- Lines 198-245
+-- Lines 256-305
 function GoldEconomyManager:layout_camp()
 	if not managers.player:local_player_in_camp() then
 		return
@@ -226,7 +286,7 @@ function GoldEconomyManager:layout_camp()
 		unit:gold_asset():apply_upgrade_level(gold_level)
 	end
 
-	for _, data in ipairs(self._global.camp) do
+	for _, data in ipairs(self._global.applied_upgrades) do
 		local levels = self._camp_units[data.upgrade]
 		local asset_level = nil
 		asset_level = data.level
@@ -245,7 +305,7 @@ function GoldEconomyManager:layout_camp()
 	end
 end
 
--- Lines 247-261
+-- Lines 307-321
 function GoldEconomyManager:_calculate_gold_pile_level(gold_spread)
 	local index = #gold_spread + 1
 
@@ -264,21 +324,22 @@ function GoldEconomyManager:_calculate_gold_pile_level(gold_spread)
 	return index
 end
 
--- Lines 263-268
+-- Lines 323-329
 function GoldEconomyManager:reset()
 	Global.gold_economy_manager = nil
 
 	self:_setup()
+	self:get_gold_awards()
 end
 
--- Lines 271-274
+-- Lines 332-335
 function GoldEconomyManager:get_difficulty_multiplier(difficulty)
 	local multiplier = tweak_data:get_value("experience_manager", "difficulty_multiplier", difficulty)
 
 	return multiplier or 0
 end
 
--- Lines 276-284
+-- Lines 337-345
 function GoldEconomyManager:register_camp_upgrade_unit(name, unit, level)
 	self._camp_units[name] = self._camp_units[name] or {}
 
@@ -289,7 +350,7 @@ function GoldEconomyManager:register_camp_upgrade_unit(name, unit, level)
 	table.insert(self._camp_units[name][level], unit)
 end
 
--- Lines 286-294
+-- Lines 347-355
 function GoldEconomyManager:register_automatic_camp_upgrade_unit(name, unit)
 	self._automatic_camp_units[name] = self._automatic_camp_units[name] or {}
 
@@ -300,53 +361,71 @@ function GoldEconomyManager:register_automatic_camp_upgrade_unit(name, unit)
 	self._automatic_camp_units[name] = unit
 end
 
--- Lines 296-298
+-- Lines 357-359
 function GoldEconomyManager:reset_camp_units()
 	self._camp_units = {}
 end
 
--- Lines 303-350
+-- Lines 364-410
 function GoldEconomyManager:get_store_items_data()
 	local result = {}
 	local is_host = Network:is_server()
 
-	for camp_upgrade_name, camp_upgrade in pairs(tweak_data.camp_customization.camp_upgrades) do
-		if camp_upgrade.purchasable then
-			local store_upgrade_data = {}
-			local current_camp_upgrade_data = self:_get_current_camp_upgrade_data(camp_upgrade_name)
+	for upgrade_slot_name, upgrade_slot in pairs(tweak_data.camp_customization.camp_upgrades) do
+		for upgrade_level, upgrade in ipairs(upgrade_slot.levels) do
+			if tweak_data.camp_customization:is_upgrade_unlocked(upgrade) then
+				local store_upgrade_data = clone(upgrade)
+				store_upgrade_data.upgrade_name = upgrade_slot_name
+				store_upgrade_data.level = upgrade_level
 
-			if current_camp_upgrade_data.level == #camp_upgrade.levels then
-				store_upgrade_data = clone(camp_upgrade.levels[#camp_upgrade.levels])
-				store_upgrade_data.status = RaidGUIControlGridItem.STATUS_OWNED_OR_PURCHASED
-				store_upgrade_data.upgrade_name = camp_upgrade_name
-				store_upgrade_data.level = current_camp_upgrade_data.level
-			elseif current_camp_upgrade_data.level < #camp_upgrade.levels then
-				store_upgrade_data = camp_upgrade.levels[current_camp_upgrade_data.level + 1]
-				store_upgrade_data.upgrade_name = camp_upgrade_name
-				store_upgrade_data.level = current_camp_upgrade_data.level + 1
-
-				if camp_upgrade.levels[current_camp_upgrade_data.level + 1].gold_price <= self:current() then
+				if self:is_upgrade_owned(upgrade_slot_name, upgrade_level) then
+					store_upgrade_data.status = RaidGUIControlGridItem.STATUS_OWNED_OR_PURCHASED
+				elseif upgrade.gold_price <= self:current() then
 					store_upgrade_data.status = RaidGUIControlGridItem.STATUS_PURCHASABLE
 				else
 					store_upgrade_data.status = RaidGUIControlGridItem.STATUS_NOT_ENOUGHT_RESOURCES
 				end
-			end
 
-			if not is_host then
-				store_upgrade_data.status = RaidGUIControlGridItem.STATUS_OWNED_OR_PURCHASED
-			end
+				if not is_host then
+					store_upgrade_data.status = RaidGUIControlGridItem.STATUS_OWNED_OR_PURCHASED
+				end
 
-			table.insert(result, store_upgrade_data)
+				table.insert(result, store_upgrade_data)
+			end
 		end
 	end
+
+	GoldEconomyManager.store = result
 
 	return result
 end
 
--- Lines 353-360
-function GoldEconomyManager:_get_current_camp_upgrade_data(camp_upgrade_name)
-	for _, camp_upgrade_data in pairs(Global.gold_economy_manager.camp) do
-		if camp_upgrade_name == camp_upgrade_data.upgrade then
+-- Lines 412-420
+function GoldEconomyManager:is_upgrade_owned(upgrade_slot_name, upgrade_level)
+	for _, upgrade in ipairs(self._global.owned_upgrades) do
+		if upgrade.upgrade == upgrade_slot_name and upgrade.level == upgrade_level then
+			return true
+		end
+	end
+
+	return false
+end
+
+-- Lines 422-430
+function GoldEconomyManager:is_upgrade_applied(upgrade_slot_name, upgrade_level)
+	for _, upgrade in ipairs(self._global.applied_upgrades) do
+		if upgrade.upgrade == upgrade_slot_name and upgrade.level == upgrade_level then
+			return true
+		end
+	end
+
+	return false
+end
+
+-- Lines 433-440
+function GoldEconomyManager:_get_current_camp_upgrade_data(upgrade_slot_name)
+	for _, upgrade_slot_name in pairs(self._global.applied_upgrades) do
+		if upgrade_slot_name == camp_upgrade_data.upgrade then
 			return camp_upgrade_data
 		end
 	end
@@ -354,15 +433,22 @@ function GoldEconomyManager:_get_current_camp_upgrade_data(camp_upgrade_name)
 	return nil
 end
 
--- Lines 363-373
-function GoldEconomyManager:update_camp_upgrade(upgrade_name, upgrade_level)
-	if not upgrade_name or not upgrade_level then
+-- Lines 443-456
+function GoldEconomyManager:update_camp_upgrade(upgrade_slot_name, upgrade_level)
+	if not upgrade_slot_name or not upgrade_level then
 		return
 	end
 
-	for _, camp_upgrade_data in pairs(Global.gold_economy_manager.camp) do
-		if camp_upgrade_data.upgrade == upgrade_name and camp_upgrade_data.level < upgrade_level then
+	for _, camp_upgrade_data in pairs(self._global.applied_upgrades) do
+		if camp_upgrade_data.upgrade == upgrade_slot_name and camp_upgrade_data.level ~= upgrade_level then
 			camp_upgrade_data.level = upgrade_level
 		end
+	end
+
+	if not self:is_upgrade_owned(upgrade_slot_name, upgrade_level) then
+		table.insert(self._global.owned_upgrades, {
+			upgrade = upgrade_slot_name,
+			level = upgrade_level
+		})
 	end
 end

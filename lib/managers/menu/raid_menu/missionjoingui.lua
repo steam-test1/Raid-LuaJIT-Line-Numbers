@@ -65,7 +65,7 @@ function MissionJoinGui:_layout()
 	self:_update_active_controls()
 	self._table_servers:set_selected(true)
 	self:_render_filters()
-	self:_find_online_games(managers.network.matchmake:search_friends_only())
+	self:_refresh_server_list()
 	self:bind_controller_inputs()
 end
 
@@ -306,7 +306,7 @@ function MissionJoinGui:_layout_server_list_table()
 	self._server_list_scrollable_area:setup_scroll_area()
 end
 
--- Lines 235-338
+-- Lines 235-347
 function MissionJoinGui:_layout_game_description()
 	local desc_mission_icon_name = tweak_data.operations.missions.flakturm.icon_menu
 	local desc_mission_icon = {
@@ -333,19 +333,27 @@ function MissionJoinGui:_layout_game_description()
 		font_size = tweak_data.gui.font_sizes.menu_list,
 		color = tweak_data.gui.colors.raid_red
 	})
-	self._desc_difficulty = self._game_description_panel:label({
-		y = 96,
+	self._desc_mission_name_small = self._game_description_panel:label({
+		y = 0,
 		vertical = "center",
 		h = 32,
-		w = 240,
+		w = 400,
 		align = "left",
-		text = "DEATH WISH",
+		text = "FLAKTURM",
 		visible = false,
-		x = 0,
+		x = 80,
 		font = tweak_data.gui.fonts.din_compressed,
-		font_size = tweak_data.gui.font_sizes.extra_small,
-		color = tweak_data.gui.colors.raid_grey
+		font_size = tweak_data.gui.font_sizes.small,
+		color = tweak_data.gui.colors.raid_red
 	})
+	local difficulty_params = {
+		name = "mission_difficulty",
+		amount = tweak_data:number_of_difficulties()
+	}
+	self._server_difficulty_indicator = RaidGuiControlDifficultyStars:new(self._game_description_panel, difficulty_params)
+
+	self._server_difficulty_indicator:set_x(80)
+
 	self._desc_xp_amount = self._game_description_panel:label({
 		y = 96,
 		vertical = "center",
@@ -520,7 +528,7 @@ function MissionJoinGui:_layout_game_description()
 	})
 end
 
--- Lines 340-387
+-- Lines 349-396
 function MissionJoinGui:_layout_footer_buttons()
 	self._join_button = self._footer_buttons_panel:short_primary_button({
 		name = "join_button",
@@ -581,61 +589,64 @@ function MissionJoinGui:_layout_footer_buttons()
 	})
 end
 
--- Lines 389-395
+-- Lines 398-407
 function MissionJoinGui:_set_additional_layout()
 	self._join_button:set_center_y(self._footer_buttons_panel:h() / 2)
 	self._apply_filters_button:set_center_y(self._footer_buttons_panel:h() / 2)
 	self._show_filters_button:set_center_y(self._footer_buttons_panel:h() / 2)
-	self._desc_mission_icon:set_center_y(48)
+	self._desc_mission_icon:set_center_y(58)
+	self._desc_mission_name_small:set_center_y(self._desc_mission_icon:center_y() - 14)
+	self._server_difficulty_indicator:set_center_y(self._desc_mission_icon:center_y() + 14)
+	self._desc_xp_amount:set_center_y(self._server_difficulty_indicator:center_y())
 end
 
--- Lines 397-400
+-- Lines 409-412
 function MissionJoinGui:close()
 	MissionJoinGui.super.close(self)
 	self:_remove_active_controls()
 end
 
--- Lines 402-411
+-- Lines 414-423
 function MissionJoinGui:update(t, dt)
 end
 
--- Lines 415-420
+-- Lines 427-432
 function MissionJoinGui:friends_only_button_on_click()
 	local friends_only = self._friends_only_button:get_value()
 
 	managers.network.matchmake:set_search_friends_only(friends_only)
 end
 
--- Lines 422-427
+-- Lines 434-439
 function MissionJoinGui:in_camp_servers_only_button_on_click()
 	local state = self._in_camp_servers_only:get_value() and 1 or -1
 
 	managers.network.matchmake:add_lobby_filter("state", state, "equal")
 end
 
--- Lines 429-433
+-- Lines 441-445
 function MissionJoinGui:on_row_clicked_servers_table(row_data, row_index)
 	self:_select_server_list_item(row_data[5].value)
 end
 
--- Lines 435-440
+-- Lines 447-452
 function MissionJoinGui:on_row_double_clicked_servers_table(row_data, row_index)
 	Application:trace("[MissionJoinGui:on_row_double_clicked_servers_table]", inspect(row_data), row_index)
 	self:_select_server_list_item(row_data[5].value)
 	self:_join_game()
 end
 
--- Lines 442-446
+-- Lines 454-458
 function MissionJoinGui:on_row_selected_servers_table(row_data, row_index)
 	self:_select_server_list_item(row_data[5].value)
 end
 
--- Lines 448-452
+-- Lines 460-464
 function MissionJoinGui:on_cell_click_servers_table(data)
 	self:_select_server_list_item(self._selected_row_data[5].value)
 end
 
--- Lines 454-495
+-- Lines 466-507
 function MissionJoinGui:data_source_servers_table()
 	local missions = {}
 
@@ -692,7 +703,7 @@ function MissionJoinGui:data_source_servers_table()
 	return missions
 end
 
--- Lines 497-503
+-- Lines 509-515
 function MissionJoinGui:_update_active_controls()
 	local active_controls = managers.menu_component._active_controls
 
@@ -703,7 +714,7 @@ function MissionJoinGui:_update_active_controls()
 	end
 end
 
--- Lines 505-510
+-- Lines 517-522
 function MissionJoinGui:_remove_active_controls()
 	local active_controls = managers.menu_component._active_controls
 
@@ -712,7 +723,7 @@ function MissionJoinGui:_remove_active_controls()
 	end
 end
 
--- Lines 512-521
+-- Lines 524-533
 function MissionJoinGui:data_source_distance_filter_stepper()
 	local result = {}
 
@@ -740,7 +751,7 @@ function MissionJoinGui:data_source_distance_filter_stepper()
 	return result
 end
 
--- Lines 523-534
+-- Lines 535-546
 function MissionJoinGui:data_source_difficulty_filter_stepper()
 	local result = {}
 
@@ -763,7 +774,7 @@ function MissionJoinGui:data_source_difficulty_filter_stepper()
 	return result
 end
 
--- Lines 536-556
+-- Lines 548-568
 function MissionJoinGui:data_source_mission_filter_stepper()
 	local result = {}
 
@@ -796,26 +807,12 @@ function MissionJoinGui:data_source_mission_filter_stepper()
 	return result
 end
 
--- Lines 559-583
+-- Lines 571-573
 function MissionJoinGui:on_click_apply_filters_button()
-	self._apply_filters_button:hide()
-
-	local maximum_servers = managers.network.matchmake:get_lobby_return_count()
-	local distance_filter = self._distance_filter_stepper:get_value()
-	local difficulty_filter = self._difficulty_filter_stepper:get_value()
-	local mission_filter = self._mission_filter_stepper:get_value()
-
-	managers.network.matchmake:set_lobby_return_count(maximum_servers)
-	managers.network.matchmake:set_distance_filter(distance_filter)
-	managers.network.matchmake:set_difficulty_filter(difficulty_filter)
-	managers.network.matchmake:add_lobby_filter("job_id", mission_filter, "equal")
-
-	self._selected_row_data = nil
-
-	self:_find_online_games(managers.network.matchmake:search_friends_only())
+	self:_refresh_server_list()
 end
 
--- Lines 585-591
+-- Lines 575-581
 function MissionJoinGui:on_click_show_filters_button()
 	self._filters_panel:set_visible(not self._filters_panel:visible())
 
@@ -824,19 +821,40 @@ function MissionJoinGui:on_click_show_filters_button()
 	end
 end
 
--- Lines 593-597
+-- Lines 583-587
 function MissionJoinGui:on_click_join_button()
 	Application:trace("[MissionJoinGui:on_click_join_button]")
 	self:_join_game()
 end
 
--- Lines 601-604
+-- Lines 591-617
+function MissionJoinGui:_refresh_server_list()
+	self._apply_filters_button:hide()
+
+	local maximum_servers = managers.network.matchmake:get_lobby_return_count()
+	local distance_filter = self._distance_filter_stepper:get_value()
+	local difficulty_filter = self._difficulty_filter_stepper:get_value()
+	local mission_filter = self._mission_filter_stepper:get_value()
+	local state = self._in_camp_servers_only:get_value() and 1 or -1
+
+	managers.network.matchmake:set_lobby_return_count(maximum_servers)
+	managers.network.matchmake:set_distance_filter(distance_filter)
+	managers.network.matchmake:set_difficulty_filter(difficulty_filter)
+	managers.network.matchmake:add_lobby_filter("job_id", mission_filter, "equal")
+	managers.network.matchmake:add_lobby_filter("state", state, "equal")
+
+	self._selected_row_data = nil
+
+	self:_find_online_games(managers.network.matchmake:search_friends_only())
+end
+
+-- Lines 619-622
 function MissionJoinGui:_select_server_list_item(data_value)
 	self:_select_game_from_list()
 	self:_set_game_description_data(data_value)
 end
 
--- Lines 606-614
+-- Lines 624-632
 function MissionJoinGui:_render_filters()
 	self._friends_only_button:set_value_and_render(managers.network.matchmake:search_friends_only())
 	self._in_camp_servers_only:set_value_and_render(managers.network.matchmake:get_lobby_filter("state") == 1)
@@ -845,7 +863,7 @@ function MissionJoinGui:_render_filters()
 	self._mission_filter_stepper:select_item_by_value(managers.network.matchmake:get_lobby_filter("job_id"))
 end
 
--- Lines 616-628
+-- Lines 634-646
 function MissionJoinGui:_join_game()
 	local selected_row = self._table_servers:get_selected_row()
 
@@ -859,7 +877,7 @@ function MissionJoinGui:_join_game()
 	managers.network.matchmake:join_server_with_check(steam_player_id)
 end
 
--- Lines 630-638
+-- Lines 648-656
 function MissionJoinGui:_select_game_from_list()
 	local selected_row = self._table_servers:get_selected_row()
 
@@ -870,16 +888,23 @@ function MissionJoinGui:_select_game_from_list()
 	self._selected_row_data = selected_row:get_data()
 end
 
--- Lines 640-832
+-- Lines 658-876
 function MissionJoinGui:_set_game_description_data(data)
+	local in_camp = data.level_id == "camp"
+
 	if data.level_id == OperationsTweakData.IN_LOBBY then
 		data.level_id = "camp"
+		in_camp = true
 	end
 
-	local desc_mission_data = tweak_data.operations.missions[data.level_id]
+	if data.job_id and data.level_id then
+		local desc_mission_icon_name = nil
 
-	if desc_mission_data then
-		local desc_mission_icon_name = tweak_data.operations.missions[data.level_id].icon_menu
+		if data.mission_type == tostring(OperationsTweakData.JOB_TYPE_RAID) or in_camp then
+			desc_mission_icon_name = tweak_data.operations.missions[data.level_id] and tweak_data.operations.missions[data.level_id].icon_menu
+		elseif data.mission_type == tostring(OperationsTweakData.JOB_TYPE_OPERATION) then
+			desc_mission_icon_name = tweak_data.operations.missions[data.job_id] and tweak_data.operations.missions[data.job_id].icon_menu
+		end
 
 		if desc_mission_icon_name then
 			local desc_mission_icon = {
@@ -898,23 +923,36 @@ function MissionJoinGui:_set_game_description_data(data)
 		self._desc_mission_icon:hide()
 	end
 
-	local mission_data = tweak_data.operations.missions[data.level_id]
+	if data.job_id and data.level_id then
+		if in_camp then
+			self._desc_mission_name:set_text(self:translate(tweak_data.operations.missions[data.level_id].name_id, true))
+			self._desc_mission_name:show()
+			self._desc_mission_name_small:hide()
+			self._server_difficulty_indicator:hide()
+		else
+			local level_name = ""
 
-	if mission_data then
-		self._desc_mission_name:set_text(self:translate(tweak_data.operations.missions[data.level_id].name_id, true))
-		self._desc_mission_name:show()
+			if data.mission_type == tostring(OperationsTweakData.JOB_TYPE_RAID) then
+				level_name = tweak_data.operations.missions[data.level_id] and self:translate(tweak_data.operations.missions[data.level_id].name_id, true)
+			elseif data.mission_type == tostring(OperationsTweakData.JOB_TYPE_OPERATION) then
+				level_name = self:translate(tweak_data.operations.missions[data.job_id].name_id, true) .. " " .. data.progress .. ": " .. self:translate(tweak_data.operations.missions[data.job_id].events[data.level_id].name_id, true)
+			end
+
+			self._desc_mission_name_small:set_text(level_name)
+			self._server_difficulty_indicator:set_active_difficulty(data.difficulty_id)
+			self._desc_mission_name_small:show()
+			self._server_difficulty_indicator:show()
+			self._desc_mission_name:hide()
+		end
 	else
 		self._desc_mission_name:hide()
 	end
 
-	self._desc_difficulty:set_text(data.difficulty)
-	self._desc_difficulty:show()
-
 	local level_xp_amount = 0
 
 	if tostring(data.mission_type) == tostring(OperationsTweakData.JOB_TYPE_RAID) then
-		if mission_data then
-			level_xp_amount = tweak_data.operations.missions[data.level_id].xp
+		if data.level_id then
+			level_xp_amount = tweak_data.operations.missions[data.level_id] and tweak_data.operations.missions[data.level_id].xp
 		else
 			level_xp_amount = 0
 		end
@@ -924,7 +962,7 @@ function MissionJoinGui:_set_game_description_data(data)
 		-- Nothing
 	end
 
-	if level_xp_amount > 0 then
+	if level_xp_amount and level_xp_amount > 0 then
 		self._desc_xp_amount:set_text(level_xp_amount .. " XP")
 		self._desc_xp_amount:show()
 	else
@@ -1055,7 +1093,7 @@ local is_x360 = SystemInfo:platform() == Idstring("X360")
 local is_xb1 = SystemInfo:platform() == Idstring("XB1")
 local is_ps4 = SystemInfo:platform() == Idstring("PS4")
 
--- Lines 841-855
+-- Lines 885-899
 function MissionJoinGui:_find_online_games(friends_only)
 	if is_win32 then
 		self:_find_online_games_win32(friends_only)
@@ -1072,9 +1110,9 @@ function MissionJoinGui:_find_online_games(friends_only)
 	end
 end
 
--- Lines 858-1054
+-- Lines 902-1098
 function MissionJoinGui:_find_online_games_win32(friends_only)
-	-- Lines 860-1039
+	-- Lines 904-1083
 	local function f(info)
 		managers.network.matchmake:search_lobby_done()
 
@@ -1270,7 +1308,7 @@ function MissionJoinGui:_find_online_games_win32(friends_only)
 	managers.network.matchmake:register_callback("search_lobby", f)
 	managers.network.matchmake:search_lobby(friends_only)
 
-	-- Lines 1044-1050
+	-- Lines 1088-1094
 	local function usrs_f(success, amount)
 		print("usrs_f", success, amount)
 
@@ -1283,29 +1321,29 @@ function MissionJoinGui:_find_online_games_win32(friends_only)
 	Steam:sa_handler():get_concurrent_users()
 end
 
--- Lines 1056-1059
+-- Lines 1100-1103
 function MissionJoinGui:add_gui_job(data)
 	self._gui_jobs[data.id] = data
 end
 
--- Lines 1061-1063
+-- Lines 1105-1107
 function MissionJoinGui:update_gui_job(data)
 	self._gui_jobs[data.id] = data
 end
 
--- Lines 1065-1067
+-- Lines 1109-1111
 function MissionJoinGui:remove_gui_job(id)
 	self._gui_jobs[id] = nil
 end
 
--- Lines 1069-1073
+-- Lines 1113-1117
 function MissionJoinGui:set_players_online(amount)
 	if self._online_users_count and self._online_users_count:is_alive() then
 		self._online_users_count:set_text(self:translate("menu_mission_join_users_online_count", true) .. " " .. amount)
 	end
 end
 
--- Lines 1077-1092
+-- Lines 1121-1136
 function MissionJoinGui:_filters_set_selected_server_table()
 	self._filters_active = false
 
@@ -1322,7 +1360,7 @@ function MissionJoinGui:_filters_set_selected_server_table()
 	self._table_servers:set_selected(true)
 end
 
--- Lines 1094-1108
+-- Lines 1138-1152
 function MissionJoinGui:_filters_set_selected_filters()
 	self._filters_active = true
 
@@ -1339,7 +1377,7 @@ function MissionJoinGui:_filters_set_selected_filters()
 	self._table_servers:set_selected(false)
 end
 
--- Lines 1112-1130
+-- Lines 1156-1174
 function MissionJoinGui:bind_controller_inputs()
 	local bindings = {
 		{
@@ -1372,7 +1410,7 @@ function MissionJoinGui:bind_controller_inputs()
 	self:set_legend(legend)
 end
 
--- Lines 1132-1149
+-- Lines 1176-1193
 function MissionJoinGui:bind_controller_inputs_no_join()
 	local bindings = {
 		{
@@ -1404,7 +1442,7 @@ function MissionJoinGui:bind_controller_inputs_no_join()
 	self:set_legend(legend)
 end
 
--- Lines 1151-1173
+-- Lines 1195-1217
 function MissionJoinGui:bind_controller_inputs_player_description()
 	local bindings = {
 		{
@@ -1439,7 +1477,7 @@ function MissionJoinGui:bind_controller_inputs_player_description()
 	self:set_legend(legend)
 end
 
--- Lines 1175-1184
+-- Lines 1219-1228
 function MissionJoinGui:_on_refresh()
 	self:on_click_apply_filters_button()
 	self:bind_controller_inputs()
@@ -1447,7 +1485,7 @@ function MissionJoinGui:_on_refresh()
 	return true, nil
 end
 
--- Lines 1186-1211
+-- Lines 1230-1255
 function MissionJoinGui:_on_filter()
 	local server_table_selected = self._table_servers:is_selected()
 	local have_any_servers = false
@@ -1471,7 +1509,7 @@ function MissionJoinGui:_on_filter()
 	return true, nil
 end
 
--- Lines 1214-1226
+-- Lines 1258-1270
 function MissionJoinGui:confirm_pressed()
 	Application:trace("[MissionJoinGui:confirm_pressed]")
 
@@ -1484,7 +1522,7 @@ function MissionJoinGui:confirm_pressed()
 	end
 end
 
--- Lines 1229-1232
+-- Lines 1273-1276
 function MissionJoinGui:back_pressed()
 	Application:trace("[MissionJoinGui:back_pressed]")
 	managers.raid_menu:on_escape()

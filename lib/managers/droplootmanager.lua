@@ -91,16 +91,21 @@ function DropLootManager:drop_item(tweak_table, position, rotation)
 end
 
 -- Lines 80-82
+function DropLootManager:clear()
+	self._spawned_units = {}
+end
+
+-- Lines 84-86
 function DropLootManager:set_enabled(enabled)
 	self._enabled = enabled
 end
 
--- Lines 84-86
+-- Lines 88-90
 function DropLootManager:on_simulation_ended()
 	self._difficulty_index = nil
 end
 
--- Lines 88-95
+-- Lines 92-99
 function DropLootManager:despawn_item(unit)
 	for index, spawned_unit in pairs(self._spawned_units) do
 		if alive(spawned_unit) and unit == spawned_unit then

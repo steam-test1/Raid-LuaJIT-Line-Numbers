@@ -122,7 +122,7 @@ function PostGameBreakdownGui:_layout()
 
 	local progress_bar_params = {
 		name = "progress_bar",
-		bar_w = 22000,
+		bar_w = 62450,
 		horizontal_padding = 64,
 		y = PostGameBreakdownGui.PROGRESS_BAR_Y,
 		w = self._root_panel:w(),
@@ -196,7 +196,7 @@ function PostGameBreakdownGui:_layout_central_display()
 	self._central_display_panel:set_center_x(self._root_panel:w() / 2)
 end
 
--- Lines 225-280
+-- Lines 225-284
 function PostGameBreakdownGui:_layout_generic_win_display()
 	local generic_win_panel_params = {
 		visible = true,
@@ -222,15 +222,17 @@ function PostGameBreakdownGui:_layout_generic_win_display()
 	icon:set_center_x(self._generic_win_panel:w() / 2)
 	icon:set_center_y(PostGameBreakdownGui.CENTRAL_DISPLAY_SINGLE_ICON_CENTER_Y)
 
+	local is_player_max_level = managers.experience:reached_level_cap()
 	local title_text_params = {
-		align = "center",
 		vertical = "center",
 		name = "generic_win_title_text",
+		align = "center",
 		h = PostGameBreakdownGui.CENTRAL_DISPLAY_TEXT_H,
 		font = PostGameBreakdownGui.FONT,
 		font_size = PostGameBreakdownGui.CENTRAL_DISPLAY_TITLE_FONT_SIZE,
 		color = PostGameBreakdownGui.CENTRAL_DISPLAY_TITLE_COLOR,
-		text = self:translate("menu_almost_there", true)
+		text = self:translate("menu_almost_there", true),
+		visible = not is_player_max_level
 	}
 	local title = self._generic_win_panel:text(title_text_params)
 	local _, _, w, h = title:text_rect()
@@ -241,14 +243,15 @@ function PostGameBreakdownGui:_layout_generic_win_display()
 	title:set_center_x(self._generic_win_panel:w() / 2)
 
 	local flavor_text_params = {
-		align = "center",
 		vertical = "center",
 		name = "generic_win_flavor_text",
+		align = "center",
 		h = PostGameBreakdownGui.CENTRAL_DISPLAY_TEXT_H,
 		font = PostGameBreakdownGui.FONT,
 		font_size = PostGameBreakdownGui.CENTRAL_DISPLAY_FLAVOR_TEXT_FONT_SIZE,
 		color = PostGameBreakdownGui.CENTRAL_DISPLAY_FLAVOR_TEXT_COLOR,
-		text = self:translate("menu_keep_it_up", true)
+		text = self:translate("menu_keep_it_up", true),
+		visible = not is_player_max_level
 	}
 	local flavor_text = self._generic_win_panel:text(flavor_text_params)
 	local _, _, w, _ = flavor_text:text_rect()
@@ -258,7 +261,7 @@ function PostGameBreakdownGui:_layout_generic_win_display()
 	flavor_text:set_x(title:x())
 end
 
--- Lines 284-338
+-- Lines 288-342
 function PostGameBreakdownGui:_layout_fail_display()
 	local fail_panel_params = {
 		visible = false,
@@ -320,17 +323,17 @@ function PostGameBreakdownGui:_layout_fail_display()
 	flavor_text:set_x(title:x())
 end
 
--- Lines 341-343
+-- Lines 345-347
 function PostGameBreakdownGui:_layout_skill_unlock_display()
 	self._skill_unlock_display = RaidGUIControlXPSkillSet:new(self._central_display_panel)
 end
 
--- Lines 345-347
+-- Lines 349-351
 function PostGameBreakdownGui:_layout_double_unlock_display()
 	self._double_unlock_display = RaidGUIControlXPDoubleUnlock:new(self._central_display_panel)
 end
 
--- Lines 351-369
+-- Lines 355-373
 function PostGameBreakdownGui:_get_progress(current_xp)
 	local level_cap = managers.experience:level_cap()
 	local current_level = self:_get_level_by_xp(current_xp)
@@ -351,7 +354,7 @@ function PostGameBreakdownGui:_get_progress(current_xp)
 	return math.clamp(progress_to_level + progress_in_level, 0, 1)
 end
 
--- Lines 371-379
+-- Lines 375-383
 function PostGameBreakdownGui:_calculate_xp_needed_for_levels()
 	local level_cap = managers.experience:level_cap()
 	self._levels_by_xp = {}
@@ -363,7 +366,7 @@ function PostGameBreakdownGui:_calculate_xp_needed_for_levels()
 	end
 end
 
--- Lines 381-394
+-- Lines 385-398
 function PostGameBreakdownGui:_get_level_by_xp(xp)
 	local level_cap = managers.experience:level_cap()
 	local points_needed = self._levels_by_xp[1]
@@ -377,7 +380,7 @@ function PostGameBreakdownGui:_get_level_by_xp(xp)
 	return level
 end
 
--- Lines 397-450
+-- Lines 401-454
 function PostGameBreakdownGui:_get_xp_breakdown()
 	local xp_table = {
 		{
@@ -517,31 +520,14 @@ function PostGameBreakdownGui:_get_xp_breakdown()
 	return xp_table
 end
 
--- Lines 452-454
+-- Lines 456-458
 function PostGameBreakdownGui:data_source_xp_breakdown()
 	return self:_get_xp_breakdown()
 end
 
--- Lines 456-522
+-- Lines 460-491
 function PostGameBreakdownGui:_get_stats_breakdown()
-	local session_killed = managers.statistics:session_killed().total.count or 0
-	local session_accuracy = managers.statistics:session_hit_accuracy() or 0
-	local session_headshots = managers.statistics:session_total_head_shots() or 0
-	local session_headshot_percentage = 0
-
-	if session_killed > 0 then
-		session_headshot_percentage = session_headshots / session_killed * 100
-	end
-
-	local session_special_kills = managers.statistics:session_total_specials_kills() or 0
-	local session_revives_data = managers.statistics:session_teammates_revived() or 0
-	local session_teammates_revived = 0
-
-	for i, count in pairs(session_revives_data) do
-		session_teammates_revived = session_teammates_revived + count
-	end
-
-	local session_bleedouts = managers.statistics:session_downed()
+	local personal_stats = game_state_machine:current_state().personal_stats
 	local stats_breakdown = {
 		{
 			{
@@ -552,7 +538,7 @@ function PostGameBreakdownGui:_get_stats_breakdown()
 			{
 				value = 200,
 				info = "lvl diff",
-				text = tostring(session_killed)
+				text = tostring(personal_stats.session_killed)
 			}
 		},
 		{
@@ -564,7 +550,7 @@ function PostGameBreakdownGui:_get_stats_breakdown()
 			{
 				value = 500,
 				info = "surviving players",
-				text = string.format("%.0f", session_accuracy) .. "%"
+				text = string.format("%.0f", personal_stats.session_accuracy) .. "%"
 			}
 		},
 		{
@@ -576,7 +562,7 @@ function PostGameBreakdownGui:_get_stats_breakdown()
 			{
 				value = 450,
 				info = "human players",
-				text = tostring(session_headshots) .. " (" .. string.format("%.0f", session_headshot_percentage) .. "%)"
+				text = tostring(personal_stats.session_headshots) .. " (" .. string.format("%.0f", personal_stats.session_headshot_percentage) .. "%)"
 			}
 		},
 		{
@@ -588,7 +574,7 @@ function PostGameBreakdownGui:_get_stats_breakdown()
 			{
 				value = 0,
 				info = "most kills",
-				text = tostring(session_special_kills)
+				text = tostring(personal_stats.session_special_kills)
 			}
 		},
 		{
@@ -600,7 +586,7 @@ function PostGameBreakdownGui:_get_stats_breakdown()
 			{
 				value = 0,
 				info = "best acc",
-				text = tostring(session_teammates_revived)
+				text = tostring(personal_stats.session_teammates_revived)
 			}
 		},
 		{
@@ -612,55 +598,7 @@ function PostGameBreakdownGui:_get_stats_breakdown()
 			{
 				value = 500,
 				info = "most specials",
-				text = tostring(session_bleedouts)
-			}
-		},
-		{
-			{
-				value = 1,
-				info = "most hs",
-				text = ""
-			},
-			{
-				value = 0,
-				info = "most hs",
-				text = ""
-			}
-		},
-		{
-			{
-				value = 1,
-				info = "empty",
-				text = ""
-			},
-			{
-				value = 0,
-				info = "empty",
-				text = ""
-			}
-		},
-		{
-			{
-				value = 1,
-				info = "empty",
-				text = ""
-			},
-			{
-				value = 0,
-				info = "empty",
-				text = ""
-			}
-		},
-		{
-			{
-				value = 1,
-				info = "empty",
-				text = ""
-			},
-			{
-				value = 0,
-				info = "empty",
-				text = ""
+				text = tostring(personal_stats.session_bleedouts)
 			}
 		}
 	}
@@ -668,17 +606,17 @@ function PostGameBreakdownGui:_get_stats_breakdown()
 	return stats_breakdown
 end
 
--- Lines 524-526
+-- Lines 493-495
 function PostGameBreakdownGui:data_source_stats_breakdown()
 	return self:_get_stats_breakdown()
 end
 
--- Lines 529-531
+-- Lines 498-500
 function PostGameBreakdownGui:_continue_button_on_click()
 	managers.raid_menu:close_menu()
 end
 
--- Lines 533-545
+-- Lines 502-514
 function PostGameBreakdownGui:close()
 	if self._closing then
 		return
@@ -695,12 +633,12 @@ function PostGameBreakdownGui:close()
 	PostGameBreakdownGui.super.close(self)
 end
 
--- Lines 547-549
+-- Lines 516-518
 function PostGameBreakdownGui:give_xp(xp_earned)
 	self._root_panel:get_engine_panel():animate(callback(self, self, "_animate_giving_xp"), xp_earned)
 end
 
--- Lines 551-574
+-- Lines 520-543
 function PostGameBreakdownGui:_unlock_level(level)
 	if level == 1 then
 		return
@@ -728,7 +666,7 @@ function PostGameBreakdownGui:_unlock_level(level)
 	end
 end
 
--- Lines 576-608
+-- Lines 545-577
 function PostGameBreakdownGui:_animate_active_display_panel(central_display_panel, new_active_panel)
 	local fade_out_duration = 0.25
 	local fade_in_duration = 0.3
@@ -766,7 +704,7 @@ function PostGameBreakdownGui:_animate_active_display_panel(central_display_pane
 	self._central_display_panel:set_alpha(1)
 end
 
--- Lines 610-641
+-- Lines 579-610
 function PostGameBreakdownGui:animate_breakdown()
 	if managers.network:session():amount_of_players() > 1 then
 		local top_stats = managers.statistics:get_top_stats()
@@ -791,7 +729,7 @@ function PostGameBreakdownGui:animate_breakdown()
 	self._root_panel:get_engine_panel():animate(callback(self, self, "_animate_xp_breakdown"))
 end
 
--- Lines 643-786
+-- Lines 612-755
 function PostGameBreakdownGui:_animate_xp_breakdown()
 	local t = 0
 	local xp_breakdown = self.current_state.xp_breakdown
@@ -926,13 +864,13 @@ function PostGameBreakdownGui:_animate_xp_breakdown()
 
 	self._stats_breakdown:fade_in()
 
-	if managers.network:session():amount_of_players() > 1 and SystemInfo:platform() ~= Idstring("XB1") and SystemInfo:platform() ~= Idstring("X360") then
+	if managers.network:session():amount_of_players() > 1 and game_state_machine:current_state():is_success() and SystemInfo:platform() ~= Idstring("XB1") and SystemInfo:platform() ~= Idstring("X360") then
 		wait(1.5)
 		self._top_stats_small_panel:get_engine_panel():animate(callback(self, self, "_fade_in_label"), 0.2)
 	end
 end
 
--- Lines 788-806
+-- Lines 757-775
 function PostGameBreakdownGui:_fade_in_label(text, duration, delay)
 	local anim_duration = duration or 0.15
 	local t = text:alpha() * anim_duration
@@ -952,7 +890,7 @@ function PostGameBreakdownGui:_fade_in_label(text, duration, delay)
 	text:set_alpha(1)
 end
 
--- Lines 808-834
+-- Lines 777-803
 function PostGameBreakdownGui:_animate_giving_xp(panel, xp_earned)
 	local points_given = 0
 	local mid_speed = 30
@@ -978,17 +916,17 @@ function PostGameBreakdownGui:_animate_giving_xp(panel, xp_earned)
 	end
 end
 
--- Lines 836-838
+-- Lines 805-807
 function PostGameBreakdownGui:confirm_pressed()
 	self:_continue_button_on_click()
 end
 
--- Lines 840-842
+-- Lines 809-811
 function PostGameBreakdownGui:on_escape()
 	return true
 end
 
--- Lines 844-859
+-- Lines 813-828
 function PostGameBreakdownGui:bind_controller_inputs()
 	local bindings = {
 		{

@@ -1,6 +1,7 @@
 RaidGUIControlSaveInfo = RaidGUIControlSaveInfo or class(RaidGUIControl)
+RaidGUIControlSaveInfo.DOG_TAG_LABEL_X = 76
 
--- Lines 3-13
+-- Lines 5-15
 function RaidGUIControlSaveInfo:init(parent, params)
 	RaidGUIControlSaveInfo.super.init(self, parent, params)
 
@@ -8,10 +9,12 @@ function RaidGUIControlSaveInfo:init(parent, params)
 
 	self:_create_panel()
 	self:_create_info_icons()
+	self:_create_separator()
+	self:_create_peer_details_title()
 	self:_create_peer_details()
 end
 
--- Lines 15-25
+-- Lines 17-27
 function RaidGUIControlSaveInfo:_create_panel()
 	local panel_params = clone(self._params)
 	panel_params.name = panel_params.name .. "_panel"
@@ -23,75 +26,106 @@ function RaidGUIControlSaveInfo:_create_panel()
 	self._object = self._panel:panel(panel_params)
 end
 
--- Lines 27-79
+-- Lines 29-83
 function RaidGUIControlSaveInfo:_create_info_icons()
 	local info_icons_panel_params = {
 		name = "info_icons_panel",
 		h = 96,
 		y = 18,
 		x = 0,
-		w = self._object:w() * 0.8
+		w = self._object:w() * 0.78
 	}
 	self._info_icons_panel = self._object:panel(info_icons_panel_params)
 
 	self._info_icons_panel:set_center_x(self._object:w() / 2)
 
 	local h = self._info_icons_panel:h()
-	local difficulty_info_params = {
-		text = "",
-		name = "difficulty_info",
-		align = "left",
-		y = 0,
-		icon = "difficulty_1",
+	local dog_tag_panel_params = {
+		name = "dog_tag_panel",
+		h = 64,
+		y = 23,
+		w = 180,
 		x = 0
 	}
-	self._difficulty_info_icon = self._info_icons_panel:info_icon(difficulty_info_params)
+	self._dog_tag_panel = self._info_icons_panel:panel(dog_tag_panel_params)
+	local dog_tag_icon_params = {
+		name = "dog_tag_icon",
+		texture = tweak_data.gui.icons.rewards_dog_tags_small.texture,
+		texture_rect = tweak_data.gui.icons.rewards_dog_tags_small.texture_rect,
+		color = tweak_data.gui.colors.raid_black
+	}
+	local dog_tag_icon = self._dog_tag_panel:bitmap(dog_tag_icon_params)
 
-	if h < self._difficulty_info_icon:h() then
-		h = self._difficulty_info_icon:h()
-	end
+	dog_tag_icon:set_center_y(self._dog_tag_panel:h() / 2)
 
-	local server_info_params = {
-		name = "server_info",
+	local dog_tag_count_params = {
+		vertical = "center",
+		name = "dog_tag_count",
+		h = 32,
 		align = "center",
+		text = "120 / 140",
 		y = 0,
-		icon = "ico_server",
-		x = 0,
-		text = self:translate("menu_save_info_server_type_title", true)
+		x = RaidGUIControlSaveInfo.DOG_TAG_LABEL_X,
+		font = RaidGUIControlPeerDetails.FONT,
+		font_size = tweak_data.gui.font_sizes.size_32,
+		color = tweak_data.gui.colors.raid_black
 	}
-	self._server_info_icon = self._info_icons_panel:info_icon(server_info_params)
-
-	self._server_info_icon:set_center_x(self._info_icons_panel:w() / 2)
-
-	if h < self._server_info_icon:h() then
-		h = self._server_info_icon:h()
-	end
-
-	local loot_info_params = {
-		text = "0000",
-		name = "loot_info",
-		align = "right",
-		y = 0,
-		x = 0,
-		title = self:translate("menu_save_info_loot_title", true)
+	self._dog_tag_count = self._dog_tag_panel:text(dog_tag_count_params)
+	local dog_tag_label_params = {
+		name = "dog_tag_label",
+		vertical = "center",
+		h = 32,
+		align = "center",
+		y = 32,
+		font = RaidGUIControlPeerDetails.FONT,
+		font_size = tweak_data.gui.font_sizes.extra_small,
+		color = tweak_data.gui.colors.raid_black,
+		text = self:translate("menu_loot_screen_dog_tags", true)
 	}
-	self._loot_info_icon = self._info_icons_panel:info_icon(loot_info_params)
+	self._dog_tag_label = self._dog_tag_panel:text(dog_tag_label_params)
+	local _, _, w, _ = self._dog_tag_label:text_rect()
 
-	self._loot_info_icon:set_right(self._info_icons_panel:w())
-
-	if h < self._loot_info_icon:h() then
-		h = self._loot_info_icon:h()
-	end
-
+	self._dog_tag_label:set_w(w)
 	self._info_icons_panel:set_h(h)
 end
 
--- Lines 81-101
+-- Lines 85-93
+function RaidGUIControlSaveInfo:_create_separator()
+	local separator_params = {
+		name = "separator",
+		h = 2,
+		y = 123,
+		w = 446,
+		x = 34,
+		color = tweak_data.gui.colors.raid_black
+	}
+	self._separator = self._object:rect(separator_params)
+end
+
+-- Lines 95-108
+function RaidGUIControlSaveInfo:_create_peer_details_title()
+	local peer_details_title_params = {
+		name = "peer_details_title",
+		h = 32,
+		vertical = "center",
+		align = "left",
+		y = 137,
+		x = self._info_icons_panel:x(),
+		w = self._info_icons_panel:w(),
+		font = RaidGUIControlPeerDetails.FONT,
+		font_size = tweak_data.gui.font_sizes.extra_small,
+		color = tweak_data.gui.colors.raid_light_red,
+		text = self:translate("operation_save_details_teammates_title", true)
+	}
+	self._peer_details_title = self._object:text(peer_details_title_params)
+end
+
+-- Lines 110-130
 function RaidGUIControlSaveInfo:_create_peer_details()
 	local peer_info_panel_params = {
 		name = "peer_info_panel",
 		h = 512,
-		y = 132,
+		y = 202,
 		x = self._info_icons_panel:x(),
 		w = self._info_icons_panel:w()
 	}
@@ -102,17 +136,18 @@ function RaidGUIControlSaveInfo:_create_peer_details()
 	for i = 1, 4 do
 		local params = {
 			x = 0,
-			y = y
+			y = y,
+			w = self._peer_info_panel:w()
 		}
 		local peer_details = self._peer_info_panel:create_custom_control(RaidGUIControlPeerDetails, params)
 
 		table.insert(self._peer_info_details, peer_details)
 
-		y = y + 128
+		y = y + 112
 	end
 end
 
--- Lines 103-149
+-- Lines 132-204
 function RaidGUIControlSaveInfo:set_save_info(slot_index)
 	local save_slot = managers.raid_job:get_save_slots()[slot_index]
 
@@ -120,23 +155,51 @@ function RaidGUIControlSaveInfo:set_save_info(slot_index)
 		return
 	end
 
-	self._difficulty_info_icon:set_icon(tostring(save_slot.difficulty), {
-		color = Color.black
-	})
-	self._difficulty_info_icon:set_text("menu_" .. tostring(save_slot.difficulty))
-
 	local event_data = save_slot.event_data[#save_slot.event_data]
 	local loot_acquired = 0
+	local loot_spawned = 0
 
 	for _, data in pairs(save_slot.event_data) do
 		if data.loot_data then
 			loot_acquired = loot_acquired + data.loot_data.acquired
+			loot_spawned = loot_spawned + data.loot_data.spawned
 		end
 	end
 
-	self._loot_info_icon:set_text(string.format("%04.0f", loot_acquired), {
-		no_translate = true
-	})
+	if loot_spawned == 0 then
+		self._dog_tag_count:set_text(tostring("--"))
+
+		local _, _, w, _ = self._dog_tag_count:text_rect()
+
+		self._dog_tag_count:set_w(w)
+	else
+		self._dog_tag_count:set_text(tostring(loot_acquired) .. " / " .. tostring(loot_spawned))
+
+		local _, _, w, _ = self._dog_tag_count:text_rect()
+
+		self._dog_tag_count:set_w(w)
+	end
+
+	local rotation = self._dog_tag_panel:rotation()
+
+	self._dog_tag_panel:set_rotation(0)
+	self._dog_tag_count:set_y(0)
+	self._dog_tag_label:set_y(32)
+
+	local actual_w = math.max(self._dog_tag_count:w(), self._dog_tag_label:w())
+
+	self._dog_tag_count:set_w(actual_w)
+	self._dog_tag_label:set_w(actual_w)
+	self._dog_tag_count:set_x(RaidGUIControlSaveInfo.DOG_TAG_LABEL_X)
+	self._dog_tag_label:set_x(RaidGUIControlSaveInfo.DOG_TAG_LABEL_X)
+	self._dog_tag_panel:set_w(self._dog_tag_count:right())
+	self._dog_tag_panel:set_rotation(rotation)
+
+	if not event_data.peer_data then
+		debug_pause("[RaidGUIControlSaveInfo][set_save_info] Operation save has no peer data: ", inspect(event_data))
+
+		return
+	end
 
 	for i = 1, #self._peer_info_details do
 		self._peer_info_details[i]:set_alpha(0)
@@ -163,36 +226,36 @@ function RaidGUIControlSaveInfo:set_save_info(slot_index)
 	end
 end
 
--- Lines 152-154
+-- Lines 207-209
 function RaidGUIControlSaveInfo:set_left(left)
 	self._object:set_left(left)
 end
 
--- Lines 156-158
+-- Lines 211-213
 function RaidGUIControlSaveInfo:set_right(right)
 	self._object:set_right(right)
 end
 
--- Lines 160-162
+-- Lines 215-217
 function RaidGUIControlSaveInfo:set_top(top)
 	self._object:set_top(top)
 end
 
--- Lines 164-166
+-- Lines 219-221
 function RaidGUIControlSaveInfo:set_bottom(bottom)
 	self._object:set_bottom(bottom)
 end
 
--- Lines 168-170
+-- Lines 223-225
 function RaidGUIControlSaveInfo:set_center_x(center_x)
 	self._object:set_center_x(center_x)
 end
 
--- Lines 172-174
+-- Lines 227-229
 function RaidGUIControlSaveInfo:set_center_y(center_y)
 	self._object:set_center_y(center_y)
 end
 
--- Lines 177-178
+-- Lines 232-233
 function RaidGUIControlSaveInfo:close()
 end

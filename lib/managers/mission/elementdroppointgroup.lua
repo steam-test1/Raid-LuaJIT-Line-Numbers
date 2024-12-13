@@ -38,8 +38,10 @@ function ElementDropPointGroup:get_random_drop_point()
 	return eligible_points[math.random(#eligible_points)]
 end
 
--- Lines 35-43
+-- Lines 35-48
 function ElementDropPointGroup:on_executed(instigator)
+	return
+
 	if not self._values.enabled then
 		return
 	end
@@ -48,6 +50,6 @@ function ElementDropPointGroup:on_executed(instigator)
 	ElementDropPointGroup.super.on_executed(self, instigator)
 end
 
--- Lines 45-46
+-- Lines 50-51
 function ElementDropPointGroup:operation_remove()
 end

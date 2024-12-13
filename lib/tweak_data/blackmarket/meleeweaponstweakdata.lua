@@ -1,4 +1,4 @@
--- Lines 1-440
+-- Lines 1-503
 function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons = {
 		weapon = {}
@@ -453,6 +453,73 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.km_dagger.gui.initial_rotation.yaw = -90
 	self.melee_weapons.km_dagger.gui.initial_rotation.pitch = -165
 	self.melee_weapons.km_dagger.gui.initial_rotation.roll = 15
+	self.melee_weapons.km_dagger.dlc = DLCTweakData.DLC_NAME_SPECIAL_EDITION
+	self.melee_weapons.marching_mace = {
+		type = "knife",
+		name_id = "bm_melee_marching_mace",
+		desc_id = "bm_melee_marching_mace_desc",
+		weapon_movement_penalty = 1,
+		exit_run_speed_multiplier = 1,
+		transition_duration = 0,
+		stance = "marching_mace",
+		weapon_hold = "marching_mace",
+		align_objects = {
+			"a_weapon_right"
+		},
+		unit = "units/vanilla/weapons/wpn_fps_mel_marching_mace/wpn_fps_mel_marching_mace",
+		third_unit = "units/vanilla/weapons/wpn_third_mel_marching_mace/wpn_third_mel_marching_mace",
+		repeat_expire_t = 0.6,
+		expire_t = 1.1,
+		melee_damage_delay = 0.1,
+		stats = {}
+	}
+	self.melee_weapons.marching_mace.stats.min_damage = 133
+	self.melee_weapons.marching_mace.stats.max_damage = 200
+	self.melee_weapons.marching_mace.stats.min_damage_effect = 1
+	self.melee_weapons.marching_mace.stats.max_damage_effect = 1
+	self.melee_weapons.marching_mace.stats.charge_time = 2
+	self.melee_weapons.marching_mace.stats.range = 185
+	self.melee_weapons.marching_mace.stats.remove_weapon_movement_penalty = true
+	self.melee_weapons.marching_mace.stats.weapon_type = "sharp"
+	self.melee_weapons.marching_mace.stats.concealment = 30
+	self.melee_weapons.marching_mace.animations = {
+		equip_id = "equip_welrod"
+	}
+	self.melee_weapons.marching_mace.timers = {
+		reload_not_empty = 1.25,
+		reload_empty = 1.65,
+		unequip = 0.5,
+		equip = 0.25
+	}
+	self.melee_weapons.marching_mace.use_data = {
+		equip = {
+			align_place = "right_hand"
+		},
+		selection_index = 4,
+		unequip = {
+			align_place = "back"
+		}
+	}
+	self.melee_weapons.marching_mace.hold = "melee"
+	self.melee_weapons.marching_mace.usage_anim = "c45"
+	self.melee_weapons.marching_mace.sounds = {
+		equip = "knife_equip",
+		hit_air = "knife_hit_air",
+		hit_gen = "knife_hit_gen",
+		hit_body = "knife_hit_body",
+		killing_blow = "knife_killing_blow"
+	}
+	self.melee_weapons.marching_mace.dlc = DLCTweakData.DLC_NAME_SPECIAL_EDITION
+	self.melee_weapons.marching_mace.gui = {
+		rotation_offset = -30,
+		distance_offset = 60,
+		height_offset = -10,
+		display_offset = -6,
+		initial_rotation = {}
+	}
+	self.melee_weapons.marching_mace.gui.initial_rotation.yaw = -90
+	self.melee_weapons.marching_mace.gui.initial_rotation.pitch = 30
+	self.melee_weapons.marching_mace.gui.initial_rotation.roll = 0
 
 	self:_add_desc_from_name_macro(self.melee_weapons)
 end

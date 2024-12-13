@@ -1,18 +1,20 @@
 RaidMenuOptionsControlsKeybinds = RaidMenuOptionsControlsKeybinds or class(RaidGuiBase)
 
--- Lines 3-6
+-- Lines 3-7
 function RaidMenuOptionsControlsKeybinds:init(ws, fullscreen_ws, node, component_name)
 	RaidMenuOptionsControlsKeybinds.super.init(self, ws, fullscreen_ws, node, component_name)
+	managers.raid_menu:register_on_escape_callback(callback(self, self, "_on_escape_callback"))
 end
 
--- Lines 8-12
+-- Lines 9-15
 function RaidMenuOptionsControlsKeybinds:_set_initial_data()
 	self._node.components.raid_menu_header:set_screen_name("menu_header_options_main_screen_name", "menu_header_options_controls_keybinds_subtitle")
 
 	self._controller_category = "normal"
+	self._keybind_controls_table = {}
 end
 
--- Lines 15-49
+-- Lines 17-51
 function RaidMenuOptionsControlsKeybinds:_layout()
 	RaidMenuOptionsControlsKeybinds.super._layout(self)
 
@@ -58,7 +60,7 @@ function RaidMenuOptionsControlsKeybinds:_layout()
 	self:bind_controller_inputs()
 end
 
--- Lines 53-58
+-- Lines 55-60
 function RaidMenuOptionsControlsKeybinds:on_click_tabs_keybind_types(controller_category)
 	self._controller_category = controller_category
 
@@ -66,22 +68,39 @@ function RaidMenuOptionsControlsKeybinds:on_click_tabs_keybind_types(controller_
 	self:_layout_controls_keybinds()
 end
 
--- Lines 63-70
+-- Lines 64-77
+function RaidMenuOptionsControlsKeybinds:_on_escape_callback()
+	local result = false
+
+	for _, control in ipairs(self._keybind_controls_table) do
+		local control_result = control:is_listening_to_input()
+
+		if control_result then
+			result = true
+		end
+	end
+
+	return result
+end
+
+-- Lines 79-88
 function RaidMenuOptionsControlsKeybinds:close()
 	self:_save_controls_keybinds_values()
 
 	Global.savefile_manager.setting_changed = true
 
 	managers.savefile:save_setting(true)
+	managers.raid_menu:register_on_escape_callback(nil)
 	RaidMenuOptionsControlsKeybinds.super.close(self)
 end
 
--- Lines 72-73
+-- Lines 90-91
 function RaidMenuOptionsControlsKeybinds:_save_controls_keybinds_values()
 end
 
--- Lines 75-127
+-- Lines 93-148
 function RaidMenuOptionsControlsKeybinds:_layout_controls_keybinds()
+	self._keybind_controls_table = {}
 	local default_controller_type = managers.controller:get_default_wrapper_type()
 
 	if default_controller_type ~= "pc" then
@@ -121,7 +140,7 @@ function RaidMenuOptionsControlsKeybinds:_layout_controls_keybinds()
 		})
 
 		for row, keybind_params in ipairs(self._keybinds[keybind_type]) do
-			self._keybind_panel:keybind({
+			local keybind_control = self._keybind_panel:keybind({
 				keybind_w = 120,
 				name = "keybind_" .. keybind_params.button,
 				x = start_x,
@@ -132,11 +151,13 @@ function RaidMenuOptionsControlsKeybinds:_layout_controls_keybinds()
 				ws = self._ws,
 				keybind_params = keybind_params
 			})
+
+			table.insert(self._keybind_controls_table, keybind_control)
 		end
 	end
 end
 
--- Lines 129-148
+-- Lines 150-169
 function RaidMenuOptionsControlsKeybinds.controls_info_by_category(category, keybind_type)
 	local t = {}
 
@@ -149,7 +170,7 @@ function RaidMenuOptionsControlsKeybinds.controls_info_by_category(category, key
 	return t
 end
 
--- Lines 150-191
+-- Lines 171-212
 function RaidMenuOptionsControlsKeybinds:_keybinds_per_type(keybind_type)
 	local controller_category = self._controller_category
 	self._keybinds[keybind_type] = {}
@@ -195,7 +216,7 @@ function RaidMenuOptionsControlsKeybinds:_keybinds_per_type(keybind_type)
 	end
 end
 
--- Lines 193-206
+-- Lines 214-227
 function RaidMenuOptionsControlsKeybinds:on_click_default_controls_keybinds()
 	local params = {
 		title = managers.localization:text("dialog_reset_controls_keybinds_title"),
@@ -210,13 +231,13 @@ function RaidMenuOptionsControlsKeybinds:on_click_default_controls_keybinds()
 	managers.menu:show_option_dialog(params)
 end
 
--- Lines 208-211
+-- Lines 229-232
 function RaidMenuOptionsControlsKeybinds:refresh_keybinds()
 	self._keybind_panel:clear()
 	self:_layout_controls_keybinds()
 end
 
--- Lines 217-228
+-- Lines 238-249
 function RaidMenuOptionsControlsKeybinds:bind_controller_inputs()
 	local legend = {
 		controller = {

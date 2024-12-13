@@ -25,6 +25,7 @@ require("lib/utils/CoroutineManager")
 require("lib/utils/EventListenerHolder")
 require("lib/utils/QueuedEventListenerHolder")
 require("lib/utils/Easing")
+require("lib/utils/UIAnimation")
 require("lib/utils/TemporaryPropertyManager")
 require("lib/managers/UpgradesManager")
 require("lib/managers/GoldEconomyManager")
@@ -43,6 +44,8 @@ require("lib/units/BuffEffect")
 require("lib/managers/BuffEffectManager")
 require("lib/managers/ChallengeCardsManager")
 require("lib/managers/ConsumableMissionManager")
+require("lib/managers/GreedManager")
+require("lib/managers/ProgressionManager")
 require("lib/managers/WeaponSkillsManager")
 require("lib/managers/QueuedTasksManager")
 require("lib/managers/WarcryManager")
@@ -89,6 +92,7 @@ require("lib/managers/challenges/Challenge")
 require("lib/managers/challenges/ChallengeTasks")
 require("lib/managers/MusicManager")
 require("lib/managers/VoteManager")
+require("lib/managers/UnlockManager")
 require("lib/units/UnitDamage")
 require("lib/units/props/TextGui")
 require("lib/units/props/MaterialControl")
@@ -136,6 +140,9 @@ require("lib/managers/menu/raid_menu/controls/RaidGUIControlNationalityDescripti
 require("lib/managers/menu/raid_menu/controls/RaidGUIControlListItemIconDescription")
 require("lib/managers/menu/raid_menu/controls/RaidGUIControlListItemIcon")
 require("lib/managers/menu/raid_menu/controls/RaidGUIControlListItemMenu")
+require("lib/managers/menu/raid_menu/controls/RaidGUIControlListItemRaids")
+require("lib/managers/menu/raid_menu/controls/RaidGUIControlListItemOperations")
+require("lib/managers/menu/raid_menu/controls/RaidGUIControlListItemSaveSlots")
 require("lib/managers/menu/raid_menu/controls/RaidGUIControlListItemWeapons")
 require("lib/managers/menu/raid_menu/controls/RaidGUIControlListItem")
 require("lib/managers/menu/raid_menu/controls/RaidGUIControlList")
@@ -167,6 +174,7 @@ require("lib/managers/menu/raid_menu/controls/RaidGUIControlBranchingBarPath")
 require("lib/managers/menu/raid_menu/controls/RaidGUIControlBranchingBarLootScreenPath")
 require("lib/managers/menu/raid_menu/controls/RaidGUIControlBranchingBarSkilltreePath")
 require("lib/managers/menu/raid_menu/controls/RaidGuiControlKeyBind")
+require("lib/managers/menu/raid_menu/controls/RaidGuiControlDifficultyStars")
 require("lib/managers/menu/raid_menu/controls/RaidGUIControlGrid")
 require("lib/managers/menu/raid_menu/controls/RaidGUIControlGridActive")
 require("lib/managers/menu/raid_menu/controls/RaidGUIControlGridItem")
@@ -178,6 +186,8 @@ require("lib/managers/menu/raid_menu/controls/RaidGUIControlScrollableArea")
 require("lib/managers/menu/raid_menu/controls/RaidGUIControlScrollbar")
 require("lib/managers/menu/raid_menu/controls/RaidGUIControlLegend")
 require("lib/managers/menu/raid_menu/controls/RaidGUIControlVideo")
+require("lib/managers/menu/raid_menu/controls/RaidGUIControlGreedBarSmall")
+require("lib/managers/menu/raid_menu/controls/RaidGUIControlMissionUnlock")
 require("lib/managers/menu/raid_menu/controls/RaidGUIControlCardDetails")
 require("lib/managers/menu/raid_menu/controls/RaidGUIControlLootCardDetails")
 require("lib/managers/menu/raid_menu/controls/RaidGUIControlLootRewardCards")
@@ -231,6 +241,12 @@ require("lib/managers/menu/raid_menu/controls/custom/RaidGUIControlKickMuteWidge
 require("lib/managers/menu/raid_menu/controls/RaidGUIControlWeaponStats")
 require("lib/managers/menu/raid_menu/controls/RaidGUIControlMeleeWeaponStats")
 require("lib/managers/menu/raid_menu/controls/RaidGUIControlTabWeaponStats")
+require("lib/managers/menu/raid_menu/controls/RaidGUIControlIntelBulletin")
+require("lib/managers/menu/raid_menu/controls/RaidGUIControlIntelOperationalStatus")
+require("lib/managers/menu/raid_menu/controls/RaidGUIControlIntelRaidPersonel")
+require("lib/managers/menu/raid_menu/controls/RaidGUIControlIntelOppositeForces")
+require("lib/managers/menu/raid_menu/controls/RaidGUIControlIntelControlArchive")
+require("lib/managers/menu/raid_menu/controls/RaidGUIControlImageViewer")
 require("lib/managers/hud/HUDSaveIcon")
 require("lib/managers/menu/raid_menu/controls/RaidGUIControlDialogTest")
 require("lib/utils/StatisticsGenerator")
@@ -239,7 +255,7 @@ script_data = script_data or {}
 game_state_machine = game_state_machine or nil
 Setup = Setup or class(CoreSetup.CoreSetup)
 
--- Lines 270-319
+-- Lines 287-336
 function Setup:init_category_print()
 	CoreSetup.CoreSetup.init_category_print(self)
 
@@ -280,12 +296,12 @@ function Setup:init_category_print()
 	catprint_load()
 end
 
--- Lines 321-325
+-- Lines 338-342
 function Setup:set_resource_loaded_clbk(...)
 	PackageManager:set_resource_loaded_clbk(...)
 end
 
--- Lines 327-348
+-- Lines 344-365
 function Setup:load_packages()
 	Application:debug("[Setup:load_packages()]")
 	setup:set_resource_loaded_clbk(Idstring("unit"), nil)
@@ -309,20 +325,21 @@ function Setup:load_packages()
 	end
 end
 
--- Lines 350-401
+-- Lines 367-421
 function Setup:init_managers(managers)
 	Global.game_settings = Global.game_settings or {
 		drop_in_allowed = true,
 		auto_kick = true,
-		team_ai = true,
 		job_plan = -1,
+		team_ai = true,
 		search_appropriate_jobs = true,
 		kick_option = 1,
 		permission = "public",
 		is_playing = false,
 		reputation_permission = 0,
+		selected_team_ai = true,
 		level_id = managers.dlc:is_trial() and "raid_trial" or "streaming_level",
-		difficulty = Global.DEAFULT_DIFFICULTY
+		difficulty = Global.DEFAULT_DIFFICULTY
 	}
 
 	managers.dlc:setup()
@@ -358,6 +375,7 @@ function Setup:init_managers(managers)
 	managers.voice_over = VoiceOverManager:new()
 	managers.breadcrumb = BreadcrumbManager.get_instance()
 	managers.challenge = ChallengeManager.get_instance()
+	managers.greed = GreedManager.get_instance()
 	managers.vote = VoteManager:new()
 	managers.vehicle = VehicleManager:new()
 	managers.fire = FireManager:new()
@@ -369,10 +387,12 @@ function Setup:init_managers(managers)
 	managers.queued_tasks = QueuedTasksManager:new()
 	managers.warcry = WarcryManager.get_instance()
 	managers.weapon_inventory = WeaponInventoryManager.get_instance()
+	managers.progression = ProgressionManager.get_instance()
+	managers.unlock = UnlockManager.get_instance()
 	game_state_machine = GameStateMachine:new()
 end
 
--- Lines 403-408
+-- Lines 423-428
 function Setup:start_boot_loading_screen()
 	if not PackageManager:loaded("packages/boot_screen") then
 		PackageManager:load("packages/boot_screen")
@@ -381,12 +401,12 @@ function Setup:start_boot_loading_screen()
 	self:_start_loading_screen()
 end
 
--- Lines 410-412
+-- Lines 430-432
 function Setup:start_loading_screen()
 	self:_start_loading_screen()
 end
 
--- Lines 414-424
+-- Lines 434-444
 function Setup:stop_loading_screen()
 	Application:debug("[Setup:stop_loading_screen()]")
 
@@ -400,7 +420,7 @@ function Setup:stop_loading_screen()
 	end
 end
 
--- Lines 426-592
+-- Lines 446-612
 function Setup:_start_loading_screen()
 	Application:debug("[Setup:_start_loading_screen()]")
 	Application:stack_dump()
@@ -513,7 +533,7 @@ function Setup:_start_loading_screen()
 	Global.is_loading = true
 end
 
--- Lines 594-656
+-- Lines 614-676
 function Setup:_setup_loading_environment()
 	local env_map = {
 		deferred = {
@@ -553,7 +573,7 @@ function Setup:_setup_loading_environment()
 	Application:destroy_viewport(dummy_vp)
 end
 
--- Lines 658-670
+-- Lines 678-690
 function Setup:init_game()
 	if not Global.initialized then
 		Global.level_data = {}
@@ -568,7 +588,7 @@ function Setup:init_game()
 	return game_state_machine
 end
 
--- Lines 672-689
+-- Lines 692-709
 function Setup:init_finalize()
 	Setup.super.init_finalize(self)
 	game_state_machine:init_finilize()
@@ -590,7 +610,7 @@ function Setup:init_finalize()
 	tweak_data:add_reload_callback(self, self.on_tweak_data_reloaded)
 end
 
--- Lines 691-717
+-- Lines 711-738
 function Setup:update(t, dt)
 	local main_t = TimerManager:main():time()
 	local main_dt = TimerManager:main():delta_time()
@@ -607,6 +627,7 @@ function Setup:update(t, dt)
 	managers.vote:update(t, dt)
 	managers.vehicle:update(t, dt)
 	managers.warcry:update(t, dt)
+	managers.progression:update(t, dt)
 	managers.video:update(t, dt)
 	game_state_machine:update(t, dt)
 	managers.challenge_cards:update(t, dt)
@@ -616,7 +637,7 @@ function Setup:update(t, dt)
 	end
 end
 
--- Lines 719-730
+-- Lines 740-751
 function Setup:paused_update(t, dt)
 	managers.platform:paused_update(t, dt)
 	managers.user:paused_update(t, dt)
@@ -628,7 +649,7 @@ function Setup:paused_update(t, dt)
 	game_state_machine:paused_update(t, dt)
 end
 
--- Lines 732-738
+-- Lines 753-759
 function Setup:end_update(t, dt)
 	game_state_machine:end_update(t, dt)
 
@@ -637,7 +658,7 @@ function Setup:end_update(t, dt)
 	end
 end
 
--- Lines 740-746
+-- Lines 761-767
 function Setup:paused_end_update(t, dt)
 	game_state_machine:end_update(t, dt)
 
@@ -646,7 +667,7 @@ function Setup:paused_end_update(t, dt)
 	end
 end
 
--- Lines 749-754
+-- Lines 770-775
 function Setup:end_frame(t, dt)
 	while self._end_frame_callbacks and #self._end_frame_callbacks > 0 do
 		table.remove(self._end_frame_callbacks)()
@@ -655,25 +676,25 @@ function Setup:end_frame(t, dt)
 	self:_upd_unload_packages()
 end
 
--- Lines 757-760
+-- Lines 778-781
 function Setup:add_end_frame_callback(callback)
 	self._end_frame_callbacks = self._end_frame_callbacks or {}
 
 	table.insert(self._end_frame_callbacks, callback)
 end
 
--- Lines 762-764
+-- Lines 783-785
 function Setup:add_end_frame_clbk(func)
 	table.insert(self._end_frame_clbks, func)
 end
 
--- Lines 766-769
+-- Lines 787-790
 function Setup:on_tweak_data_reloaded()
 	managers.dlc:on_tweak_data_reloaded()
 	managers.voice_over:on_tweak_data_reloaded()
 end
 
--- Lines 771-782
+-- Lines 792-803
 function Setup:destroy()
 	managers.system_menu:destroy()
 	managers.menu:destroy()
@@ -685,7 +706,7 @@ function Setup:destroy()
 	end
 end
 
--- Lines 784-801
+-- Lines 805-822
 function Setup:load_level(level, mission, world_setting, level_class_name, level_id)
 	managers.menu:close_all_menus()
 	managers.platform:destroy_context()
@@ -702,14 +723,14 @@ function Setup:load_level(level, mission, world_setting, level_class_name, level
 	self:exec(level)
 end
 
--- Lines 803-808
+-- Lines 824-829
 function Setup:load_start_menu_lobby()
 	self:load_start_menu()
 
 	Global.load_start_menu_lobby = true
 end
 
--- Lines 810-838
+-- Lines 831-859
 function Setup:load_start_menu(save_progress)
 	Application:trace("[Setup:load_start_menu()]")
 	managers.platform:set_playing(false)
@@ -737,7 +758,7 @@ function Setup:load_start_menu(save_progress)
 	self:exec(nil)
 end
 
--- Lines 840-863
+-- Lines 861-884
 function Setup:exec(context)
 	if managers.network then
 		if SystemInfo:platform() == Idstring("PS4") then
@@ -769,7 +790,7 @@ function Setup:exec(context)
 	CoreSetup.CoreSetup.exec(self, context)
 end
 
--- Lines 865-872
+-- Lines 886-893
 function Setup:quit()
 	CoreSetup.CoreSetup.quit(self)
 
@@ -779,7 +800,30 @@ function Setup:quit()
 	end
 end
 
--- Lines 874-908
+-- Lines 896-914
+function Setup:return_to_camp_client()
+	if Network:is_client() then
+		game_state_machine:change_state_by_name("ingame_standard")
+		managers.hud:set_disabled()
+		managers.statistics:stop_session({
+			quit = true
+		})
+		managers.raid_job:deactivate_current_job()
+		managers.raid_job:cleanup()
+		managers.queued_tasks:unqueue_all()
+		managers.lootdrop:reset_loot_value_counters()
+		managers.consumable_missions:on_level_exited(false)
+		managers.greed:on_level_exited(false)
+		managers.network:session():send_to_peers("set_peer_left")
+		managers.network:stop_network()
+		managers.network.matchmake:destroy_game()
+		managers.network.voice_chat:destroy_voice()
+		managers.network:host_game()
+		managers.network:session():load_level(Global.level_data.level, nil, nil, nil, Global.game_settings.level_id)
+	end
+end
+
+-- Lines 917-953
 function Setup:quit_to_main_menu()
 	game_state_machine:change_state_by_name("ingame_standard")
 	managers.platform:set_playing(false)
@@ -789,6 +833,8 @@ function Setup:quit_to_main_menu()
 	managers.raid_job:deactivate_current_job()
 	managers.raid_job:cleanup()
 	managers.lootdrop:reset_loot_value_counters()
+	managers.consumable_missions:on_level_exited(false)
+	managers.greed:on_level_exited(false)
 	managers.worldcollection:on_simulation_ended()
 	managers.queued_tasks:unqueue_all()
 
@@ -814,7 +860,7 @@ function Setup:quit_to_main_menu()
 	end
 end
 
--- Lines 910-917
+-- Lines 955-962
 function Setup:restart()
 	local data = Global.level_data
 
@@ -825,7 +871,7 @@ function Setup:restart()
 	end
 end
 
--- Lines 919-981
+-- Lines 964-1026
 function Setup:block_exec()
 	if not self._main_thread_loading_screen_gui_visible then
 		self:set_main_thread_loading_screen_visible(true)
@@ -880,12 +926,12 @@ function Setup:block_exec()
 	return result
 end
 
--- Lines 983-985
+-- Lines 1028-1030
 function Setup:block_quit()
 	return self:block_exec()
 end
 
--- Lines 987-993
+-- Lines 1032-1038
 function Setup:set_main_thread_loading_screen_visible(visible)
 	if not self._main_thread_loading_screen_gui_visible ~= not visible then
 		cat_print("loading_environment", "[LoadingEnvironment] Main thread loading screen visible: " .. tostring(visible))
@@ -895,14 +941,14 @@ function Setup:set_main_thread_loading_screen_visible(visible)
 	end
 end
 
--- Lines 995-999
+-- Lines 1040-1044
 function Setup:set_fps_cap(value)
 	if not self._framerate_low then
 		Application:cap_framerate(value)
 	end
 end
 
--- Lines 1001-1010
+-- Lines 1046-1055
 function Setup:_unload_pkg_with_init(pkg)
 	Application:debug("[Setup:_unload_pkg_with_init] Unloading...", pkg)
 
@@ -917,7 +963,7 @@ function Setup:_unload_pkg_with_init(pkg)
 	end
 end
 
--- Lines 1012-1044
+-- Lines 1057-1089
 function Setup:_upd_unload_packages()
 	if self._packages_to_unload then
 		local package_name = table.remove(self._packages_to_unload)
@@ -957,7 +1003,7 @@ function Setup:_upd_unload_packages()
 	end
 end
 
--- Lines 1047-1049
+-- Lines 1092-1094
 function Setup:is_unloading()
 	return self._started_unloading_packages and true
 end

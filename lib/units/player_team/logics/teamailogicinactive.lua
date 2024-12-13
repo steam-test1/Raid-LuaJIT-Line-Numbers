@@ -1,14 +1,16 @@
 TeamAILogicInactive = class(TeamAILogicBase)
 
--- Lines 7-23
+-- Lines 7-24
 function TeamAILogicInactive.enter(data, new_logic_name, enter_params)
-	TeamAILogicBase.enter(data, new_logic_name, enter_params)
+	local my_data = {}
+
+	TeamAILogicBase.enter(data, new_logic_name, enter_params, my_data)
 	data.brain:rem_all_pos_rsrv()
 	CopLogicBase._set_attention_obj(data, nil, nil)
 	CopLogicBase._destroy_all_detected_attention_object_data(data)
 	CopLogicBase._reset_attention(data)
 
-	data.internal_data = {}
+	data.internal_data = my_data
 
 	data.unit:brain():set_update_enabled_state(false)
 
@@ -18,7 +20,7 @@ function TeamAILogicInactive.enter(data, new_logic_name, enter_params)
 	end
 end
 
--- Lines 27-34
+-- Lines 28-35
 function TeamAILogicInactive.exit(data, new_logic_name, enter_params)
 	TeamAILogicBase.exit(data, new_logic_name, enter_params)
 	data.unit:brain():set_update_enabled_state(true)
@@ -28,7 +30,7 @@ function TeamAILogicInactive.exit(data, new_logic_name, enter_params)
 	TeamAILogicBase.cancel_delayed_clbks(my_data)
 end
 
--- Lines 38-40
+-- Lines 39-41
 function TeamAILogicInactive.is_available_for_assignment(data)
 	return false
 end

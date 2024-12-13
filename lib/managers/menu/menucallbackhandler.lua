@@ -958,11 +958,11 @@ function MenuCallbackHandler:lobby_create_campaign(item)
 	Application:debug("[MenuCallbackHandler:lobby_create_campaign]", job_id)
 
 	Global.exe_argument_level = job_id
-	Global.exe_argument_difficulty = Global.exe_argument_difficulty or Global.DEAFULT_DIFFICULTY
+	Global.exe_argument_difficulty = Global.exe_argument_difficulty or Global.DEFAULT_DIFFICULTY
 
 	MenuCallbackHandler:start_job({
 		job_id = job_id,
-		difficulty = Global.DEAFULT_DIFFICULTY
+		difficulty = Global.DEFAULT_DIFFICULTY
 	})
 end
 
@@ -1519,7 +1519,7 @@ function MenuCallbackHandler:restart_mission(item)
 	end
 
 	local dialog_data = {
-		title = managers.localization:text("dialog_mp_restart_level_title"),
+		title = managers.localization:text("dialog_mp_restart_mission_title"),
 		text = managers.localization:text(managers.vote:option_vote_restart() and "dialog_mp_restart_level_message" or "dialog_mp_restart_level_host_message")
 	}
 	local yes_button = {
@@ -1769,7 +1769,7 @@ function MenuCallbackHandler:end_game()
 	managers.system_menu:show(dialog_data)
 end
 
--- Lines 1578-1605
+-- Lines 1578-1607
 function MenuCallbackHandler:_dialog_end_game_yes()
 	managers.platform:set_playing(false)
 	managers.statistics:stop_session({
@@ -1779,6 +1779,8 @@ function MenuCallbackHandler:_dialog_end_game_yes()
 	managers.raid_job:deactivate_current_job()
 	managers.raid_job:cleanup()
 	managers.lootdrop:reset_loot_value_counters()
+	managers.consumable_missions:on_level_exited(false)
+	managers.greed:on_level_exited(false)
 	managers.worldcollection:on_simulation_ended()
 
 	if Network:multiplayer() then
@@ -1799,9 +1801,9 @@ function MenuCallbackHandler:_dialog_end_game_yes()
 	setup:load_start_menu()
 end
 
--- Lines 1607-1612
+-- Lines 1609-1614
 function MenuCallbackHandler:leave_safehouse()
-	-- Lines 1608-1610
+	-- Lines 1610-1612
 	local function yes_func()
 		self:_dialog_end_game_yes()
 	end
@@ -1811,13 +1813,13 @@ function MenuCallbackHandler:leave_safehouse()
 	})
 end
 
--- Lines 1614-1625
+-- Lines 1616-1627
 function MenuCallbackHandler:abort_mission()
 	if game_state_machine:current_state_name() == "disconnected" then
 		return
 	end
 
-	-- Lines 1619-1623
+	-- Lines 1621-1625
 	local function yes_func()
 		if game_state_machine:current_state_name() ~= "disconnected" then
 			self:load_start_menu_lobby()
@@ -1829,22 +1831,22 @@ function MenuCallbackHandler:abort_mission()
 	})
 end
 
--- Lines 1627-1651
+-- Lines 1629-1653
 function MenuCallbackHandler:load_start_menu_lobby()
 	managers.network:session():load_lobby()
 end
 
--- Lines 1653-1654
+-- Lines 1655-1656
 function MenuCallbackHandler:_dialog_end_game_no()
 end
 
--- Lines 1656-1659
+-- Lines 1658-1661
 function MenuCallbackHandler:_reset_mainmusic()
 	managers.music:post_event(MusicManager.STOP_ALL_MUSIC)
 	managers.music:post_event(MusicManager.MENU_MUSIC)
 end
 
--- Lines 1661-1675
+-- Lines 1663-1677
 function MenuCallbackHandler:show_steam_controller_binding_panel()
 	if MenuCallbackHandler:is_not_steam_controller() then
 		return
@@ -1863,7 +1865,7 @@ function MenuCallbackHandler:show_steam_controller_binding_panel()
 	end
 end
 
--- Lines 1677-1687
+-- Lines 1679-1689
 function MenuCallbackHandler:set_default_options()
 	local params = {
 		text = managers.localization:text("dialog_default_options_message"),
@@ -1876,7 +1878,7 @@ function MenuCallbackHandler:set_default_options()
 	managers.menu:show_default_option_dialog(params)
 end
 
--- Lines 1689-1695
+-- Lines 1691-1697
 function MenuCallbackHandler:set_default_control_options()
 	local params = {
 		text = managers.localization:text("dialog_default_controls_options_message"),
@@ -1889,7 +1891,7 @@ function MenuCallbackHandler:set_default_control_options()
 	managers.menu:show_default_option_dialog(params)
 end
 
--- Lines 1697-1703
+-- Lines 1699-1705
 function MenuCallbackHandler:set_default_video_options()
 	local params = {
 		text = managers.localization:text("dialog_default_video_options_message"),
@@ -1902,7 +1904,7 @@ function MenuCallbackHandler:set_default_video_options()
 	managers.menu:show_default_option_dialog(params)
 end
 
--- Lines 1705-1711
+-- Lines 1707-1713
 function MenuCallbackHandler:set_default_sound_options()
 	local params = {
 		text = managers.localization:text("dialog_default_sound_options_message"),
@@ -1916,7 +1918,7 @@ function MenuCallbackHandler:set_default_sound_options()
 	managers.menu:show_default_option_dialog(params)
 end
 
--- Lines 1713-1719
+-- Lines 1715-1721
 function MenuCallbackHandler:set_default_network_options()
 	local params = {
 		text = managers.localization:text("dialog_default_network_options_message"),
@@ -1929,16 +1931,16 @@ function MenuCallbackHandler:set_default_network_options()
 	managers.menu:show_default_option_dialog(params)
 end
 
--- Lines 1721-1723
+-- Lines 1723-1725
 function MenuCallbackHandler:resume_game()
 	managers.menu:close_menu("menu_pause")
 end
 
--- Lines 1725-1726
+-- Lines 1727-1728
 function MenuCallbackHandler:change_upgrade(menu_item)
 end
 
--- Lines 1728-1736
+-- Lines 1730-1738
 function MenuCallbackHandler:delayed_open_savefile_menu(item)
 	if not self._delayed_open_savefile_menu_callback then
 		if managers.savefile:is_active() then
@@ -1949,7 +1951,7 @@ function MenuCallbackHandler:delayed_open_savefile_menu(item)
 	end
 end
 
--- Lines 1738-1743
+-- Lines 1740-1745
 function MenuCallbackHandler:open_savefile_menu(item)
 	managers.menu:set_delayed_open_savefile_menu_callback(nil)
 
@@ -1960,12 +1962,12 @@ function MenuCallbackHandler:open_savefile_menu(item)
 	})
 end
 
--- Lines 1745-1747
+-- Lines 1747-1749
 function MenuCallbackHandler:hide_huds()
 	managers.hud:set_disabled()
 end
 
--- Lines 1749-1755
+-- Lines 1751-1757
 function MenuCallbackHandler:toggle_hide_huds(item)
 	if item:value() == "on" then
 		managers.hud:set_disabled()
@@ -1974,17 +1976,17 @@ function MenuCallbackHandler:toggle_hide_huds(item)
 	end
 end
 
--- Lines 1757-1759
+-- Lines 1759-1761
 function MenuCallbackHandler:toggle_mission_fading_debug_enabled(item)
 	managers.mission:set_fading_debug_enabled(item:value() == "off")
 end
 
--- Lines 1761-1763
+-- Lines 1763-1765
 function MenuCallbackHandler:menu_back()
 	managers.menu:back()
 end
 
--- Lines 1765-1781
+-- Lines 1767-1783
 function MenuCallbackHandler:set_default_controller(item)
 	local params = {
 		text = managers.localization:text("dialog_use_default_keys_message"),
@@ -2003,14 +2005,14 @@ function MenuCallbackHandler:set_default_controller(item)
 	managers.menu:show_default_option_dialog(params)
 end
 
--- Lines 1783-1786
+-- Lines 1785-1788
 function MenuCallbackHandler:choice_button_layout_category(item)
 	local node_gui = managers.menu:active_menu().renderer:active_node_gui()
 
 	node_gui:set_current_category(item:value())
 end
 
--- Lines 1788-1811
+-- Lines 1790-1813
 function MenuCallbackHandler:debug_goto_custody()
 	local player = managers.player:player_unit()
 
@@ -2038,7 +2040,7 @@ function MenuCallbackHandler:debug_goto_custody()
 	player:base():set_slot(player, 0)
 end
 
--- Lines 1814-1825
+-- Lines 1816-1827
 function MenuCallbackHandler:toggle_visual_upgrade(item)
 	managers.upgrades:toggle_visual_weapon_upgrade(item:parameters().upgrade_id)
 	managers.upgrades:setup_current_weapon()
@@ -2052,7 +2054,7 @@ function MenuCallbackHandler:toggle_visual_upgrade(item)
 	print("Toggled", item:parameters().upgrade_id)
 end
 
--- Lines 1828-1845
+-- Lines 1830-1847
 function MenuCallbackHandler:set_contact_info(item)
 	local parameters = item:parameters() or {}
 	local id = parameters.name
@@ -2071,7 +2073,7 @@ function MenuCallbackHandler:set_contact_info(item)
 	end
 end
 
--- Lines 1847-1854
+-- Lines 1849-1856
 function MenuCallbackHandler:is_current_contact_info(item)
 	local active_node_gui = managers.menu:active_menu().renderer:active_node_gui()
 
@@ -2082,7 +2084,7 @@ function MenuCallbackHandler:is_current_contact_info(item)
 	return false
 end
 
--- Lines 1858-1876
+-- Lines 1860-1878
 function MenuCallbackHandler:is_reticle_applicable(node)
 	local type = node:item("reticle_type"):value()
 	local color = node:item("reticle_color"):value()
@@ -2102,7 +2104,7 @@ function MenuCallbackHandler:is_reticle_applicable(node)
 	return pass_type and pass_color
 end
 
--- Lines 1878-1910
+-- Lines 1880-1912
 function MenuCallbackHandler:update_weapon_texture_switch(item)
 	if not managers.menu:active_menu() then
 		return false
@@ -2136,12 +2138,12 @@ function MenuCallbackHandler:update_weapon_texture_switch(item)
 	end
 end
 
--- Lines 1912-1914
+-- Lines 1914-1916
 function MenuCallbackHandler:casino_betting_visible()
 	return true
 end
 
--- Lines 1917-1949
+-- Lines 1919-1951
 function MenuCallbackHandler:unlock_skill_switch(item)
 	local spending_cost = managers.money:get_unlock_skill_switch_spending_cost(item:parameters().name)
 	local offshore_cost = managers.money:get_unlock_skill_switch_offshore_cost(item:parameters().name)
@@ -2193,22 +2195,22 @@ function MenuCallbackHandler:unlock_skill_switch(item)
 	managers.system_menu:show(dialog_data)
 end
 
--- Lines 1951-1954
+-- Lines 1953-1956
 function MenuCallbackHandler:set_active_skill_switch(item)
 	managers.skilltree:switch_skills(item:parameters().name)
 	self:refresh_node()
 end
 
--- Lines 1959-1961
+-- Lines 1961-1963
 function MenuCallbackHandler:has_installed_mods()
 	return not self:is_console() and table.size(DB:mods()) > 0
 end
 
--- Lines 1963-1965
+-- Lines 1965-1967
 function MenuCallbackHandler:save_mod_changes(node)
 end
 
--- Lines 1967-1973
+-- Lines 1969-1975
 function MenuCallbackHandler:mod_option_toggle_enabled(item)
 	print("mod_option_toggle_enabled", "mod", item:name(), "status", item:value())
 
@@ -2217,12 +2219,12 @@ function MenuCallbackHandler:mod_option_toggle_enabled(item)
 	DB:set_mod_enabled(item:name(), enabled)
 end
 
--- Lines 1976-1983
+-- Lines 1978-1985
 function MenuCallbackHandler:is_current_challenge(item)
 	return false
 end
 
--- Lines 1985-1997
+-- Lines 1987-1999
 function MenuCallbackHandler:update_challenge_menu_node()
 	if not managers.menu:active_menu() then
 		return false
@@ -2239,12 +2241,12 @@ function MenuCallbackHandler:update_challenge_menu_node()
 	MenuCallbackHandler:refresh_node()
 end
 
--- Lines 1999-2023
+-- Lines 2001-2025
 function MenuCallbackHandler:give_challenge_reward(item)
 	return false
 end
 
--- Lines 2025-2046
+-- Lines 2027-2048
 function MenuCallbackHandler:choice_challenge_choose_weapon_category(item)
 	if not managers.menu:active_menu() then
 		return false
@@ -2271,7 +2273,7 @@ function MenuCallbackHandler:choice_challenge_choose_weapon_category(item)
 	MenuCallbackHandler:refresh_node()
 end
 
--- Lines 2048-2067
+-- Lines 2050-2069
 function MenuCallbackHandler:choice_challenge_choose_weapon(item)
 	if not managers.menu:active_menu() then
 		return false
@@ -2298,7 +2300,7 @@ function MenuCallbackHandler:choice_challenge_choose_weapon(item)
 	MenuCallbackHandler:refresh_node()
 end
 
--- Lines 2069-2089
+-- Lines 2071-2091
 function MenuCallbackHandler:choice_challenge_choose_global_value(item)
 	if not managers.menu:active_menu() then
 		return false
@@ -2325,23 +2327,23 @@ function MenuCallbackHandler:choice_challenge_choose_global_value(item)
 	MenuCallbackHandler:refresh_node()
 end
 
--- Lines 2091-2094
+-- Lines 2093-2096
 function MenuCallbackHandler:continue_to_lobby()
 end
 
--- Lines 2096-2101
+-- Lines 2098-2103
 function MenuCallbackHandler:on_view_character_focus(node, in_focus, data)
 	if not in_focus or not data then
 		managers.menu_component:close_view_character_profile_gui()
 	end
 end
 
--- Lines 2103-2106
+-- Lines 2105-2108
 function MenuCallbackHandler:on_character_customization()
 	managers.menu_component:close_weapon_box()
 end
 
--- Lines 2108-2156
+-- Lines 2110-2158
 function MenuCallbackHandler:start_job(job_data)
 	local raid_data = tweak_data.operations:mission_data(job_data.job_id)
 	Global.game_settings.level_id = raid_data.level_id or job_data.job_id
@@ -2387,24 +2389,24 @@ function MenuCallbackHandler:start_job(job_data)
 	managers.raid_job:on_mission_started()
 end
 
--- Lines 2158-2162
+-- Lines 2160-2164
 function MenuCallbackHandler:play_single_player_job(item)
 	self:play_single_player()
 	self:start_single_player_job({
 		job_id = item:parameter("job_id"),
-		difficulty = Global.DEAFULT_DIFFICULTY
+		difficulty = Global.DEFAULT_DIFFICULTY
 	})
 end
 
--- Lines 2164-2166
+-- Lines 2166-2168
 function MenuCallbackHandler:play_quick_start_job(item)
 	self:start_job({
 		job_id = item:parameter("job_id"),
-		difficulty = Global.DEAFULT_DIFFICULTY
+		difficulty = Global.DEFAULT_DIFFICULTY
 	})
 end
 
--- Lines 2168-2178
+-- Lines 2170-2180
 function MenuCallbackHandler:start_single_player_job(job_data)
 	local raid_data = tweak_data.operations:mission_data(job_data.job_id)
 	Global.game_settings.level_id = raid_data.level_id
@@ -2416,61 +2418,61 @@ function MenuCallbackHandler:start_single_player_job(job_data)
 	managers.raid_job:on_mission_started()
 end
 
--- Lines 2180-2182
+-- Lines 2182-2184
 function MenuCallbackHandler:can_buy_weapon(item)
 	return not Global.blackmarket_manager.weapons[item:parameter("weapon_id")].owned
 end
 
--- Lines 2184-2187
+-- Lines 2186-2189
 function MenuCallbackHandler:owns_weapon(item)
 	return not self:can_buy_weapon(item)
 end
 
--- Lines 2189-2191
+-- Lines 2191-2193
 function MenuCallbackHandler:open_blackmarket_node()
 	managers.menu:active_menu().logic:select_node("blackmarket")
 end
 
--- Lines 2193-2197
+-- Lines 2195-2199
 function MenuCallbackHandler:leave_blackmarket(...)
 	managers.menu_component:close_weapon_box()
 	managers.blackmarket:release_preloaded_blueprints()
 end
 
--- Lines 2199-2200
+-- Lines 2201-2202
 function MenuCallbackHandler:_left_blackmarket()
 end
 
--- Lines 2202-2204
+-- Lines 2204-2206
 function MenuCallbackHandler:blackmarket_abort_customize_mask()
 	managers.blackmarket:abort_customize_mask()
 end
 
--- Lines 2206-2208
+-- Lines 2208-2210
 function MenuCallbackHandler:got_skillpoint_to_spend()
 	return false
 end
 
--- Lines 2210-2212
+-- Lines 2212-2214
 function MenuCallbackHandler:got_new_content_update()
 	return false
 end
 
--- Lines 2214-2216
+-- Lines 2216-2218
 function MenuCallbackHandler:got_new_fav_videos()
 	return false
 end
 
--- Lines 2218-2220
+-- Lines 2220-2222
 function MenuCallbackHandler:not_got_new_content_update()
 	return not self:got_new_content_update()
 end
 
--- Lines 2222-2223
+-- Lines 2224-2225
 function MenuCallbackHandler:do_content_lootdrop(node)
 end
 
--- Lines 2225-2230
+-- Lines 2227-2232
 function MenuCallbackHandler:buy_weapon(item)
 	local name = managers.localization:text(tweak_data.weapon[item:parameter("weapon_id")].name_id)
 	local cost = 50000
@@ -2484,7 +2486,7 @@ function MenuCallbackHandler:buy_weapon(item)
 	}, name, "$" .. cost)
 end
 
--- Lines 2232-2238
+-- Lines 2234-2240
 function MenuCallbackHandler:on_buy_weapon_yes(params)
 	Global.blackmarket_manager.weapons[params.item:parameter("weapon_id")].owned = true
 	params.item:parameter("parent_item"):parameters().owned = true
@@ -2493,7 +2495,7 @@ function MenuCallbackHandler:on_buy_weapon_yes(params)
 	params.item:parameters().parent_item:on_buy(params.item:parameters().gui_node)
 end
 
--- Lines 2240-2248
+-- Lines 2242-2250
 function MenuCallbackHandler:equip_weapon(item)
 	Global.player_manager.kit.weapon_slots[item:parameter("weapon_slot")] = item:parameter("weapon_id")
 
@@ -2504,7 +2506,7 @@ function MenuCallbackHandler:equip_weapon(item)
 	end
 end
 
--- Lines 2250-2259
+-- Lines 2252-2261
 function MenuCallbackHandler:repair_weapon(item)
 	if item:_at_max_condition() then
 		return
@@ -2522,7 +2524,7 @@ function MenuCallbackHandler:repair_weapon(item)
 	}, name, "$" .. cost)
 end
 
--- Lines 2261-2266
+-- Lines 2263-2268
 function MenuCallbackHandler:on_repair_yes(params)
 	Global.blackmarket_manager.weapons[params.item:parameters().weapon_id].condition = params.item:_max_condition()
 
@@ -2530,63 +2532,63 @@ function MenuCallbackHandler:on_repair_yes(params)
 	self:test_clicked_weapon(params.item:parameters().parent_item)
 end
 
--- Lines 2268-2269
+-- Lines 2270-2271
 function MenuCallbackHandler:clicked_weapon_upgrade_type(item)
 end
 
--- Lines 2271-2272
+-- Lines 2273-2274
 function MenuCallbackHandler:clicked_weapon_upgrade(item)
 end
 
--- Lines 2275-2277
+-- Lines 2277-2279
 function MenuCallbackHandler:can_buy_weapon_upgrade(item)
 	return false
 end
 
--- Lines 2280-2282
+-- Lines 2282-2284
 function MenuCallbackHandler:owns_weapon_upgrade(item)
 	return true
 end
 
--- Lines 2285-2286
+-- Lines 2287-2288
 function MenuCallbackHandler:buy_weapon_upgrades(item)
 end
 
--- Lines 2289-2291
+-- Lines 2291-2293
 function MenuCallbackHandler:buy_weapon_upgrade(item)
 	return
 end
 
--- Lines 2294-2296
+-- Lines 2296-2298
 function MenuCallbackHandler:_on_buy_weapon_upgrade_yes(params)
 	return
 end
 
--- Lines 2299-2301
+-- Lines 2301-2303
 function MenuCallbackHandler:attach_weapon_upgrade(item)
 	return
 end
 
--- Lines 2304-2305
+-- Lines 2306-2307
 function MenuCallbackHandler:clicked_customize_character_category(item)
 end
 
--- Lines 2307-2310
+-- Lines 2309-2312
 function MenuCallbackHandler:test_clicked_mask(item)
 	managers.menu_component:close_weapon_box()
 end
 
--- Lines 2312-2314
+-- Lines 2314-2316
 function MenuCallbackHandler:can_buy_mask(item)
 	return not self:owns_mask(item)
 end
 
--- Lines 2316-2318
+-- Lines 2318-2320
 function MenuCallbackHandler:owns_mask(item)
 	return Global.blackmarket_manager.masks[item:parameter("mask_id")].owned
 end
 
--- Lines 2320-2327
+-- Lines 2322-2329
 function MenuCallbackHandler:equip_mask(item)
 	local mask_id = item:parameter("mask_id")
 
@@ -2595,7 +2597,7 @@ function MenuCallbackHandler:equip_mask(item)
 	self:_update_outfit_information()
 end
 
--- Lines 2329-2347
+-- Lines 2331-2349
 function MenuCallbackHandler:_update_outfit_information()
 	local outfit_string = managers.blackmarket:outfit_string()
 
@@ -2619,7 +2621,7 @@ function MenuCallbackHandler:_update_outfit_information()
 	end
 end
 
--- Lines 2349-2355
+-- Lines 2351-2357
 function MenuCallbackHandler:buy_mask(item)
 	local name = managers.localization:text(tweak_data.blackmarket.masks[item:parameter("mask_id")].name_id)
 	local cost = 10000
@@ -2633,7 +2635,7 @@ function MenuCallbackHandler:buy_mask(item)
 	}, name, "$" .. cost)
 end
 
--- Lines 2357-2363
+-- Lines 2359-2365
 function MenuCallbackHandler:_on_buy_mask_yes(params)
 	Global.blackmarket_manager.masks[params.item:parameter("mask_id")].owned = true
 	params.item:parameter("parent_item"):parameters().owned = true
@@ -2642,17 +2644,17 @@ function MenuCallbackHandler:_on_buy_mask_yes(params)
 	params.item:parameters().parent_item:on_buy(params.item:parameters().gui_node)
 end
 
--- Lines 2365-2367
+-- Lines 2367-2369
 function MenuCallbackHandler:leave_character_customization()
 	self:leave_blackmarket()
 end
 
--- Lines 2370-2372
+-- Lines 2372-2374
 function MenuCallbackHandler:clicked_character(item)
 	print("MenuCallbackHandler:clicked_character", item)
 end
 
--- Lines 2374-2385
+-- Lines 2376-2387
 function MenuCallbackHandler:equip_character(item)
 	local character_id = item:parameter("character_id")
 	Global.blackmarket_manager.characters[character_id].equipped = true
@@ -2666,17 +2668,17 @@ function MenuCallbackHandler:equip_character(item)
 	self:_update_outfit_information()
 end
 
--- Lines 2387-2389
+-- Lines 2389-2391
 function MenuCallbackHandler:can_buy_character(item)
 	return not self:owns_character(item)
 end
 
--- Lines 2391-2393
+-- Lines 2393-2395
 function MenuCallbackHandler:owns_character(item)
 	return Global.blackmarket_manager.characters[item:parameter("character_id")].owned
 end
 
--- Lines 2395-2401
+-- Lines 2397-2403
 function MenuCallbackHandler:buy_character(item)
 	local name = managers.localization:text(tweak_data.blackmarket.characters[item:parameter("character_id")].name_id)
 	local cost = 10000
@@ -2690,7 +2692,7 @@ function MenuCallbackHandler:buy_character(item)
 	}, name, "$" .. cost)
 end
 
--- Lines 2403-2409
+-- Lines 2405-2411
 function MenuCallbackHandler:_on_buy_character_yes(params)
 	Global.blackmarket_manager.characters[params.item:parameter("character_id")].owned = true
 	params.item:parameter("parent_item"):parameters().owned = true
@@ -2699,22 +2701,22 @@ function MenuCallbackHandler:_on_buy_character_yes(params)
 	params.item:parameters().parent_item:on_buy(params.item:parameters().gui_node)
 end
 
--- Lines 2412-2416
+-- Lines 2414-2418
 function MenuCallbackHandler:test_clicked_armor(item)
 	managers.menu_component:close_weapon_box()
 end
 
--- Lines 2418-2420
+-- Lines 2420-2422
 function MenuCallbackHandler:can_buy_armor(item)
 	return not self:owns_armor(item)
 end
 
--- Lines 2422-2424
+-- Lines 2424-2426
 function MenuCallbackHandler:owns_armor(item)
 	return Global.blackmarket_manager.armors[item:parameter("armor_id")].owned
 end
 
--- Lines 2426-2432
+-- Lines 2428-2434
 function MenuCallbackHandler:buy_armor(item)
 	local name = managers.localization:text(tweak_data.blackmarket.armors[item:parameter("armor_id")].name_id)
 	local cost = 20000
@@ -2728,7 +2730,7 @@ function MenuCallbackHandler:buy_armor(item)
 	}, name, "$" .. cost)
 end
 
--- Lines 2434-2440
+-- Lines 2436-2442
 function MenuCallbackHandler:_on_buy_armor_yes(params)
 	Global.blackmarket_manager.armors[params.item:parameter("armor_id")].owned = true
 	params.item:parameter("parent_item"):parameters().owned = true
@@ -2737,7 +2739,7 @@ function MenuCallbackHandler:_on_buy_armor_yes(params)
 	params.item:parameters().parent_item:on_buy(params.item:parameters().gui_node)
 end
 
--- Lines 2442-2453
+-- Lines 2444-2455
 function MenuCallbackHandler:equip_armor(item)
 	local armor_id = item:parameter("armor_id")
 	Global.blackmarket_manager.armors[armor_id].equipped = true
@@ -2751,7 +2753,7 @@ function MenuCallbackHandler:equip_armor(item)
 	self:_update_outfit_information()
 end
 
--- Lines 2455-2467
+-- Lines 2457-2469
 function MenuCallbackHandler:repair_armor(item)
 	if item:_at_max_condition() then
 		return
@@ -2770,14 +2772,14 @@ function MenuCallbackHandler:repair_armor(item)
 	}, name, "$" .. cost)
 end
 
--- Lines 2469-2477
+-- Lines 2471-2479
 function MenuCallbackHandler:on_repair_armor_yes(params)
 	Global.blackmarket_manager.armors[params.item:parameters().armor_id].condition = params.item:_max_condition()
 
 	params.item:dirty()
 end
 
--- Lines 2481-2486
+-- Lines 2483-2488
 function MenuCallbackHandler:stage_success()
 	if not managers.raid_job:has_active_job() then
 		return true
@@ -2786,34 +2788,34 @@ function MenuCallbackHandler:stage_success()
 	return managers.raid_job:stage_success()
 end
 
--- Lines 2488-2490
+-- Lines 2490-2492
 function MenuCallbackHandler:stage_not_success()
 	return not self:stage_success()
 end
 
--- Lines 2492-2494
+-- Lines 2494-2496
 function MenuCallbackHandler:got_job()
 	return managers.raid_job:has_active_job()
 end
 
--- Lines 2496-2498
+-- Lines 2498-2500
 function MenuCallbackHandler:got_no_job()
 	return not self:got_job()
 end
 
--- Lines 2501-2502
+-- Lines 2503-2504
 function MenuCallbackHandler:start_safe_test_overkill()
 end
 
--- Lines 2504-2505
+-- Lines 2506-2507
 function MenuCallbackHandler:start_safe_test_event_01()
 end
 
--- Lines 2507-2508
+-- Lines 2509-2510
 function MenuCallbackHandler:start_safe_test_weapon_01()
 end
 
--- Lines 2510-2515
+-- Lines 2512-2517
 function MenuCallbackHandler:reset_safe_scene()
 	if not managers.menu:cash_safe_scene_done() then
 		return true
@@ -2822,28 +2824,28 @@ function MenuCallbackHandler:reset_safe_scene()
 	managers.menu:set_cash_safe_scene_done(false)
 end
 
--- Lines 2517-2519
+-- Lines 2519-2521
 function MenuCallbackHandler:is_cash_safe_back_visible()
 	return managers.menu:cash_safe_scene_done()
 end
 
--- Lines 2521-2523
+-- Lines 2523-2525
 function MenuCallbackHandler:on_visit_crimefest_challenges()
 	Steam:overlay_activate("url", tweak_data.gui.crimefest_challenges_webpage)
 end
 
--- Lines 2527-2528
+-- Lines 2529-2530
 function MenuCallbackHandler:leave_steam_inventory(item)
 end
 
--- Lines 2532-2536
+-- Lines 2534-2538
 function MenuCallbackHandler:can_toggle_chat()
 	local input = managers.menu:active_menu() and managers.menu:active_menu().input
 
 	return not input or input.can_toggle_chat and input:can_toggle_chat()
 end
 
--- Lines 2541-2547
+-- Lines 2543-2549
 function MenuCallbackHandler:on_visit_fbi_files()
 	if MenuCallbackHandler:is_overlay_enabled() then
 		Steam:overlay_activate("url", tweak_data.gui.fbi_files_webpage)
@@ -2852,7 +2854,7 @@ function MenuCallbackHandler:on_visit_fbi_files()
 	end
 end
 
--- Lines 2549-2557
+-- Lines 2551-2559
 function MenuCallbackHandler:on_visit_fbi_files_suspect(item)
 	if item then
 		if MenuCallbackHandler:is_overlay_enabled() then
@@ -2863,7 +2865,7 @@ function MenuCallbackHandler:on_visit_fbi_files_suspect(item)
 	end
 end
 
--- Lines 2559-2564
+-- Lines 2561-2566
 function MenuCallbackHandler:on_steam_transaction_over(canceled)
 	print("on_steam_transaction_over", canceled)
 	managers.network.account:remove_overlay_listener("steam_transaction_tradable_item")
@@ -2871,7 +2873,7 @@ function MenuCallbackHandler:on_steam_transaction_over(canceled)
 	managers.system_menu:close("buy_tradable_item")
 end
 
--- Lines 2566-2590
+-- Lines 2568-2592
 function MenuCallbackHandler:steam_open_container(item)
 	if not managers.menu:active_menu() or not managers.menu:active_menu().logic:selected_node() then
 		return false
@@ -2885,7 +2887,7 @@ function MenuCallbackHandler:steam_open_container(item)
 
 	local safe_entry = data.safe
 
-	-- Lines 2579-2585
+	-- Lines 2581-2587
 	local function ready_clbk()
 		print("ECONOMY SAFE READY CALLBACK")
 		managers.menu:back()
@@ -2901,7 +2903,7 @@ function MenuCallbackHandler:steam_open_container(item)
 	managers.network.account:inventory_reward_unlock(data.safe, data.safe_id, data.drill_id, callback(MenuCallbackHandler, MenuCallbackHandler, "_safe_result_recieved"))
 end
 
--- Lines 2592-2603
+-- Lines 2594-2605
 function MenuCallbackHandler:_safe_result_recieved(error, items_new, items_removed)
 	local active_node_gui = managers.menu:active_menu().renderer:active_node_gui()
 

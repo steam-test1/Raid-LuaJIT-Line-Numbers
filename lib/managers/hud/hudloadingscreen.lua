@@ -6,36 +6,40 @@ HUDLoadingScreen.LOADING_TEXT_H = 64
 HUDLoadingScreen.LOADING_TEXT_FONT = tweak_data.gui.fonts.din_compressed
 HUDLoadingScreen.LOADING_TEXT_FONT_SIZE = tweak_data.gui.font_sizes.medium
 HUDLoadingScreen.LOADING_TEXT_COLOR = tweak_data.gui.colors.raid_grey
-HUDLoadingScreen.RAID_INFO_Y = 736
+HUDLoadingScreen.RAID_INFO_Y = 670
 HUDLoadingScreen.RAID_INFO_W = 1184
-HUDLoadingScreen.RAID_INFO_H = 200
+HUDLoadingScreen.RAID_INFO_H = 264
 HUDLoadingScreen.INFO_TITLE_Y = 0
 HUDLoadingScreen.INFO_TITLE_H = 64
 HUDLoadingScreen.INFO_TITLE_FONT = tweak_data.gui.fonts.din_compressed
 HUDLoadingScreen.INFO_TITLE_FONT_SIZE = tweak_data.gui.font_sizes.size_56
 HUDLoadingScreen.INFO_TITLE_COLOR = tweak_data.gui.colors.raid_red
-HUDLoadingScreen.RAID_INFO_TEXT_Y = 96
+HUDLoadingScreen.RAID_INFO_TITLE_CENTER_Y = 48
+HUDLoadingScreen.RAID_INFO_TEXT_Y = 160
 HUDLoadingScreen.RAID_INFO_TEXT_FONT = tweak_data.gui.fonts.lato
 HUDLoadingScreen.RAID_INFO_TEXT_FONT_SIZE = tweak_data.gui.font_sizes.medium
 HUDLoadingScreen.RAID_INFO_TEXT_COLOR = Color("878787")
-HUDLoadingScreen.RAID_COMPLETED_Y = 717
-HUDLoadingScreen.OPERATION_COMPLETED_Y = 181
-HUDLoadingScreen.MISSION_COMPLETED_Y = 101
+HUDLoadingScreen.RAID_DIFFICULTY_CENTER_Y = 128
+HUDLoadingScreen.RAID_COMPLETED_Y = 653
+HUDLoadingScreen.RAID_COMPLETED_H = 328
+HUDLoadingScreen.OPERATION_COMPLETED_Y = 245
+HUDLoadingScreen.MISSION_COMPLETED_Y = 165
 HUDLoadingScreen.MISSION_COMPLETED_H = 160
 HUDLoadingScreen.MISSION_COMPLETED_FONT = tweak_data.gui.fonts.din_compressed
 HUDLoadingScreen.MISSION_COMPLETED_FONT_SIZE = tweak_data.gui.font_sizes.size_84
 HUDLoadingScreen.MISSION_COMPLETED_COLOR_SUCCESS = tweak_data.gui.colors.raid_grey
 HUDLoadingScreen.MISSION_COMPLETED_COLOR_FAIL = tweak_data.gui.colors.raid_red
 HUDLoadingScreen.MISSION_ICON_PADDING_RIGHT = 10
-HUDLoadingScreen.OPERATION_INFO_Y = 640
+HUDLoadingScreen.OPERATION_INFO_Y = 576
 HUDLoadingScreen.OPERATION_INFO_W = 1184
-HUDLoadingScreen.OPERATION_INFO_H = 320
-HUDLoadingScreen.OPERATION_EVENT_TITLE_Y = 96
+HUDLoadingScreen.OPERATION_INFO_H = 384
+HUDLoadingScreen.OPERATION_EVENT_TITLE_Y = 80
 HUDLoadingScreen.OPERATION_EVENT_TITLE_H = 64
 HUDLoadingScreen.OPERATION_EVENT_TITLE_FONT = tweak_data.gui.fonts.din_compressed
-HUDLoadingScreen.OPERATION_EVENT_TITLE_FONT_SIZE = tweak_data.gui.font_sizes.menu_list
+HUDLoadingScreen.OPERATION_EVENT_TITLE_FONT_SIZE = tweak_data.gui.font_sizes.size_32
 HUDLoadingScreen.OPERATION_EVENT_TITLE_COLOR = Color("ececec")
-HUDLoadingScreen.OPERATION_INFO_TEXT_Y = 192
+HUDLoadingScreen.OPERATION_DIFFICULTY_CENTER_Y = 192
+HUDLoadingScreen.OPERATION_INFO_TEXT_Y = 256
 HUDLoadingScreen.OPERATION_INFO_TEXT_FONT = tweak_data.gui.fonts.lato
 HUDLoadingScreen.OPERATION_INFO_TEXT_FONT_SIZE = tweak_data.gui.font_sizes.medium
 HUDLoadingScreen.OPERATION_INFO_TEXT_COLOR = Color("878787")
@@ -66,7 +70,7 @@ HUDLoadingScreen.LOADING_SCREEN_TIPS = {
 	"tip_shoot_in_bleed_out"
 }
 
--- Lines 78-91
+-- Lines 84-97
 function HUDLoadingScreen:init(hud)
 	self._workspace = managers.gui_data:create_fullscreen_workspace()
 	self._hud_panel = self._workspace:panel()
@@ -98,7 +102,7 @@ function HUDLoadingScreen:init(hud)
 	self._resolution_changed_callback_id = managers.viewport:add_resolution_changed_func(callback(self, self, "on_resolution_changed"))
 end
 
--- Lines 134-144
+-- Lines 140-150
 function HUDLoadingScreen:_create_loading_icon()
 	local saferect_data = managers.gui_data:safe_scaled_size()
 	local saferect_y = (self._panel:h() - saferect_data.h) / 2
@@ -113,7 +117,7 @@ function HUDLoadingScreen:_create_loading_icon()
 	self._loading_icon = HUDSaveIcon:new(self._loading_icon_panel)
 end
 
--- Lines 146-192
+-- Lines 152-198
 function HUDLoadingScreen:setup(data)
 	self._data = data
 
@@ -169,7 +173,7 @@ function HUDLoadingScreen:setup(data)
 	end
 end
 
--- Lines 194-270
+-- Lines 200-268
 function HUDLoadingScreen:_layout_raid(current_job)
 	local info_panel_params = {
 		alpha = 0,
@@ -183,11 +187,13 @@ function HUDLoadingScreen:_layout_raid(current_job)
 	self._info_panel = self._panel:panel(info_panel_params)
 	local raid_title_panel_params = {
 		name = "raid_title_panel",
-		y = HUDLoadingScreen.INFO_TITLE_Y,
 		h = HUDLoadingScreen.INFO_TITLE_H,
 		layer = self._info_panel:layer() + 1
 	}
 	local raid_title_panel = self._info_panel:panel(raid_title_panel_params)
+
+	raid_title_panel:set_center_y(HUDLoadingScreen.RAID_INFO_TITLE_CENTER_Y)
+
 	local raid_icon_params = {
 		name = "raid_icon",
 		y = 0,
@@ -216,6 +222,18 @@ function HUDLoadingScreen:_layout_raid(current_job)
 	title:set_w(w)
 	raid_title_panel:set_w(title:x() + title:w())
 	raid_title_panel:set_center_x(self._info_panel:w() / 2)
+
+	local difficulty_params = {
+		amount = tweak_data:number_of_difficulties()
+	}
+	local difficulty_indicator = RaidGuiControlDifficultyStars:new(self._info_panel, difficulty_params)
+
+	difficulty_indicator:set_center_x(self._info_panel:w() / 2)
+	difficulty_indicator:set_center_y(HUDLoadingScreen.RAID_DIFFICULTY_CENTER_Y)
+
+	local current_difficulty = tweak_data:difficulty_to_index(Global.game_settings.difficulty)
+
+	difficulty_indicator:set_active_difficulty(current_difficulty)
 
 	local raid_description_params = {
 		name = "raid_description",
@@ -232,7 +250,7 @@ function HUDLoadingScreen:_layout_raid(current_job)
 	local description = self._info_panel:text(raid_description_params)
 end
 
--- Lines 272-336
+-- Lines 270-343
 function HUDLoadingScreen:_layout_raid_finished(current_job, success)
 	local info_panel_params = {
 		alpha = 0,
@@ -240,7 +258,7 @@ function HUDLoadingScreen:_layout_raid_finished(current_job, success)
 		x = self._panel:w() / 2 - HUDLoadingScreen.RAID_INFO_W / 2,
 		y = HUDLoadingScreen.RAID_COMPLETED_Y,
 		w = HUDLoadingScreen.RAID_INFO_W,
-		h = HUDLoadingScreen.RAID_INFO_H,
+		h = HUDLoadingScreen.RAID_COMPLETED_H,
 		layer = self._bg:layer() + 1
 	}
 	self._info_panel = self._panel:panel(info_panel_params)
@@ -279,6 +297,18 @@ function HUDLoadingScreen:_layout_raid_finished(current_job, success)
 	title:set_w(w)
 	raid_title_panel:set_w(title:x() + title:w())
 	raid_title_panel:set_center_x(self._info_panel:w() / 2)
+
+	local difficulty_params = {
+		amount = tweak_data:number_of_difficulties()
+	}
+	local difficulty_indicator = RaidGuiControlDifficultyStars:new(self._info_panel, difficulty_params)
+
+	difficulty_indicator:set_center_x(self._info_panel:w() / 2)
+	difficulty_indicator:set_center_y(HUDLoadingScreen.RAID_DIFFICULTY_CENTER_Y - 16)
+
+	local current_difficulty = tweak_data:difficulty_to_index(Global.game_settings.difficulty)
+
+	difficulty_indicator:set_active_difficulty(current_difficulty)
 
 	local mission_status_panel_params = {
 		name = "mission_status_panel",
@@ -302,7 +332,7 @@ function HUDLoadingScreen:_layout_raid_finished(current_job, success)
 	local mission_status = mission_status_panel:text(mission_status_params)
 end
 
--- Lines 338-442
+-- Lines 345-457
 function HUDLoadingScreen:_layout_operation(current_job)
 	local info_panel_params = {
 		alpha = 0,
@@ -367,6 +397,18 @@ function HUDLoadingScreen:_layout_operation(current_job)
 	title:set_w(w)
 	title:set_center_x(self._info_panel:w() / 2)
 
+	local difficulty_params = {
+		amount = tweak_data:number_of_difficulties()
+	}
+	local difficulty_indicator = RaidGuiControlDifficultyStars:new(self._info_panel, difficulty_params)
+
+	difficulty_indicator:set_center_x(self._info_panel:w() / 2)
+	difficulty_indicator:set_center_y(HUDLoadingScreen.OPERATION_DIFFICULTY_CENTER_Y)
+
+	local current_difficulty = tweak_data:difficulty_to_index(Global.game_settings.difficulty)
+
+	difficulty_indicator:set_active_difficulty(current_difficulty)
+
 	local event_description_params = {
 		name = "raid_description",
 		vertical = "top",
@@ -382,7 +424,7 @@ function HUDLoadingScreen:_layout_operation(current_job)
 	local description = self._info_panel:text(event_description_params)
 end
 
--- Lines 444-526
+-- Lines 459-550
 function HUDLoadingScreen:_layout_operation_finished(current_job, success)
 	local info_panel_params = {
 		alpha = 0,
@@ -450,6 +492,18 @@ function HUDLoadingScreen:_layout_operation_finished(current_job, success)
 	title:set_w(w)
 	title:set_center_x(self._info_panel:w() / 2)
 
+	local difficulty_params = {
+		amount = tweak_data:number_of_difficulties()
+	}
+	local difficulty_indicator = RaidGuiControlDifficultyStars:new(self._info_panel, difficulty_params)
+
+	difficulty_indicator:set_center_x(self._info_panel:w() / 2)
+	difficulty_indicator:set_center_y(HUDLoadingScreen.OPERATION_DIFFICULTY_CENTER_Y)
+
+	local current_difficulty = tweak_data:difficulty_to_index(Global.game_settings.difficulty)
+
+	difficulty_indicator:set_active_difficulty(current_difficulty)
+
 	local mission_status_panel_params = {
 		name = "mission_status_panel",
 		y = HUDLoadingScreen.OPERATION_COMPLETED_Y,
@@ -472,7 +526,7 @@ function HUDLoadingScreen:_layout_operation_finished(current_job, success)
 	local mission_status = mission_status_panel:text(mission_status_params)
 end
 
--- Lines 528-594
+-- Lines 552-618
 function HUDLoadingScreen:_layout_camp()
 	local current_job = tweak_data.operations.missions.camp
 	local info_panel_params = {
@@ -543,11 +597,11 @@ function HUDLoadingScreen:_layout_camp()
 	local tip = tip_panel:text(tip_params)
 end
 
--- Lines 596-597
+-- Lines 620-621
 function HUDLoadingScreen:_layout_default()
 end
 
--- Lines 599-604
+-- Lines 623-628
 function HUDLoadingScreen:_get_random_tip()
 	local number_of_tips = #HUDLoadingScreen.LOADING_SCREEN_TIPS
 	local chosen_tip = math.random(1, number_of_tips)
@@ -555,7 +609,7 @@ function HUDLoadingScreen:_get_random_tip()
 	return utf8.to_upper(managers.localization:text("tip_tips")) .. " " .. managers.localization:text(HUDLoadingScreen.LOADING_SCREEN_TIPS[chosen_tip])
 end
 
--- Lines 606-612
+-- Lines 630-636
 function HUDLoadingScreen:_fit_panel_to_screen()
 	self._hud_panel:set_x(0)
 	self._hud_panel:set_y(0)
@@ -564,12 +618,12 @@ function HUDLoadingScreen:_fit_panel_to_screen()
 	self._black:set_w(self._workspace:width())
 end
 
--- Lines 614-616
+-- Lines 638-640
 function HUDLoadingScreen:on_resolution_changed()
 	managers.gui_data:layout_fullscreen_16_9_workspace(self._workspace)
 end
 
--- Lines 618-666
+-- Lines 642-690
 function HUDLoadingScreen:show(data, clbk)
 	if self._state == "shown" then
 		if clbk then
@@ -582,7 +636,7 @@ function HUDLoadingScreen:show(data, clbk)
 	self:setup(data)
 
 	if managers.queued_tasks then
-		managers.queued_tasks:queue("menu_background_destruction", managers.raid_menu.clean_up_background, managers.raid_menu, nil, 0.5, nil)
+		managers.queued_tasks:queue("menu_background_destruction", managers.raid_menu.clean_up_background, managers.raid_menu, nil, 0.5, nil, true)
 	end
 
 	if self._state == "hidden" then
@@ -620,7 +674,7 @@ function HUDLoadingScreen:show(data, clbk)
 	self._state = "shown"
 end
 
--- Lines 668-686
+-- Lines 692-710
 function HUDLoadingScreen:hide()
 	if self._state == "shown" then
 		if self._info_panel then
@@ -638,7 +692,7 @@ function HUDLoadingScreen:hide()
 	self._state = "hidden"
 end
 
--- Lines 688-702
+-- Lines 712-726
 function HUDLoadingScreen:fade_to_black()
 	if self._state == "hidden" then
 		self._black:animate(callback(self, self, "_animate_alpha"), 1, 0.5, 0, self.black_alpha_full, callback(self, self, "_on_faded_to_black"))
@@ -653,7 +707,7 @@ function HUDLoadingScreen:fade_to_black()
 	self._state = "black"
 end
 
--- Lines 704-715
+-- Lines 728-739
 function HUDLoadingScreen:_on_faded_to_black()
 	if managers.hud then
 		managers.hud:on_loading_screen_faded_to_black()
@@ -669,7 +723,7 @@ function HUDLoadingScreen:_on_faded_to_black()
 	})
 end
 
--- Lines 717-756
+-- Lines 741-780
 function HUDLoadingScreen:clean_up()
 	if self._prompt then
 		self._prompt:parent():remove(self._prompt)
@@ -717,7 +771,7 @@ function HUDLoadingScreen:clean_up()
 	end
 end
 
--- Lines 758-766
+-- Lines 782-790
 function HUDLoadingScreen:_real_aspect_ratio()
 	if SystemInfo:platform() == Idstring("WIN32") then
 		return RenderSettings.aspect_ratio
@@ -729,7 +783,7 @@ function HUDLoadingScreen:_real_aspect_ratio()
 	end
 end
 
--- Lines 768-827
+-- Lines 792-851
 function HUDLoadingScreen:_animate_show_summary(summary_panel, delay)
 	summary_panel:set_visible(true)
 	summary_panel:set_alpha(1)
@@ -791,7 +845,7 @@ function HUDLoadingScreen:_animate_show_summary(summary_panel, delay)
 	self._summary_background:set_alpha(0.7)
 end
 
--- Lines 829-873
+-- Lines 853-897
 function HUDLoadingScreen:_animate_hide_summary(summary_panel, delay)
 	summary_panel:set_visible(true)
 	summary_panel:set_alpha(1)
@@ -839,7 +893,7 @@ function HUDLoadingScreen:_animate_hide_summary(summary_panel, delay)
 	self._summary_background:set_alpha(0)
 end
 
--- Lines 875-898
+-- Lines 899-922
 function HUDLoadingScreen:_animate_alpha(o, new_alpha, duration, delay, callback)
 	local t = 0
 	local starting_alpha = o:alpha()
@@ -864,7 +918,7 @@ function HUDLoadingScreen:_animate_alpha(o, new_alpha, duration, delay, callback
 	end
 end
 
--- Lines 900-915
+-- Lines 924-939
 function HUDLoadingScreen:_animate_move_background_horizontal(background)
 	local t = 0
 	local starting_x = 0
@@ -880,12 +934,12 @@ function HUDLoadingScreen:_animate_move_background_horizontal(background)
 	end
 end
 
--- Lines 917-919
+-- Lines 941-943
 function HUDLoadingScreen:_linear(t, starting_value, change, duration)
 	return change * t / duration + starting_value
 end
 
--- Lines 921-929
+-- Lines 945-953
 function HUDLoadingScreen:_ease_in_out_quart(t, starting_value, change, duration)
 	t = t / (duration / 2)
 
@@ -898,7 +952,7 @@ function HUDLoadingScreen:_ease_in_out_quart(t, starting_value, change, duration
 	return -change / 2 * (t * t * t * t - 2) + starting_value
 end
 
--- Lines 931-939
+-- Lines 955-963
 function HUDLoadingScreen:_ease_in_out_quadratic(t, starting_value, change, duration)
 	t = t / (duration / 2)
 
@@ -911,7 +965,7 @@ function HUDLoadingScreen:_ease_in_out_quadratic(t, starting_value, change, dura
 	return -change / 2 * (t * (t - 2) - 1) + starting_value
 end
 
--- Lines 941-945
+-- Lines 965-969
 function HUDLoadingScreen:_ease_out_quint(t, starting_value, change, duration)
 	t = t / duration
 	t = t - 1
@@ -919,7 +973,7 @@ function HUDLoadingScreen:_ease_out_quint(t, starting_value, change, duration)
 	return change * (t * t * t * t * t + 1) + starting_value
 end
 
--- Lines 948-952
+-- Lines 972-976
 function HUDLoadingScreen:set_mid_text(text)
 	local mid_text = self._blackscreen_panel:child("mid_text")
 
@@ -927,17 +981,17 @@ function HUDLoadingScreen:set_mid_text(text)
 	mid_text:set_text(utf8.to_upper(text))
 end
 
--- Lines 954-956
+-- Lines 978-980
 function HUDLoadingScreen:fade_in_mid_text()
 	self._blackscreen_panel:child("mid_text"):animate(callback(self, self, "_animate_fade_in"))
 end
 
--- Lines 958-960
+-- Lines 982-984
 function HUDLoadingScreen:fade_out_mid_text()
 	self._blackscreen_panel:child("mid_text"):animate(callback(self, self, "_animate_fade_out"))
 end
 
--- Lines 962-982
+-- Lines 986-1006
 function HUDLoadingScreen:_animate_fade_in(mid_text)
 	local job_panel = self._blackscreen_panel:child("job_panel")
 	local t = 1
@@ -967,7 +1021,7 @@ function HUDLoadingScreen:_animate_fade_in(mid_text)
 	self:_on_faded_to_black()
 end
 
--- Lines 984-1003
+-- Lines 1008-1027
 function HUDLoadingScreen:_animate_fade_out(mid_text)
 	local job_panel = self._blackscreen_panel:child("job_panel")
 	local t = 1

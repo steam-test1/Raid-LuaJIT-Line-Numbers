@@ -22,7 +22,7 @@ HUDTabScreen.DIFFICULTY_FONT = tweak_data.gui.fonts.din_compressed
 HUDTabScreen.DIFFICULTY_FONT_SIZE = tweak_data.gui.font_sizes.size_56
 HUDTabScreen.DIFFICULTY_Y = 0
 HUDTabScreen.DIFFICULTY_ICON_TEXT_DISTANCE = 10
-HUDTabScreen.MISSION_INFO_Y = 8
+HUDTabScreen.MISSION_INFO_Y = 0
 HUDTabScreen.MISSION_INFO_W = 640
 HUDTabScreen.MISSION_INFO_H = 64
 HUDTabScreen.MISSION_INFO_TEXT_X = 74
@@ -34,65 +34,68 @@ HUDTabScreen.LOOT_INFO_W = 416
 HUDTabScreen.LOOT_INFO_H = 96
 HUDTabScreen.LOOT_INFO_BOTTOM_OFFSET = 134
 HUDTabScreen.LOOT_INFO_FONT = tweak_data.gui.fonts.din_compressed
-HUDTabScreen.LOOT_INFO_TITLE_FONT_SIZE = tweak_data.gui.font_sizes.size_24
-HUDTabScreen.LOOT_INFO_VALUE_FONT_SIZE = tweak_data.gui.font_sizes.size_52
+HUDTabScreen.LOOT_INFO_TITLE_FONT_SIZE = tweak_data.gui.font_sizes.extra_small
+HUDTabScreen.LOOT_INFO_TITLE_COLOR = tweak_data.gui.colors.raid_grey_effects
+HUDTabScreen.LOOT_INFO_VALUE_FONT_SIZE = tweak_data.gui.font_sizes.size_32
+HUDTabScreen.LOOT_INFO_VALUE_COLOR = tweak_data.gui.colors.raid_dirty_white
 HUDTabScreen.LOOT_INFO_RIBBON_Y = 768
 HUDTabScreen.LOOT_INFO_RIBBON_ICON = "rwd_stats_bg"
 HUDTabScreen.LOOT_INFO_RIBBON_ICON_CENTER_FROM_RIGHT = 320
 HUDTabScreen.LOOT_INFO_RIBBON_CENTER_Y = 800
 HUDTabScreen.CARD_INFO_X = 0
-HUDTabScreen.CARD_INFO_Y = 103
+HUDTabScreen.CARD_INFO_Y = 128
 HUDTabScreen.CARD_INFO_W = 384
 HUDTabScreen.CARD_INFO_H = 608
 HUDTabScreen.CARD_INFO_TITLE_FONT = tweak_data.gui.fonts.din_compressed
 HUDTabScreen.CARD_INFO_TITLE_FONT_SIZE = tweak_data.gui.font_sizes.size_24
-HUDTabScreen.CARD_INFO_TITLE_COLOR = Color.white
+HUDTabScreen.CARD_INFO_TITLE_COLOR = tweak_data.gui.colors.raid_dirty_white
 HUDTabScreen.CARD_INFO_FAILED_TITLE_COLOR = tweak_data.gui.colors.raid_red
 HUDTabScreen.NO_CARD_ICON = "card_pass"
-HUDTabScreen.NO_CARD_TEXT_Y = 256
+HUDTabScreen.NO_CARD_TEXT_Y = 272
 HUDTabScreen.NO_CARD_TEXT_FONT = tweak_data.gui.fonts.lato
 HUDTabScreen.NO_CARD_TEXT_FONT_SIZE = tweak_data.gui.font_sizes.size_20
-HUDTabScreen.CARD_Y = 64
+HUDTabScreen.CARD_Y = 48
 HUDTabScreen.CARD_W = 168
 HUDTabScreen.OBJECTIVES_INFO_Y = 96
 HUDTabScreen.NEXT_CHALLENGE_QUEUE_ID = "tab_screen_show_next_challenge"
 HUDTabScreen.NEXT_CHALLENGE_DELAY = 4
 
--- Lines 85-101
+-- Lines 87-107
 function HUDTabScreen:init(fullscreen_hud, hud)
 	self:_create_background(fullscreen_hud)
 	self:_create_map(fullscreen_hud)
 	self:_create_panel(hud)
 	self:_create_mission_info()
 	self:_create_timer()
-	self:_create_difficulty()
+	self:_create_progression_timer()
 	self:_create_card_info()
 	self:_create_profile_info()
 	self:_create_weapon_challenge_info()
 	self:_create_loot_info()
+	self:_create_greed_bar()
 	self:_create_objectives_info(hud)
+	self:set_current_greed_amount(managers.greed:current_loot_counter())
 end
 
--- Lines 103-116
+-- Lines 109-121
 function HUDTabScreen:_create_background(fullscreen_hud)
 	local background_params = {
+		y = 0,
 		name = "tab_screen_background",
 		halign = "scale",
-		y = 0,
-		alpha = 0.95,
+		alpha = 0.9,
 		visible = false,
 		x = 0,
 		valign = "scale",
 		w = fullscreen_hud.panel:w(),
 		h = fullscreen_hud.panel:h(),
-		texture = tweak_data.gui.backgrounds[HUDTabScreen.BACKGROUND_IMAGE].texture,
-		texture_rect = tweak_data.gui.backgrounds[HUDTabScreen.BACKGROUND_IMAGE].texture_rect,
+		color = tweak_data.gui.colors.raid_black,
 		layer = tweak_data.gui.TAB_SCREEN_LAYER
 	}
-	self._background = fullscreen_hud.panel:bitmap(background_params)
+	self._background = fullscreen_hud.panel:rect(background_params)
 end
 
--- Lines 118-156
+-- Lines 123-161
 function HUDTabScreen:_create_background_image()
 	if self._background_image then
 		self._background_image:parent():remove(self._background_image)
@@ -136,7 +139,7 @@ function HUDTabScreen:_create_background_image()
 	self._background_image:set_center_y(fullscreen_panel:h() / 2)
 end
 
--- Lines 199-205
+-- Lines 204-210
 function HUDTabScreen:_create_map(fullscreen_hud)
 	local map_params = {
 		name = "tab_map",
@@ -145,7 +148,7 @@ function HUDTabScreen:_create_map(fullscreen_hud)
 	self._map = HUDMapTab:new(fullscreen_hud.panel, map_params)
 end
 
--- Lines 207-217
+-- Lines 212-222
 function HUDTabScreen:_create_panel(hud)
 	local panel_params = {
 		y = 0,
@@ -161,7 +164,7 @@ function HUDTabScreen:_create_panel(hud)
 	self._object = hud.panel:panel(panel_params)
 end
 
--- Lines 219-310
+-- Lines 224-316
 function HUDTabScreen:_create_card_info()
 	local card_info_panel_params = {
 		halign = "left",
@@ -221,6 +224,7 @@ function HUDTabScreen:_create_card_info()
 		h = self._empty_card_panel:h() - HUDTabScreen.NO_CARD_TEXT_Y - HUDTabScreen.CARD_Y,
 		font = tweak_data.gui:get_font_path(HUDTabScreen.NO_CARD_TEXT_FONT, HUDTabScreen.NO_CARD_TEXT_FONT_SIZE),
 		font_size = HUDTabScreen.NO_CARD_TEXT_FONT_SIZE,
+		color = HUDTabScreen.CARD_INFO_TITLE_COLOR,
 		text = managers.localization:text("hud_no_challenge_card_text")
 	}
 	local empty_card_text = self._empty_card_panel:text(empty_card_text_params)
@@ -262,7 +266,7 @@ function HUDTabScreen:_create_card_info()
 	self._active_card = HUDCardDetails:new(self._active_card_panel, active_card_params)
 end
 
--- Lines 312-427
+-- Lines 318-433
 function HUDTabScreen:_create_profile_info()
 	local profile_info_panel_params = {
 		halign = "left",
@@ -379,14 +383,14 @@ function HUDTabScreen:_create_profile_info()
 	level_text:set_center_x(self._profile_info_panel:w() - HUDTabScreen.PROFILE_LEVEL_RIGHT_OFFSET)
 end
 
--- Lines 429-432
+-- Lines 435-438
 function HUDTabScreen:_create_weapon_challenge_info()
 	self._weapon_challenge_info = HUDTabWeaponChallenge:new(self._object)
 
-	self._weapon_challenge_info:set_bottom(878)
+	self._weapon_challenge_info:set_bottom(926)
 end
 
--- Lines 435-468
+-- Lines 441-475
 function HUDTabScreen:_create_timer()
 	local timer_panel_params = {
 		halign = "right",
@@ -399,15 +403,16 @@ function HUDTabScreen:_create_timer()
 	self._timer_panel:set_right(self._object:w())
 
 	local timer_params = {
-		vertical = "top",
 		name = "timer",
+		vertical = "top",
 		align = "right",
 		text = "00:00",
 		y = HUDTabScreen.TIMER_Y,
 		w = HUDTabScreen.TIMER_W,
 		h = HUDTabScreen.TIMER_H,
 		font = tweak_data.gui:get_font_path(HUDTabScreen.TIMER_FONT, HUDTabScreen.TIMER_FONT_SIZE),
-		font_size = HUDTabScreen.TIMER_FONT_SIZE
+		font_size = HUDTabScreen.TIMER_FONT_SIZE,
+		color = tweak_data.gui.colors.raid_dirty_white
 	}
 	self._timer = self._timer_panel:text(timer_params)
 
@@ -429,44 +434,92 @@ function HUDTabScreen:_create_timer()
 	self:set_time(0)
 end
 
--- Lines 470-503
-function HUDTabScreen:_create_difficulty()
-	local difficulty_panel_params = {
+-- Lines 477-550
+function HUDTabScreen:_create_progression_timer()
+	local progression_timer_panel_params = {
 		halign = "right",
-		name = "difficulty_panel",
-		valign = "top",
-		h = HUDTabScreen.DIFFICULTY_H
+		name = "progression_timer_panel",
+		h = 64,
+		valign = "top"
 	}
-	self._difficulty_panel = self._object:panel(difficulty_panel_params)
-	local difficulty = Global.game_settings.difficulty or Global.DEFAULT_DIFFICULTY
-	local difficulty_params = {
-		name = "difficulty",
-		align = "right",
-		vertical = "top",
-		y = HUDTabScreen.DIFFICULTY_Y,
-		h = HUDTabScreen.DIFFICULTY_H,
-		font = tweak_data.gui:get_font_path(HUDTabScreen.DIFFICULTY_FONT, HUDTabScreen.DIFFICULTY_FONT_SIZE),
-		font_size = HUDTabScreen.DIFFICULTY_FONT_SIZE,
-		text = utf8.to_upper(managers.localization:text("menu_" .. difficulty))
+	self._progression_timer_panel = self._object:panel(progression_timer_panel_params)
+
+	self._progression_timer_panel:set_right(self._timer_panel:x())
+
+	local separator_params = {
+		w = 2,
+		h = 52,
+		halign = "right",
+		valign = "center",
+		color = tweak_data.gui.colors.raid_dark_grey
 	}
-	self._difficulty = self._difficulty_panel:text(difficulty_params)
+	local separator = self._progression_timer_panel:rect(separator_params)
 
-	self._difficulty:set_right(self._difficulty_panel:w())
+	separator:set_center_x(self._progression_timer_panel:w() - 48)
+	separator:set_center_y(self._progression_timer_panel:h() / 2)
 
-	local difficulty_icon_params = {
-		name = "difficulty_icon",
+	local content_panel_params = {
+		halign = "left",
+		name = "progression_timer_content_panel",
+		x = 30,
+		valign = "center"
+	}
+	self._progression_timer_content_panel = self._progression_timer_panel:panel(content_panel_params)
+	local progression_timer_icon_params = {
+		name = "progression_timer_icon",
 		valign = "center",
 		halign = "left",
-		texture = tweak_data.gui.icons[difficulty].texture,
-		texture_rect = tweak_data.gui.icons[difficulty].texture_rect
+		texture = tweak_data.gui.icons.missions_raids_category_menu.texture,
+		texture_rect = tweak_data.gui.icons.missions_raids_category_menu.texture_rect,
+		color = tweak_data.gui.colors.raid_dirty_white
 	}
-	local difficulty_icon = self._difficulty_panel:bitmap(difficulty_icon_params)
+	local progression_timer_icon = self._progression_timer_content_panel:bitmap(progression_timer_icon_params)
 
-	difficulty_icon:set_center_y(self._difficulty_panel:h() / 2)
-	self:set_difficulty(difficulty)
+	progression_timer_icon:set_center_y(self._progression_timer_content_panel:h() / 2)
+
+	local is_final_unlock_cycle = managers.progression:at_final_unlock_cycle()
+	local timer_title_params = {
+		name = "progression_timer_title",
+		vertical = "center",
+		h = 32,
+		halign = "left",
+		x = 70,
+		font = tweak_data.gui:get_font_path(tweak_data.gui.fonts.din_compressed, tweak_data.gui.font_sizes.small),
+		font_size = tweak_data.gui.font_sizes.small,
+		color = tweak_data.gui.colors.raid_dirty_white,
+		text = utf8.to_upper(managers.localization:text(is_final_unlock_cycle and "raid_final_raids_in_title" or "raid_next_raid_in_title"))
+	}
+	local timer_title = self._progression_timer_content_panel:text(timer_title_params)
+	local timer_description_params = {
+		name = "progression_timer_description",
+		vertical = "center",
+		h = 32,
+		halign = "left",
+		x = 70,
+		font = tweak_data.gui:get_font_path(tweak_data.gui.fonts.din_compressed, tweak_data.gui.font_sizes.size_20),
+		font_size = tweak_data.gui.font_sizes.size_20,
+		color = tweak_data.gui.colors.raid_grey_effects,
+		text = utf8.to_upper(managers.localization:text(is_final_unlock_cycle and "raid_final_raids_in_description" or "raid_next_raid_in_description"))
+	}
+	local timer_description = self._progression_timer_content_panel:text(timer_description_params)
+
+	timer_description:set_bottom(self._progression_timer_content_panel:h())
+
+	local timer_params = {
+		name = "progression_timer_timer",
+		vertical = "center",
+		h = 32,
+		text = "",
+		horizontal = "right",
+		halign = "right",
+		font = tweak_data.gui:get_font_path(tweak_data.gui.fonts.din_compressed, tweak_data.gui.font_sizes.small),
+		font_size = tweak_data.gui.font_sizes.small,
+		color = tweak_data.gui.colors.raid_dirty_white
+	}
+	local timer = self._progression_timer_content_panel:text(timer_params)
 end
 
--- Lines 505-540
+-- Lines 552-612
 function HUDTabScreen:_create_mission_info()
 	local mission_info_panel_params = {
 		name = "mission_info_panel",
@@ -475,7 +528,7 @@ function HUDTabScreen:_create_mission_info()
 		h = HUDTabScreen.MISSION_INFO_H
 	}
 	self._mission_info_panel = self._object:panel(mission_info_panel_params)
-	local temp_mission = "flakturm"
+	local temp_mission = "clear_skies"
 	local temp_mission_icon = tweak_data.operations:mission_data(temp_mission).icon_menu
 	local temp_mission_name = tweak_data.operations:mission_data(temp_mission).name_id
 	local mission_icon_params = {
@@ -503,101 +556,131 @@ function HUDTabScreen:_create_mission_info()
 		text = utf8.to_upper(managers.localization:text(temp_mission_name))
 	}
 	local mission_name_text = self._mission_info_panel:text(mission_name_params)
+	local mission_name_small_params = {
+		name = "mission_name_small",
+		h = 32,
+		vertical = "center",
+		align = "left",
+		visible = false,
+		y = 0,
+		x = HUDTabScreen.MISSION_INFO_TEXT_X,
+		w = self._mission_info_panel:w() - HUDTabScreen.MISSION_INFO_TEXT_X,
+		font = tweak_data.gui:get_font_path(HUDTabScreen.MISSION_INFO_TEXT_FONT, tweak_data.gui.font_sizes.small),
+		font_size = tweak_data.gui.font_sizes.small,
+		color = HUDTabScreen.MISSION_INFO_TEXT_COLOR,
+		text = utf8.to_upper(managers.localization:text(temp_mission_name))
+	}
+	local mission_name_small_text = self._mission_info_panel:text(mission_name_small_params)
+	local difficulty_params = {
+		name = "mission_difficulty",
+		amount = tweak_data:number_of_difficulties()
+	}
+	self._difficulty_indicator = RaidGuiControlDifficultyStars:new(self._mission_info_panel, difficulty_params)
+
+	self._difficulty_indicator:set_x(mission_name_small_text:x())
+	self._difficulty_indicator:set_center_y(48)
+
+	local current_difficulty = tweak_data:difficulty_to_index(Global.game_settings.difficulty)
+
+	self._difficulty_indicator:set_active_difficulty(current_difficulty)
 end
 
--- Lines 542-626
+-- Lines 614-754
 function HUDTabScreen:_create_loot_info()
-	local fullscreen_panel = self._background:parent()
-	local loot_info_panel_params = {
+	local loot_panel_params = {
+		valing = "bottom",
 		name = "loot_info_panel",
+		h = 96,
 		halign = "right",
+		w = 416,
 		visible = false,
-		valign = "bottom",
-		w = tweak_data.gui:icon_w(HUDTabScreen.LOOT_INFO_RIBBON_ICON),
-		h = tweak_data.gui:icon_h(HUDTabScreen.LOOT_INFO_RIBBON_ICON),
 		layer = tweak_data.gui.TAB_SCREEN_LAYER + 10
 	}
-	self._loot_info_panel = fullscreen_panel:panel(loot_info_panel_params)
+	self._loot_info_panel = self._object:panel(loot_panel_params)
 
-	self._loot_info_panel:set_right(fullscreen_panel:w())
-	self._loot_info_panel:set_bottom(fullscreen_panel:h() - HUDTabScreen.LOOT_INFO_BOTTOM_OFFSET)
+	self._loot_info_panel:set_right(self._object:w())
+	self._loot_info_panel:set_bottom(self._object:h())
 
-	local loot_ribbon_params = {
-		name = "loot_ribbon",
-		texture = tweak_data.gui.icons[HUDTabScreen.LOOT_INFO_RIBBON_ICON].texture,
-		texture_rect = tweak_data.gui.icons[HUDTabScreen.LOOT_INFO_RIBBON_ICON].texture_rect
+	local dog_tag_panel_params = {
+		visible = false,
+		name = "dog_tag_panel",
+		h = 96,
+		halign = "left",
+		w = 224,
+		valign = "bottom"
 	}
-	local loot_ribbon = self._loot_info_panel:bitmap(loot_ribbon_params)
-	local total_loot_panel_params = {
-		halign = "right",
-		name = "total_loot_panel",
-		h = 128,
-		valign = "center"
+	self._dog_tag_panel = self._loot_info_panel:panel(dog_tag_panel_params)
+	local dog_tag_icon_params = {
+		name = "dog_tag_icon",
+		texture = tweak_data.gui.icons.rewards_dog_tags_small.texture,
+		texture_rect = tweak_data.gui.icons.rewards_dog_tags_small.texture_rect
 	}
-	local total_loot_panel = self._loot_info_panel:panel(total_loot_panel_params)
+	local dog_tag_icon = self._dog_tag_panel:bitmap(dog_tag_icon_params)
 
-	total_loot_panel:set_center_y(self._loot_info_panel:h() / 2)
+	dog_tag_icon:set_center_x(48)
+	dog_tag_icon:set_center_y(self._dog_tag_panel:h() / 2)
 
-	local total_loot_params = {
-		text = "0000",
+	local dog_tag_amount_params = {
 		vertical = "center",
-		name = "total_loot",
+		h = 64,
+		name = "dog_tag_amount",
+		w = 160,
 		align = "center",
-		layer = 1,
+		text = "0 / 0",
 		font = tweak_data.gui:get_font_path(HUDTabScreen.LOOT_INFO_FONT, HUDTabScreen.LOOT_INFO_VALUE_FONT_SIZE),
-		font_size = HUDTabScreen.LOOT_INFO_VALUE_FONT_SIZE
+		font_size = HUDTabScreen.LOOT_INFO_VALUE_FONT_SIZE,
+		color = HUDTabScreen.LOOT_INFO_VALUE_COLOR
 	}
-	self._total_loot = total_loot_panel:text(total_loot_params)
-	local total_loot_title_params = {
+	self._dog_tag_amount = self._dog_tag_panel:text(dog_tag_amount_params)
+
+	self._dog_tag_amount:set_center_x(144)
+	self._dog_tag_amount:set_center_y(32)
+
+	local dog_tag_title_params = {
 		vertical = "center",
-		name = "total_loot_title",
+		h = 32,
+		name = "dog_tag_title",
+		w = 128,
 		align = "center",
-		layer = 1,
 		font = tweak_data.gui:get_font_path(HUDTabScreen.LOOT_INFO_FONT, HUDTabScreen.LOOT_INFO_TITLE_FONT_SIZE),
 		font_size = HUDTabScreen.LOOT_INFO_TITLE_FONT_SIZE,
-		text = utf8.to_upper(managers.localization:text("menu_loot_screen_total_loot"))
+		color = HUDTabScreen.LOOT_INFO_TITLE_COLOR,
+		text = utf8.to_upper(managers.localization:text("hud_dog_tags"))
 	}
-	local total_loot_title = total_loot_panel:text(total_loot_title_params)
-	local acquired_loot_panel_params = {
-		halign = "right",
-		name = "acquired_loot_panel",
-		h = 128,
-		valign = "center"
-	}
-	local acquired_loot_panel = self._loot_info_panel:panel(acquired_loot_panel_params)
+	local dog_tag_title = self._dog_tag_panel:text(dog_tag_title_params)
 
-	acquired_loot_panel:set_center_y(self._loot_info_panel:h() / 2)
+	dog_tag_title:set_center_x(144)
+	dog_tag_title:set_center_y(64)
 
-	local acquired_loot_params = {
-		text = "0000",
-		vertical = "center",
-		name = "acquired_loot",
-		align = "center",
-		layer = 1,
-		font = tweak_data.gui:get_font_path(HUDTabScreen.LOOT_INFO_FONT, HUDTabScreen.LOOT_INFO_VALUE_FONT_SIZE),
-		font_size = HUDTabScreen.LOOT_INFO_VALUE_FONT_SIZE
-	}
-	self._acquired_loot = acquired_loot_panel:text(acquired_loot_params)
-
-	self._acquired_loot:set_center_y(48)
-
-	local acquired_loot_title_params = {
-		vertical = "center",
-		name = "acquired_loot_title",
-		align = "center",
-		layer = 1,
-		font = tweak_data.gui:get_font_path(HUDTabScreen.LOOT_INFO_FONT, HUDTabScreen.LOOT_INFO_TITLE_FONT_SIZE),
-		font_size = HUDTabScreen.LOOT_INFO_TITLE_FONT_SIZE,
-		text = utf8.to_upper(managers.localization:text("menu_loot_screen_acquired_loot"))
-	}
-	local acquired_loot_title = acquired_loot_panel:text(acquired_loot_title_params)
 	self._loot_picked_up = 0
 	self._loot_total = 0
 
 	self:_refresh_loot_info()
 end
 
--- Lines 628-632
+-- Lines 756-759
+function HUDTabScreen:_create_greed_bar()
+	self._greed_bar = HUDTabGreedBar:new(self._loot_info_panel, {})
+
+	self._greed_bar:set_right(self._loot_info_panel:w())
+end
+
+-- Lines 761-763
+function HUDTabScreen:on_greed_loot_picked_up(old_progress, new_progress)
+	self._greed_bar:change_progress(old_progress, new_progress)
+end
+
+-- Lines 765-767
+function HUDTabScreen:set_current_greed_amount(amount)
+	self._greed_bar:set_current_greed_amount(amount)
+end
+
+-- Lines 769-771
+function HUDTabScreen:reset_greed_indicator()
+	self._greed_bar:reset_state()
+end
+
+-- Lines 773-777
 function HUDTabScreen:_create_objectives_info(hud)
 	self._objectives = HUDObjectivesTab:new(self._object)
 
@@ -605,18 +688,32 @@ function HUDTabScreen:_create_objectives_info(hud)
 	self._objectives:set_y(HUDTabScreen.OBJECTIVES_INFO_Y)
 end
 
--- Lines 634-636
+-- Lines 779-781
 function HUDTabScreen:get_objectives_control()
 	return self._objectives
 end
 
--- Lines 638-670
+-- Lines 783-840
 function HUDTabScreen:_refresh_mission_info()
 	local mission_icon, mission_name = nil
+	local control_mission_name = self._mission_info_panel:child("mission_name")
+	local control_mission_name_small = self._mission_info_panel:child("mission_name_small")
 
 	if managers.raid_job:is_camp_loaded() then
 		mission_icon = tweak_data.operations.missions.camp.icon_hud
 		mission_name = tweak_data.operations.missions.camp.name_id
+
+		control_mission_name_small:set_text(utf8.to_upper(managers.localization:text(mission_name)))
+
+		local current_difficulty = tweak_data:difficulty_to_index(Global.game_settings.difficulty)
+
+		self._difficulty_indicator:set_active_difficulty(current_difficulty)
+
+		self._current_difficulty = current_difficulty
+
+		control_mission_name:set_visible(false)
+		control_mission_name_small:set_visible(true)
+		self._difficulty_indicator:set_visible(true)
 	else
 		local current_job = managers.raid_job:current_job()
 
@@ -630,22 +727,33 @@ function HUDTabScreen:_refresh_mission_info()
 
 		if current_job.job_type == OperationsTweakData.JOB_TYPE_RAID or current_job.job_type == OperationsTweakData.JOB_TYPE_OPERATION and managers.raid_job:is_camp_loaded() then
 			mission_icon = current_job.icon_menu
-			mission_name = current_job.name_id
+			mission_name = utf8.to_upper(managers.localization:text(current_job.name_id))
 		elseif current_job.job_type == OperationsTweakData.JOB_TYPE_OPERATION and not managers.raid_job:is_camp_loaded() then
 			local current_event_id = current_job.events_index[current_job.current_event]
 			local current_event_data = current_job.events[current_event_id]
 			mission_icon = current_event_data.icon_menu
-			mission_name = current_event_data.name_id
+			mission_name = utf8.to_upper(managers.localization:text(current_job.name_id)) .. " " .. tostring(current_job.current_event) .. "/" .. tostring(#current_job.events_index) .. ": " .. utf8.to_upper(managers.localization:text(current_event_data.name_id))
 		end
+
+		control_mission_name_small:set_text(mission_name)
+
+		local current_difficulty = tweak_data:difficulty_to_index(Global.game_settings.difficulty)
+
+		self._difficulty_indicator:set_active_difficulty(current_difficulty)
+
+		self._current_difficulty = current_difficulty
+
+		control_mission_name:set_visible(false)
+		control_mission_name_small:set_visible(true)
+		self._difficulty_indicator:set_visible(true)
 	end
 
 	self._mission_info_panel:set_visible(true)
 	self._mission_info_panel:child("mission_icon"):set_image(tweak_data.gui.icons[mission_icon].texture)
 	self._mission_info_panel:child("mission_icon"):set_texture_rect(unpack(tweak_data.gui.icons[mission_icon].texture_rect))
-	self._mission_info_panel:child("mission_name"):set_text(utf8.to_upper(managers.localization:text(mission_name)))
 end
 
--- Lines 672-688
+-- Lines 842-858
 function HUDTabScreen:_refresh_profile_info()
 	local profile_name = managers.network:session():local_peer():name()
 
@@ -675,12 +783,14 @@ function HUDTabScreen:_refresh_profile_info()
 	})
 end
 
--- Lines 690-709
+-- Lines 860-883
 function HUDTabScreen:_refresh_loot_info()
 	local current_job = managers.raid_job:current_job()
 
+	self._loot_info_panel:set_visible(true)
+
 	if not current_job then
-		self._loot_info_panel:set_visible(false)
+		self._dog_tag_panel:set_visible(false)
 
 		return
 	end
@@ -688,87 +798,28 @@ function HUDTabScreen:_refresh_loot_info()
 	self._loot_picked_up = managers.lootdrop:picked_up_current_leg()
 	self._loot_total = managers.lootdrop:loot_spawned_current_leg()
 
-	self._acquired_loot:set_text(self._loot_picked_up)
-	self._total_loot:set_text(self._loot_total)
-	self:_fit_loot_info()
+	self._dog_tag_amount:set_text(tostring(self._loot_picked_up) .. " / " .. tostring(self._loot_total))
 
 	if self._shown == true then
-		self._loot_info_panel:set_visible(true)
+		self._dog_tag_panel:set_visible(true)
 	end
 end
 
--- Lines 711-763
-function HUDTabScreen:_fit_loot_info()
-	local total_loot_panel = self._loot_info_panel:child("total_loot_panel")
-	local total_loot_title = total_loot_panel:child("total_loot_title")
-	local _, _, w, h = self._total_loot:text_rect()
-
-	self._total_loot:set_w(w)
-	self._total_loot:set_h(h)
-
-	local _, _, w, h = total_loot_title:text_rect()
-
-	total_loot_title:set_w(w)
-	total_loot_title:set_h(h)
-
-	local total_loot_panel_w = 0
-
-	if total_loot_title:w() < self._total_loot:w() then
-		total_loot_panel_w = self._total_loot:w()
-	else
-		total_loot_panel_w = total_loot_title:w()
-	end
-
-	total_loot_panel:set_w(total_loot_panel_w)
-	self._total_loot:set_center_x(total_loot_panel:w() / 2)
-	self._total_loot:set_center_y(48)
-	total_loot_title:set_center_x(total_loot_panel:w() / 2)
-	total_loot_title:set_center_y(96)
-
-	local acquired_loot_panel = self._loot_info_panel:child("acquired_loot_panel")
-	local acquired_loot_title = acquired_loot_panel:child("acquired_loot_title")
-	local _, _, w, h = self._acquired_loot:text_rect()
-
-	self._acquired_loot:set_w(w)
-	self._acquired_loot:set_h(h)
-
-	local _, _, w, h = acquired_loot_title:text_rect()
-
-	acquired_loot_title:set_w(w)
-	acquired_loot_title:set_h(h)
-
-	local acquired_loot_panel_w = 0
-
-	if acquired_loot_title:w() < self._acquired_loot:w() then
-		acquired_loot_panel_w = self._acquired_loot:w()
-	else
-		acquired_loot_panel_w = acquired_loot_title:w()
-	end
-
-	acquired_loot_panel:set_w(acquired_loot_panel_w)
-	self._acquired_loot:set_center_x(acquired_loot_panel:w() / 2)
-	self._acquired_loot:set_center_y(48)
-	acquired_loot_title:set_center_x(acquired_loot_panel:w() / 2)
-	acquired_loot_title:set_center_y(96)
-	total_loot_panel:set_right(self._loot_info_panel:w() - 96)
-	acquired_loot_panel:set_right(total_loot_panel:x() - 32)
-end
-
--- Lines 765-768
+-- Lines 939-942
 function HUDTabScreen:set_loot_picked_up(amount)
 	self._loot_picked_up = amount
 
 	self:_refresh_loot_info()
 end
 
--- Lines 770-773
+-- Lines 944-947
 function HUDTabScreen:set_loot_total(amount)
 	self._loot_total = amount
 
 	self:_refresh_loot_info()
 end
 
--- Lines 775-802
+-- Lines 949-972
 function HUDTabScreen:set_time(time)
 	if math.floor(time) < self._last_set_time then
 		return
@@ -792,35 +843,9 @@ function HUDTabScreen:set_time(time)
 	self._timer_panel:set_right(self._object:w())
 	self._timer:set_w(w)
 	self._timer:set_right(self._timer_panel:w())
-
-	if self._difficulty_panel then
-		self._difficulty_panel:set_right(self._timer_panel:x() - HUDTabScreen.TIMER_PADDING_LEFT)
-	end
 end
 
--- Lines 804-820
-function HUDTabScreen:set_difficulty(difficulty)
-	if difficulty == self._current_difficulty then
-		return
-	end
-
-	self._difficulty:set_text(utf8.to_upper(managers.localization:text("menu_" .. difficulty)))
-
-	local image = tweak_data.gui.icons[difficulty]
-
-	self._difficulty_panel:child("difficulty_icon"):set_image(image.texture, unpack(image.texture_rect))
-
-	local _, _, w, _ = self._difficulty:text_rect()
-
-	self._difficulty_panel:set_w(w + HUDTabScreen.DIFFICULTY_ICON_TEXT_DISTANCE + self._difficulty_panel:child("difficulty_icon"):w())
-	self._difficulty_panel:set_right(self._timer_panel:x() - HUDTabScreen.TIMER_PADDING_LEFT)
-	self._difficulty:set_w(w)
-	self._difficulty:set_right(self._difficulty_panel:w())
-
-	self._current_difficulty = difficulty
-end
-
--- Lines 822-842
+-- Lines 974-994
 function HUDTabScreen:_refresh_card_info()
 	local active_card = managers.challenge_cards:get_active_card()
 
@@ -844,7 +869,7 @@ function HUDTabScreen:_refresh_card_info()
 	end
 end
 
--- Lines 844-871
+-- Lines 996-1023
 function HUDTabScreen:_refresh_weapon_challenge_info()
 	if not managers.player:player_unit() then
 		self._weapon_challenge_info:hide()
@@ -877,7 +902,7 @@ function HUDTabScreen:_refresh_weapon_challenge_info()
 	self._profile_info_panel:set_visible(true)
 end
 
--- Lines 873-881
+-- Lines 1025-1033
 function HUDTabScreen:show_next_weapon_challenge(dont_animate, next_delay)
 	self._currently_displayed_weapon_challenge = self._currently_displayed_weapon_challenge % #self._active_weapon_challenges + 1
 
@@ -888,8 +913,16 @@ function HUDTabScreen:show_next_weapon_challenge(dont_animate, next_delay)
 	end
 end
 
--- Lines 883-907
+-- Lines 1035-1065
 function HUDTabScreen:show()
+	self._progression_timer_shown = not managers.progression:mission_progression_completed() and managers.raid_job:played_tutorial()
+
+	self._progression_timer_panel:set_visible(self._progression_timer_shown)
+
+	if self._progression_timer_shown and not self._animating_cycle_completed then
+		self:_layout_progression()
+	end
+
 	managers.hud:add_updator("tab", callback(self, self, "update"))
 
 	self._shown = true
@@ -899,7 +932,6 @@ function HUDTabScreen:show()
 	self:_refresh_loot_info()
 	self:_refresh_card_info()
 	self:_refresh_weapon_challenge_info()
-	self:set_difficulty(Global.game_settings.difficulty)
 
 	local current_level = self:_get_current_player_level()
 
@@ -915,12 +947,95 @@ function HUDTabScreen:show()
 	end
 end
 
--- Lines 909-911
-function HUDTabScreen:update()
-	self._loot_info_panel:set_bottom(self._background:parent():h() - HUDTabScreen.LOOT_INFO_BOTTOM_OFFSET)
+-- Lines 1067-1120
+function HUDTabScreen:_layout_progression()
+	local is_final_unlock_cycle = managers.progression:at_final_unlock_cycle()
+	local cycle_completed = managers.progression:have_pending_missions_to_unlock()
+	local progression_completion_pending = managers.progression:mission_progression_completion_pending()
+	local timer_control = self._progression_timer_content_panel:child("progression_timer_timer")
+	local title_color = tweak_data.gui.colors.raid_dirty_white
+
+	if not cycle_completed and not progression_completion_pending then
+		self:_set_progress_timer_value()
+		timer_control:set_visible(true)
+	else
+		timer_control:set_w(0)
+		timer_control:set_visible(false)
+
+		title_color = HUDTabScreen.MISSION_INFO_TEXT_COLOR
+	end
+
+	local title_text = "raid_next_raid_in_title"
+	local description_text = "raid_next_raid_in_description"
+	local timer_title = self._progression_timer_content_panel:child("progression_timer_title")
+	local timer_description = self._progression_timer_content_panel:child("progression_timer_description")
+
+	if is_final_unlock_cycle then
+		if progression_completion_pending then
+			title_text = "raid_final_unlocked_title"
+			description_text = "raid_next_unlocked_description"
+		else
+			title_text = "raid_final_raids_in_title"
+			description_text = "raid_final_raids_in_description"
+		end
+	elseif cycle_completed then
+		title_text = "raid_next_unlocked_title"
+		description_text = "raid_next_unlocked_description"
+	end
+
+	timer_title:set_text(utf8.to_upper(managers.localization:text(title_text)))
+	timer_title:set_color(title_color)
+
+	local _, _, w, _ = timer_title:text_rect()
+
+	timer_title:set_w(w)
+	timer_description:set_text(utf8.to_upper(managers.localization:text(description_text)))
+
+	local _, _, w, _ = timer_description:text_rect()
+
+	timer_description:set_w(w)
+
+	local content_panel_w = timer_title:x() + math.max(timer_title:w() + timer_control:w() + 64, timer_description:w())
+
+	self._progression_timer_content_panel:set_w(content_panel_w)
+	self._progression_timer_panel:set_w(self._progression_timer_content_panel:w() + 126)
+
+	if is_final_unlock_cycle or cycle_completed then
+		self._progression_timer_panel:set_right(self._timer_panel:x())
+	end
 end
 
--- Lines 913-931
+-- Lines 1122-1142
+function HUDTabScreen:_set_progress_timer_value()
+	local timer_control = self._progression_timer_content_panel:child("progression_timer_timer")
+	local remaining_time = math.floor(managers.progression:time_until_next_unlock())
+	local hours = math.floor(remaining_time / 3600)
+	remaining_time = remaining_time - hours * 3600
+	local minutes = math.floor(remaining_time / 60)
+	remaining_time = remaining_time - minutes * 60
+	local seconds = math.round(remaining_time)
+	local text = hours > 0 and string.format("%02d", hours) .. ":" or ""
+	local text = text .. string.format("%02d", minutes) .. ":" .. string.format("%02d", seconds)
+
+	timer_control:set_text(text)
+
+	local _, _, w, _ = timer_control:text_rect()
+
+	timer_control:set_w(w)
+	timer_control:set_right(self._progression_timer_content_panel:w())
+	self._progression_timer_panel:set_right(self._timer_panel:x())
+end
+
+-- Lines 1144-1150
+function HUDTabScreen:update()
+	self._loot_info_panel:set_bottom(self._background:parent():h() - HUDTabScreen.LOOT_INFO_BOTTOM_OFFSET)
+
+	if self._progression_timer_shown and not managers.progression:have_pending_missions_to_unlock() then
+		self:_set_progress_timer_value()
+	end
+end
+
+-- Lines 1152-1170
 function HUDTabScreen:hide()
 	managers.hud:remove_updator("tab")
 
@@ -937,37 +1052,37 @@ function HUDTabScreen:hide()
 	end
 end
 
--- Lines 933-935
+-- Lines 1172-1174
 function HUDTabScreen:refresh_peers()
 	self._map:refresh_peers()
 end
 
--- Lines 937-939
+-- Lines 1176-1178
 function HUDTabScreen:add_waypoint(waypoint_data)
 	self._map:add_waypoint(waypoint_data)
 end
 
--- Lines 941-943
+-- Lines 1180-1182
 function HUDTabScreen:remove_waypoint(id)
 	self._map:remove_waypoint(id)
 end
 
--- Lines 945-947
+-- Lines 1184-1186
 function HUDTabScreen:peer_enter_vehicle(peer_id)
 	self._map:peer_enter_vehicle(peer_id)
 end
 
--- Lines 949-951
+-- Lines 1188-1190
 function HUDTabScreen:peer_exit_vehicle(peer_id)
 	self._map:peer_exit_vehicle(peer_id)
 end
 
--- Lines 954-956
+-- Lines 1193-1195
 function HUDTabScreen:is_shown()
 	return self._object:visible()
 end
 
--- Lines 958-966
+-- Lines 1197-1205
 function HUDTabScreen:_current_level_has_map()
 	local player_world = self:_get_current_player_level()
 
@@ -978,7 +1093,7 @@ function HUDTabScreen:_current_level_has_map()
 	return false
 end
 
--- Lines 968-991
+-- Lines 1207-1230
 function HUDTabScreen:_get_current_player_level()
 	local current_job = managers.raid_job:current_job()
 
@@ -996,4 +1111,53 @@ function HUDTabScreen:_get_current_player_level()
 	end
 
 	return nil
+end
+
+-- Lines 1233-1236
+function HUDTabScreen:on_progression_cycle_completed()
+	self._progression_timer_content_panel:stop()
+	self._progression_timer_content_panel:animate(callback(self, self, "animate_progression_cycle_completed"))
+end
+
+-- Lines 1238-1275
+function HUDTabScreen:animate_progression_cycle_completed()
+	self._animating_cycle_completed = true
+	local fade_out_duration = 0.35
+	local t = (1 - self._progression_timer_content_panel:alpha()) * fade_out_duration
+
+	while fade_out_duration > t do
+		local dt = coroutine.yield()
+		t = t + dt
+		local current_alpha = Easing.quartic_in(t, 1, -1, fade_out_duration)
+
+		self._progression_timer_content_panel:set_alpha(current_alpha)
+
+		local current_x = Easing.quartic_in(t, 30, -30, fade_out_duration)
+
+		self._progression_timer_content_panel:set_x(current_x)
+	end
+
+	self._progression_timer_content_panel:set_alpha(0)
+	self._progression_timer_content_panel:set_x(0)
+	self:_layout_progression()
+
+	local fade_in_duration = 0.35
+	t = 0
+
+	while fade_in_duration > t do
+		local dt = coroutine.yield()
+		t = t + dt
+		local current_alpha = Easing.quartic_out(t, 0, 1, fade_in_duration)
+
+		self._progression_timer_content_panel:set_alpha(current_alpha)
+
+		local current_x = Easing.quartic_out(t, 0, 30, fade_in_duration)
+
+		self._progression_timer_content_panel:set_x(current_x)
+	end
+
+	self._progression_timer_content_panel:set_alpha(1)
+	self._progression_timer_content_panel:set_x(30)
+
+	self._animating_cycle_completed = false
 end

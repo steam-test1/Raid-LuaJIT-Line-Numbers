@@ -63,7 +63,18 @@ function WarcryBerserk:duration()
 	return self._tweak_data.base_duration * managers.player:upgrade_value("player", "warcry_duration", 1)
 end
 
--- Lines 63-72
+-- Lines 63-70
+function WarcryBerserk:get_level_description(level)
+	level = math.clamp(level, 1, #self._tweak_data.buffs)
+
+	if level >= 2 then
+		return managers.localization:text("skill_warcry_berserk_level_" .. tostring(level) .. "_desc")
+	end
+
+	return "warcry_berserk_desc"
+end
+
+-- Lines 72-81
 function WarcryBerserk:check_ammo_consumption()
 	self._ammo_consumption_counter = self._ammo_consumption_counter - 1
 
@@ -76,7 +87,7 @@ function WarcryBerserk:check_ammo_consumption()
 	return false
 end
 
--- Lines 74-99
+-- Lines 83-108
 function WarcryBerserk:_on_enemy_killed(params)
 	local unit = managers.player:player_unit()
 
@@ -101,7 +112,7 @@ function WarcryBerserk:_on_enemy_killed(params)
 	managers.warcry:fill_meter_by_value(base_fill_value * multiplier, true)
 end
 
--- Lines 101-103
+-- Lines 110-112
 function WarcryBerserk:cleanup()
 	managers.system_event_listener:remove_listener("warcry_berserk_enemy_killed")
 end

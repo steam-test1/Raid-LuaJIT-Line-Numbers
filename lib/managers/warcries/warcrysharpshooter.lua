@@ -86,7 +86,20 @@ function WarcrySharpshooter:duration()
 	return self._tweak_data.base_duration * managers.player:upgrade_value("player", "warcry_duration", 1)
 end
 
--- Lines 83-102
+-- Lines 83-92
+function WarcrySharpshooter:get_level_description(level)
+	level = math.clamp(level, 1, #self._tweak_data.buffs)
+
+	if level == 3 then
+		return managers.localization:text("skill_warcry_sharpshooter_level_2_desc")
+	elseif level >= 2 then
+		return managers.localization:text("skill_warcry_sharpshooter_level_" .. tostring(level) .. "_desc")
+	end
+
+	return "warcry_sharpshooter_desc"
+end
+
+-- Lines 94-113
 function WarcrySharpshooter:_on_enemy_killed(params)
 	local unit = managers.player:player_unit()
 
@@ -109,7 +122,7 @@ function WarcrySharpshooter:_on_enemy_killed(params)
 	managers.warcry:fill_meter_by_value(base_fill_value * multiplier, true)
 end
 
--- Lines 104-106
+-- Lines 115-117
 function WarcrySharpshooter:cleanup()
 	managers.system_event_listener:remove_listener("warcry_sharpshooter_enemy_killed")
 end

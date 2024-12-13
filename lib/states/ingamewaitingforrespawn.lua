@@ -579,7 +579,14 @@ function IngameWaitingForRespawnState:cb_prev_player()
 	self._dis_curr = nil
 end
 
--- Lines 615-648
+-- Lines 615-622
+function IngameWaitingForRespawnState:currently_spectated_unit()
+	if self._spectator_data and self._spectator_data.teammate_records and self._spectator_data.watch_u_key and self._spectator_data.teammate_records[self._spectator_data.watch_u_key] then
+		return self._spectator_data.teammate_records[self._spectator_data.watch_u_key].unit
+	end
+end
+
+-- Lines 626-659
 function IngameWaitingForRespawnState:trade_death(respawn_delay, hostages_killed)
 	managers.hud:set_custody_can_be_trade_visible(false)
 
@@ -608,12 +615,12 @@ function IngameWaitingForRespawnState:trade_death(respawn_delay, hostages_killed
 	end
 end
 
--- Lines 650-652
+-- Lines 661-663
 function IngameWaitingForRespawnState:finish_trade()
 	self:_begin_game_enter_transition()
 end
 
--- Lines 654-673
+-- Lines 665-684
 function IngameWaitingForRespawnState:begin_trade()
 	managers.hud:set_custody_can_be_trade_visible(true)
 
@@ -633,7 +640,7 @@ function IngameWaitingForRespawnState:begin_trade()
 	self._play_too_long_line_t = Application:time() + 60
 end
 
--- Lines 675-677
+-- Lines 686-688
 function IngameWaitingForRespawnState:cancel_trade()
 	managers.hud:set_custody_can_be_trade_visible(false)
 end

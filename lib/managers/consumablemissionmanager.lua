@@ -14,8 +14,18 @@ function ConsumableMissionManager:init()
 	self._peer_document_spawn_chances = {}
 end
 
--- Lines 30-49
-function ConsumableMissionManager:system_start_raid(params)
+-- Lines 28-35
+function ConsumableMissionManager:reset()
+	Global.consumable_missions_manager = {
+		inventory = {},
+		intel_spawn_modifier = 0
+	}
+	self._registered_intel_documents = {}
+	self._peer_document_spawn_chances = {}
+end
+
+-- Lines 38-57
+function ConsumableMissionManager:system_start_raid()
 	local current_job = managers.raid_job:current_job()
 
 	if not current_job or not current_job.consumable then
@@ -34,7 +44,7 @@ function ConsumableMissionManager:system_start_raid(params)
 	end
 end
 
--- Lines 51-55
+-- Lines 59-63
 function ConsumableMissionManager:register_document(unit, world_id)
 	self._registered_intel_documents[world_id] = self._registered_intel_documents[world_id] or {}
 	local loot_data = {
@@ -45,7 +55,7 @@ function ConsumableMissionManager:register_document(unit, world_id)
 	table.insert(self._registered_intel_documents[world_id], loot_data)
 end
 
--- Lines 58-103
+-- Lines 66-111
 function ConsumableMissionManager:plant_document_on_level(world_id)
 	Application:trace("[ConsumableMissionManager][plant_document_on_level]")
 
@@ -70,6 +80,15 @@ function ConsumableMissionManager:plant_document_on_level(world_id)
 
 	local chosen_document_unit = nil
 
+	if math.random() <= math.clamp(document_spawn_chance, -1, 1) then
+		math.shuffle(self._registered_intel_documents[world_id])
+
+		chosen_document_unit = self._registered_intel_documents[world_id][1].unit
+
+		self:reset_document_spawn_modifier()
+		managers.network:session():send_to_peers("reset_document_spawn_chance_modifier")
+	end
+
 	for index, document in pairs(self._registered_intel_documents[world_id]) do
 		if alive(document.unit) and document.unit ~= chosen_document_unit then
 			document.unit:set_slot(0)
@@ -79,7 +98,7 @@ function ConsumableMissionManager:plant_document_on_level(world_id)
 	self._registered_intel_documents[world_id] = nil
 end
 
--- Lines 106-117
+-- Lines 114-125
 function ConsumableMissionManager:sync_document_spawn_chance()
 	local document_spawn_chance = 0
 
@@ -93,7 +112,7 @@ function ConsumableMissionManager:sync_document_spawn_chance()
 	managers.network:session():send_to_host("sync_document_spawn_chance", document_spawn_chance)
 end
 
--- Lines 119-121
+-- Lines 127-129
 function ConsumableMissionManager:on_document_spawn_chance_received(chance, peer_id)
 	table.insert(self._peer_document_spawn_chances, {
 		chance = chance,
@@ -101,7 +120,7 @@ function ConsumableMissionManager:on_document_spawn_chance_received(chance, peer
 	})
 end
 
--- Lines 124-133
+-- Lines 132-141
 function ConsumableMissionManager:is_any_mission_unlocked()
 	local any_mission_unlocked = false
 
@@ -114,25 +133,25 @@ function ConsumableMissionManager:is_any_mission_unlocked()
 	return any_mission_unlocked
 end
 
--- Lines 136-138
+-- Lines 144-146
 function ConsumableMissionManager:is_mission_unlocked(mission_name)
 	return Global.consumable_missions_manager.inventory[mission_name] ~= nil
 end
 
--- Lines 141-144
+-- Lines 149-152
 function ConsumableMissionManager:pickup_mission(mission_name)
 	self._picked_up_missions = self._picked_up_missions or {}
 
 	table.insert(self._picked_up_missions, mission_name)
 end
 
--- Lines 146-149
+-- Lines 154-157
 function ConsumableMissionManager:reset_document_spawn_modifier()
 	Global.consumable_missions_manager.intel_spawn_modifier = 0
 	self._reset_spawn_modifier = true
 end
 
--- Lines 153-178
+-- Lines 161-186
 function ConsumableMissionManager:on_level_exited(success)
 	if self._level_exit_handled then
 		return
@@ -161,17 +180,19 @@ function ConsumableMissionManager:on_level_exited(success)
 	self._level_exit_handled = true
 end
 
--- Lines 181-183
+-- Lines 189-192
 function ConsumableMissionManager:on_mission_started()
 	self._level_exit_handled = false
+
+	self:system_start_raid()
 end
 
--- Lines 186-188
+-- Lines 195-197
 function ConsumableMissionManager:on_mission_completed(success)
 	self._level_exit_handled = false
 end
 
--- Lines 191-212
+-- Lines 200-221
 function ConsumableMissionManager:_unlock_mission(mission_name)
 	Application:trace("[ConsumableMissionManager][_unlock_mission] Unlocking the mission: ", mission_name)
 
@@ -196,14 +217,14 @@ function ConsumableMissionManager:_unlock_mission(mission_name)
 	})
 end
 
--- Lines 224-228
+-- Lines 233-237
 function ConsumableMissionManager:consume_mission(mission_name)
 	Application:trace("[ConsumableMissionManager:consume_mission] Consuming the mission: ", mission_name)
 
 	Global.consumable_missions_manager.inventory[mission_name] = nil
 end
 
--- Lines 232-246
+-- Lines 241-255
 function ConsumableMissionManager:save(data)
 	local state = {
 		version = ConsumableMissionManager.VERSION,
@@ -218,7 +239,7 @@ function ConsumableMissionManager:save(data)
 	data.ConsumableMissionManager = state
 end
 
--- Lines 250-284
+-- Lines 259-293
 function ConsumableMissionManager:load(data, version)
 	Global.consumable_missions_manager.inventory = {}
 	Global.consumable_missions_manager.intel_spawn_modifier = 0

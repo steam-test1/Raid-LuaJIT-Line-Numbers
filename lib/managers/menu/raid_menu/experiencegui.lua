@@ -384,17 +384,21 @@ function ExperienceGui:on_skill_mouse_over(button_data)
 	end
 end
 
--- Lines 384-442
+-- Lines 384-452
 function ExperienceGui:_prepare_skill_description(button_data)
 	local skill = tweak_data.skilltree.skills[button_data.skill]
 	local upgrade_tweak_data = tweak_data.upgrades.definitions[skill.upgrades[1]]
 
-	if not upgrade_tweak_data then
+	if skill.acquires and skill.acquires[1] and skill.acquires[1].warcry_level then
+		return self:_prepare_warcry_upgrade_description(button_data.level, skill.acquires[1].warcry_level)
+	elseif not upgrade_tweak_data then
 		return managers.localization:text(button_data.skill_description)
 	end
 
 	local upgrade = tweak_data.upgrades.definitions[skill.upgrades[1]].upgrade
 	local current_upgrade_level = managers.player:upgrade_level(upgrade.category, upgrade.upgrade)
+	local current_selected_level = self:_upgrade_level_from_selected_skills(skill, button_data.level, button_data.index)
+	local total_upgrade_level = current_upgrade_level + current_selected_level
 	local color_changes = {}
 	local stat_line = nil
 
@@ -402,33 +406,37 @@ function ExperienceGui:_prepare_skill_description(button_data)
 		local macros = {}
 		local pending = false
 
-		if (button_data.state == RaidGUIControlBranchingBarNode.STATE_HOVER or button_data.state == RaidGUIControlBranchingBarNode.STATE_SELECTED or button_data.state == RaidGUIControlBranchingBarNode.STATE_PENDING) and tweak_data.upgrades.values[upgrade.category][upgrade.upgrade][current_upgrade_level + 1] then
-			macros.LEVEL = current_upgrade_level + 1
+		if (button_data.state == RaidGUIControlBranchingBarNode.STATE_HOVER or button_data.state == RaidGUIControlBranchingBarNode.STATE_SELECTED or button_data.state == RaidGUIControlBranchingBarNode.STATE_PENDING) and tweak_data.upgrades.values[upgrade.category][upgrade.upgrade][total_upgrade_level + 1] then
+			macros.LEVEL = total_upgrade_level + 1
 			pending = true
 		else
-			macros.LEVEL = current_upgrade_level
+			macros.LEVEL = total_upgrade_level
 		end
+
+		local str_raw = managers.localization:text(skill.stat_desc_id, macros)
+		local str_utf8 = utf8.sub(str_raw, 0, string.len(str_raw))
 
 		if upgrade_tweak_data.description_data then
 			if upgrade_tweak_data.description_data.upgrade_type == UpgradesTweakData.UPGRADE_TYPE_MULTIPLIER then
-				self:_prepare_upgrade_stats_type_multiplier(managers.localization:text(skill.stat_desc_id, macros), current_upgrade_level, pending, upgrade_tweak_data, macros, color_changes)
+				self:_prepare_upgrade_stats_type_multiplier(str_utf8, total_upgrade_level, pending, upgrade_tweak_data, macros, color_changes)
 			elseif upgrade_tweak_data.description_data.upgrade_type == UpgradesTweakData.UPGRADE_TYPE_REDUCTIVE_MULTIPLIER then
-				self:_prepare_upgrade_stats_type_reductive_multiplier(managers.localization:text(skill.stat_desc_id, macros), current_upgrade_level, pending, upgrade_tweak_data, macros, color_changes)
+				self:_prepare_upgrade_stats_type_reductive_multiplier(str_utf8, total_upgrade_level, pending, upgrade_tweak_data, macros, color_changes)
 			elseif upgrade_tweak_data.description_data.upgrade_type == UpgradesTweakData.UPGRADE_TYPE_MULTIPLIER_REDUCTIVE_STRING then
-				self:_prepare_upgrade_stats_type_multiplier_reductive_string(managers.localization:text(skill.stat_desc_id, macros), current_upgrade_level, pending, upgrade_tweak_data, macros, color_changes)
+				self:_prepare_upgrade_stats_type_multiplier_reductive_string(str_utf8, total_upgrade_level, pending, upgrade_tweak_data, macros, color_changes)
 			elseif upgrade_tweak_data.description_data.upgrade_type == UpgradesTweakData.UPGRADE_TYPE_RAW_VALUE_REDUCTION then
-				self:_prepare_upgrade_stats_type_raw_value_reduction(managers.localization:text(skill.stat_desc_id, macros), current_upgrade_level, pending, upgrade_tweak_data, macros, color_changes)
+				self:_prepare_upgrade_stats_type_raw_value_reduction(str_utf8, total_upgrade_level, pending, upgrade_tweak_data, macros, color_changes)
 			elseif upgrade_tweak_data.description_data.upgrade_type == UpgradesTweakData.UPGRADE_TYPE_RAW_VALUE_AMOUNT then
-				self:_prepare_upgrade_stats_type_raw_value_amount(managers.localization:text(skill.stat_desc_id, macros), current_upgrade_level, pending, upgrade_tweak_data, macros, color_changes)
+				self:_prepare_upgrade_stats_type_raw_value_amount(str_utf8, total_upgrade_level, pending, upgrade_tweak_data, macros, color_changes)
 			elseif upgrade_tweak_data.description_data.upgrade_type == UpgradesTweakData.UPGRADE_TYPE_TEMPORARY_REDUCTION then
-				self:_prepare_upgrade_stats_type_temporary_reduction(managers.localization:text(skill.stat_desc_id, macros), current_upgrade_level, pending, upgrade_tweak_data, macros, color_changes)
+				self:_prepare_upgrade_stats_type_temporary_reduction(str_utf8, total_upgrade_level, pending, upgrade_tweak_data, macros, color_changes)
 			end
 		end
 
 		stat_line = managers.localization:text(skill.stat_desc_id, macros)
 	end
 
-	local description = managers.localization:text(button_data.skill_description)
+	local description_raw = managers.localization:text(button_data.skill_description)
+	local description = utf8.sub(description_raw, 0, string.len(description_raw))
 
 	if stat_line then
 		description = description .. "\n"
@@ -445,7 +453,31 @@ function ExperienceGui:_prepare_skill_description(button_data)
 	return description, color_changes
 end
 
--- Lines 444-473
+-- Lines 454-459
+function ExperienceGui:_prepare_warcry_upgrade_description(level, warcry_level_increase)
+	local active_warcry = managers.warcry:get_active_warcry()
+	local target_warcry_level = math.round(level / 10) + 1
+
+	return active_warcry:get_level_description(target_warcry_level)
+end
+
+-- Lines 461-472
+function ExperienceGui:_upgrade_level_from_selected_skills(skill, skill_button_level, skill_button_index)
+	local selected_nodes = self._skilltrack_progress_bar:get_selected_nodes()
+	local selected_num = 0
+
+	for index, node_data in pairs(selected_nodes) do
+		local same_button = node_data.level == skill_button_level and node_data.index == skill_button_index
+
+		if skill.name_id == node_data.skill_title and not same_button then
+			selected_num = selected_num + 1
+		end
+	end
+
+	return selected_num
+end
+
+-- Lines 474-503
 function ExperienceGui:_prepare_upgrade_stats_type_raw_value_reduction(string, current_level, pending, upgrade_tweak_data, macros, color_changes)
 	local upgrade_values = tweak_data.upgrades.values[upgrade_tweak_data.upgrade.category][upgrade_tweak_data.upgrade.upgrade]
 	local starting_index = string:find("$REDUCTION;") - 1
@@ -488,7 +520,7 @@ function ExperienceGui:_prepare_upgrade_stats_type_raw_value_reduction(string, c
 	macros.REDUCTION = macro
 end
 
--- Lines 475-504
+-- Lines 505-534
 function ExperienceGui:_prepare_upgrade_stats_type_raw_value_amount(string, current_level, pending, upgrade_tweak_data, macros, color_changes)
 	local upgrade_values = tweak_data.upgrades.values[upgrade_tweak_data.upgrade.category][upgrade_tweak_data.upgrade.upgrade]
 	local starting_index = string:find("$AMOUNT;") - 1
@@ -531,7 +563,7 @@ function ExperienceGui:_prepare_upgrade_stats_type_raw_value_amount(string, curr
 	macros.AMOUNT = macro
 end
 
--- Lines 507-563
+-- Lines 537-593
 function ExperienceGui:_prepare_upgrade_stats_type_temporary_reduction(string, current_level, pending, upgrade_tweak_data, macros, color_changes)
 	local upgrade_values = tweak_data.upgrades.values[upgrade_tweak_data.upgrade.category][upgrade_tweak_data.upgrade.upgrade]
 	local starting_index = string:find("$PERCENTAGE;") - 1
@@ -611,7 +643,7 @@ function ExperienceGui:_prepare_upgrade_stats_type_temporary_reduction(string, c
 	macros.SECONDS = macro
 end
 
--- Lines 565-594
+-- Lines 595-624
 function ExperienceGui:_prepare_upgrade_stats_type_multiplier(string, current_level, pending, upgrade_tweak_data, macros, color_changes)
 	local upgrade_values = tweak_data.upgrades.values[upgrade_tweak_data.upgrade.category][upgrade_tweak_data.upgrade.upgrade]
 	local starting_index = string:find("$PERCENTAGE;") - 1
@@ -654,7 +686,7 @@ function ExperienceGui:_prepare_upgrade_stats_type_multiplier(string, current_le
 	macros.PERCENTAGE = macro
 end
 
--- Lines 596-625
+-- Lines 626-655
 function ExperienceGui:_prepare_upgrade_stats_type_multiplier_reductive_string(string, current_level, pending, upgrade_tweak_data, macros, color_changes)
 	local upgrade_values = tweak_data.upgrades.values[upgrade_tweak_data.upgrade.category][upgrade_tweak_data.upgrade.upgrade]
 	local starting_index = string:find("$PERCENTAGE;") - 1
@@ -697,7 +729,7 @@ function ExperienceGui:_prepare_upgrade_stats_type_multiplier_reductive_string(s
 	macros.PERCENTAGE = macro
 end
 
--- Lines 627-655
+-- Lines 657-685
 function ExperienceGui:_prepare_upgrade_stats_type_reductive_multiplier(string, current_level, pending, upgrade_tweak_data, macros, color_changes)
 	local upgrade_values = tweak_data.upgrades.values[upgrade_tweak_data.upgrade.category][upgrade_tweak_data.upgrade.upgrade]
 	local starting_index = string:find("$PERCENTAGE;") - 1
@@ -740,7 +772,7 @@ function ExperienceGui:_prepare_upgrade_stats_type_reductive_multiplier(string, 
 	macros.PERCENTAGE = macro
 end
 
--- Lines 657-690
+-- Lines 687-720
 function ExperienceGui:_refresh_stats(additional_hover_pending_skill)
 	local character_class = managers.skilltree:get_character_profile_class()
 	local applied_skills = managers.skilltree:get_character_skilltree()
@@ -775,7 +807,7 @@ function ExperienceGui:_refresh_stats(additional_hover_pending_skill)
 	self._stamina_stat:set_value_delta(math.round(stats.stamina.pending))
 end
 
--- Lines 694-717
+-- Lines 722-745
 function ExperienceGui:on_skilltree_selection_changed()
 	local selected_nodes = self._skilltrack_progress_bar:get_selected_nodes()
 	local selected_quantity = 0
@@ -799,7 +831,7 @@ function ExperienceGui:on_skilltree_selection_changed()
 	self:_refresh_stats()
 end
 
--- Lines 732-742
+-- Lines 760-770
 function ExperienceGui:on_click_apply_callback(button_data)
 	local selection_valid = self._skilltrack_progress_bar:is_selection_valid()
 
@@ -816,7 +848,7 @@ function ExperienceGui:on_click_apply_callback(button_data)
 	})
 end
 
--- Lines 744-747
+-- Lines 772-775
 function ExperienceGui:on_click_respec_callback(button_data)
 	local dialog_params = {
 		gold = managers.gold_economy:respec_cost_string(),
@@ -826,13 +858,13 @@ function ExperienceGui:on_click_respec_callback(button_data)
 	managers.menu:show_respec_dialog(dialog_params)
 end
 
--- Lines 749-752
+-- Lines 777-780
 function ExperienceGui:on_click_clear_callback(button_data)
 	self._skilltrack_progress_bar:clear_selection()
 	self:on_skilltree_selection_changed()
 end
 
--- Lines 754-779
+-- Lines 782-807
 function ExperienceGui:on_skill_acquisition_confirmed()
 	local selected_skills = self._skilltrack_progress_bar:get_selected_nodes()
 
@@ -852,11 +884,11 @@ function ExperienceGui:on_skill_acquisition_confirmed()
 	managers.player:replenish_player_weapons()
 end
 
--- Lines 782-783
+-- Lines 810-811
 function ExperienceGui:on_skill_mouse_out(button_data)
 end
 
--- Lines 785-811
+-- Lines 813-839
 function ExperienceGui:_get_character_skilltree()
 	local skill_tree = managers.skilltree:get_character_skilltree()
 	local tree = {}
@@ -896,12 +928,12 @@ function ExperienceGui:_get_character_skilltree()
 	return tree
 end
 
--- Lines 915-917
+-- Lines 943-945
 function ExperienceGui:data_source_branching_progress_bar()
 	return self:_get_character_skilltree()
 end
 
--- Lines 919-929
+-- Lines 947-957
 function ExperienceGui:close()
 	if self._closing then
 		return
@@ -917,7 +949,7 @@ function ExperienceGui:close()
 	ExperienceGui.super.close(self)
 end
 
--- Lines 936-968
+-- Lines 964-996
 function ExperienceGui:bind_controller_inputs_initial_state()
 	local have_enough_money = managers.gold_economy:respec_cost() <= managers.gold_economy:current()
 	local respec_binding, respec_legend = nil
@@ -962,7 +994,7 @@ function ExperienceGui:bind_controller_inputs_initial_state()
 	self:set_legend(legend)
 end
 
--- Lines 970-1001
+-- Lines 998-1029
 function ExperienceGui:bind_controller_inputs_apply_state()
 	local have_enough_money = managers.gold_economy:respec_cost() <= managers.gold_economy:current()
 	local respec_binding, respec_legend = nil
@@ -1012,22 +1044,22 @@ function ExperienceGui:bind_controller_inputs_apply_state()
 	self:set_legend(legend)
 end
 
--- Lines 1003-1007
+-- Lines 1031-1035
 function ExperienceGui:_on_move_panel_left()
 	self._skilltrack_progress_bar:shoulder_move_left()
 end
 
--- Lines 1009-1013
+-- Lines 1037-1041
 function ExperienceGui:_on_move_panel_right()
 	self._skilltrack_progress_bar:shoulder_move_right()
 end
 
--- Lines 1015-1019
+-- Lines 1043-1047
 function ExperienceGui:_on_apply_selected_skills()
 	self:on_click_apply_callback()
 end
 
--- Lines 1021-1031
+-- Lines 1049-1059
 function ExperienceGui:do_respec()
 	managers.skilltree:respec()
 	managers.gold_economy:respec()

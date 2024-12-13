@@ -879,3 +879,16 @@ end
 function ElementSpecialObjective:_get_default_value_if_nil(name_in)
 	return self._values[name_in] or self._DEFAULT_VALUES[name_in]
 end
+
+-- Lines 825-835
+function ElementSpecialObjective:destroy()
+	ElementSpecialObjective.super.destroy(self)
+
+	if self._pos_rsrv then
+		for _, unit_rsrv in pairs(self._pos_rsrv) do
+			managers.navigation:unreserve_pos(unit_rsrv)
+		end
+
+		self._pos_rsrv = nil
+	end
+end

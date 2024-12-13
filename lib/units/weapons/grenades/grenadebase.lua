@@ -66,7 +66,21 @@ function GrenadeBase:sync_net_event(event_id)
 	end
 end
 
--- Lines 68-93
+-- Lines 68-77
+function GrenadeBase:throw(...)
+	GrenadeBase.super.throw(self, ...)
+
+	local weapon_id = tweak_data.projectiles[self:projectile_entry()].weapon_id
+
+	if weapon_id then
+		managers.statistics:shot_fired({
+			hit = false,
+			name_id = weapon_id
+		})
+	end
+end
+
+-- Lines 79-105
 function GrenadeBase:add_damage_result(unit, is_dead, damage_percent)
 	if not alive(self._thrower_unit) or self._thrower_unit ~= managers.player:player_unit() then
 		return
@@ -83,12 +97,14 @@ function GrenadeBase:add_damage_result(unit, is_dead, damage_percent)
 
 	local weapon_id = tweak_data.projectiles[self:projectile_entry()].weapon_id
 
-	if weapon_id then
+	if weapon_id and not self._recorded_hit then
 		managers.statistics:shot_fired({
 			skip_bullet_count = true,
 			hit = true,
 			name_id = weapon_id
 		})
+
+		self._recorded_hit = true
 	end
 
 	table.insert(self._damage_results, is_dead)
@@ -101,7 +117,7 @@ function GrenadeBase:add_damage_result(unit, is_dead, damage_percent)
 	end
 end
 
--- Lines 95-101
+-- Lines 107-113
 function GrenadeBase:get_use_data(character_setup)
 	local use_data = {
 		equip = {
@@ -116,7 +132,7 @@ function GrenadeBase:get_use_data(character_setup)
 	return use_data
 end
 
--- Lines 105-112
+-- Lines 117-124
 function GrenadeBase:tweak_data_anim_play(anim, ...)
 	local animations = self:weapon_tweak_data().animations
 
@@ -129,7 +145,7 @@ function GrenadeBase:tweak_data_anim_play(anim, ...)
 	return false
 end
 
--- Lines 114-121
+-- Lines 126-133
 function GrenadeBase:anim_play(anim, speed_multiplier)
 	if anim then
 		local length = self._unit:anim_length(Idstring(anim))
@@ -140,7 +156,7 @@ function GrenadeBase:anim_play(anim, speed_multiplier)
 	end
 end
 
--- Lines 123-130
+-- Lines 135-142
 function GrenadeBase:tweak_data_anim_stop(anim, ...)
 	local animations = self:weapon_tweak_data().animations
 
@@ -153,121 +169,121 @@ function GrenadeBase:tweak_data_anim_stop(anim, ...)
 	return false
 end
 
--- Lines 132-134
+-- Lines 144-146
 function GrenadeBase:anim_stop(anim)
 	self._unit:anim_stop(Idstring(anim))
 end
 
--- Lines 136-140
+-- Lines 148-152
 function GrenadeBase:melee_damage_info()
 	local my_tweak_data = self:weapon_tweak_data()
 
 	return my_tweak_data.damage_melee, my_tweak_data.damage_melee_effect_mul
 end
 
--- Lines 142-143
+-- Lines 154-155
 function GrenadeBase:ammo_info()
 end
 
--- Lines 145-148
+-- Lines 157-160
 function GrenadeBase:add_ammo(ratio, add_amount_override, add_amount_multiplier)
 	return false, 0
 end
 
--- Lines 151-153
+-- Lines 163-165
 function GrenadeBase:add_ammo_from_bag(available)
 	return 0
 end
 
--- Lines 155-157
+-- Lines 167-169
 function GrenadeBase:set_hand_held(value)
 	self._hand_held = value
 end
 
--- Lines 159-160
+-- Lines 171-172
 function GrenadeBase:on_equip()
 end
 
--- Lines 162-163
+-- Lines 174-175
 function GrenadeBase:on_unequip()
 end
 
--- Lines 165-167
+-- Lines 177-179
 function GrenadeBase:on_enabled()
 	self._enabled = true
 end
 
--- Lines 169-171
+-- Lines 181-183
 function GrenadeBase:on_disabled()
 	self._enabled = false
 end
 
--- Lines 173-175
+-- Lines 185-187
 function GrenadeBase:enabled()
 	return self._enabled
 end
 
--- Lines 177-179
+-- Lines 189-191
 function GrenadeBase:get_stance_id()
 	return self:weapon_tweak_data().stance
 end
 
--- Lines 181-183
+-- Lines 193-195
 function GrenadeBase:transition_duration()
 	return self:weapon_tweak_data().transition_duration
 end
 
--- Lines 186-188
+-- Lines 198-200
 function GrenadeBase:enter_steelsight_speed_multiplier()
 	return 1
 end
 
--- Lines 190-192
+-- Lines 202-204
 function GrenadeBase:exit_run_speed_multiplier()
 	return self:weapon_tweak_data().exit_run_speed_multiplier
 end
 
--- Lines 194-196
+-- Lines 206-208
 function GrenadeBase:weapon_tweak_data()
 	return tweak_data.projectiles[self.name_id]
 end
 
--- Lines 198-200
+-- Lines 210-212
 function GrenadeBase:weapon_hold()
 	return self:weapon_tweak_data().weapon_hold
 end
 
--- Lines 202-204
+-- Lines 214-216
 function GrenadeBase:selection_index()
 	return PlayerInventory.SLOT_3
 end
 
--- Lines 206-208
+-- Lines 218-220
 function GrenadeBase:has_range_distance_scope()
 	return false
 end
 
--- Lines 210-212
+-- Lines 222-224
 function GrenadeBase:set_visibility_state(state)
 	self._unit:set_visible(state)
 end
 
--- Lines 214-216
+-- Lines 226-228
 function GrenadeBase:movement_penalty()
 	return self:weapon_tweak_data().weapon_movement_penalty or 1
 end
 
--- Lines 218-220
+-- Lines 230-232
 function GrenadeBase:clbk_impact(tag, unit, body, other_unit, other_body, position, normal, collision_velocity, velocity, other_velocity, new_velocity, direction, damage, ...)
 	self:_detonate(tag, unit, body, other_unit, other_body, position, normal, collision_velocity, velocity, other_velocity, new_velocity, direction, damage, ...)
 end
 
--- Lines 222-224
+-- Lines 234-236
 function GrenadeBase:start_shooting_allowed()
 	return true
 end
 
--- Lines 226-230
+-- Lines 238-242
 function GrenadeBase:save(data)
 	local state = {
 		timer = self._timer
@@ -275,18 +291,18 @@ function GrenadeBase:save(data)
 	data.GrenadeBase = state
 end
 
--- Lines 232-235
+-- Lines 244-247
 function GrenadeBase:load(data)
 	local state = data.GrenadeBase
 	self._timer = state.timer
 end
 
--- Lines 238-240
+-- Lines 250-252
 function GrenadeBase:uses_ammo()
 	return false
 end
 
--- Lines 242-245
+-- Lines 254-257
 function GrenadeBase:replenish()
 	local name, amount = managers.blackmarket:equipped_grenade()
 

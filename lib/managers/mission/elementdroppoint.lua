@@ -23,8 +23,10 @@ function ElementDropPoint:client_on_executed(...)
 	self:on_executed(...)
 end
 
--- Lines 23-29
+-- Lines 23-34
 function ElementDropPoint:on_executed(instigator)
+	return
+
 	if not self._values.enabled then
 		return
 	end
@@ -32,6 +34,6 @@ function ElementDropPoint:on_executed(instigator)
 	ElementDropPoint.super.on_executed(self, instigator)
 end
 
--- Lines 31-32
+-- Lines 36-37
 function ElementDropPoint:operation_remove()
 end

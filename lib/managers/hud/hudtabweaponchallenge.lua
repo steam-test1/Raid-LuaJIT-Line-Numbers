@@ -1,7 +1,8 @@
 HUDTabWeaponChallenge = HUDTabWeaponChallenge or class()
 HUDTabWeaponChallenge.WIDTH = 384
-HUDTabWeaponChallenge.HEIGHT = 192
+HUDTabWeaponChallenge.HEIGHT = 256
 HUDTabWeaponChallenge.RIGHT_SIDE_X = 64
+HUDTabWeaponChallenge.TITLE_Y = 32
 HUDTabWeaponChallenge.TITLE_H = 64
 HUDTabWeaponChallenge.TITLE_FONT = tweak_data.gui.fonts.din_compressed
 HUDTabWeaponChallenge.TITLE_FONT_SIZE = tweak_data.gui.font_sizes.size_24
@@ -15,7 +16,7 @@ HUDTabWeaponChallenge.INDEX_BULLET_ACTIVE_ICON = "bullet_active"
 HUDTabWeaponChallenge.INDEX_BULLET_PANEL_W = 96
 HUDTabWeaponChallenge.INDEX_BULLET_PADDING = 5
 
--- Lines 24-35
+-- Lines 25-36
 function HUDTabWeaponChallenge:init(panel)
 	self:_create_panel(panel)
 	self:_create_inner_panel()
@@ -27,7 +28,7 @@ function HUDTabWeaponChallenge:init(panel)
 	self:_create_progress_bar()
 end
 
--- Lines 37-47
+-- Lines 38-48
 function HUDTabWeaponChallenge:_create_panel(panel)
 	local panel_params = {
 		name = "weapon_challenge_panel",
@@ -40,7 +41,7 @@ function HUDTabWeaponChallenge:_create_panel(panel)
 	self._initial_x_position = self._object:x()
 end
 
--- Lines 49-56
+-- Lines 50-57
 function HUDTabWeaponChallenge:_create_inner_panel()
 	local inner_panel_params = {
 		name = "weapon_challenge_inner_panel",
@@ -51,27 +52,28 @@ function HUDTabWeaponChallenge:_create_inner_panel()
 	self._inner_panel = self._object:panel(inner_panel_params)
 end
 
--- Lines 58-67
+-- Lines 59-69
 function HUDTabWeaponChallenge:_create_index_bullet_panel()
 	local index_bullet_panel_params = {
 		name = "index_bullet_panel",
+		h = 32,
 		halign = "right",
 		valign = "top",
-		w = HUDTabWeaponChallenge.INDEX_BULLET_PANEL_W,
-		h = HUDTabWeaponChallenge.TITLE_H
+		w = HUDTabWeaponChallenge.INDEX_BULLET_PANEL_W
 	}
 	self._index_bullet_panel = self._object:panel(index_bullet_panel_params)
 
 	self._index_bullet_panel:set_right(self._object:w() - HUDTabWeaponChallenge.ANIMATION_MOVE_X_DISTANCE)
 end
 
--- Lines 69-82
+-- Lines 71-85
 function HUDTabWeaponChallenge:_create_title()
 	local title_params = {
 		name = "weapon_challenge_title",
 		vertical = "center",
 		align = "left",
 		text = "INCREASE ACCURACY",
+		y = HUDTabWeaponChallenge.TITLE_Y,
 		x = HUDTabWeaponChallenge.RIGHT_SIDE_X,
 		w = self._inner_panel:w() - HUDTabWeaponChallenge.RIGHT_SIDE_X,
 		h = HUDTabWeaponChallenge.TITLE_H,
@@ -82,13 +84,14 @@ function HUDTabWeaponChallenge:_create_title()
 	self._title = self._inner_panel:text(title_params)
 end
 
--- Lines 84-95
+-- Lines 87-99
 function HUDTabWeaponChallenge:_create_tier_label()
 	local tier_label_params = {
-		text = "TI",
-		align = "left",
-		vertical = "center",
 		name = "weapon_challenge_tier",
+		vertical = "center",
+		align = "left",
+		text = "TI",
+		y = HUDTabWeaponChallenge.TITLE_Y,
 		h = HUDTabWeaponChallenge.TITLE_H,
 		font = tweak_data.gui:get_font_path(HUDTabWeaponChallenge.TITLE_FONT, HUDTabWeaponChallenge.TITLE_FONT_SIZE),
 		font_size = HUDTabWeaponChallenge.TITLE_FONT_SIZE,
@@ -97,26 +100,26 @@ function HUDTabWeaponChallenge:_create_tier_label()
 	self._tier = self._inner_panel:text(tier_label_params)
 end
 
--- Lines 97-107
+-- Lines 101-111
 function HUDTabWeaponChallenge:_create_icon()
 	local default_icon = "wpn_skill_accuracy"
 	local icon_params = {
 		name = "weapon_challenge_icon",
-		y = HUDTabWeaponChallenge.TITLE_H,
+		y = HUDTabWeaponChallenge.TITLE_Y + HUDTabWeaponChallenge.TITLE_H,
 		texture = tweak_data.gui.icons[default_icon].texture,
 		texture_rect = tweak_data.gui.icons[default_icon].texture_rect
 	}
 	self._icon = self._inner_panel:bitmap(icon_params)
 end
 
--- Lines 109-122
+-- Lines 113-126
 function HUDTabWeaponChallenge:_create_description()
 	local description_params = {
 		name = "weapon_challenge_description",
 		wrap = true,
 		text = "Bla bla bla bla",
 		x = HUDTabWeaponChallenge.RIGHT_SIDE_X,
-		y = HUDTabWeaponChallenge.TITLE_H,
+		y = HUDTabWeaponChallenge.TITLE_Y + HUDTabWeaponChallenge.TITLE_H,
 		w = self._inner_panel:w() - HUDTabWeaponChallenge.RIGHT_SIDE_X,
 		font = tweak_data.gui:get_font_path(HUDTabWeaponChallenge.DESCRIPTION_FONT, HUDTabWeaponChallenge.DESCRIPTION_FONT_SIZE),
 		font_size = HUDTabWeaponChallenge.DESCRIPTION_FONT_SIZE,
@@ -125,7 +128,7 @@ function HUDTabWeaponChallenge:_create_description()
 	self._description = self._inner_panel:text(description_params)
 end
 
--- Lines 124-187
+-- Lines 128-190
 function HUDTabWeaponChallenge:_create_progress_bar()
 	local texture_center = "slider_large_center"
 	local texture_left = "slider_large_left"
@@ -140,7 +143,7 @@ function HUDTabWeaponChallenge:_create_progress_bar()
 	}
 	self._progress_bar_panel = RaidGUIPanel:new(self._inner_panel, progress_bar_panel_params)
 
-	self._progress_bar_panel:set_bottom(self._inner_panel:h())
+	self._progress_bar_panel:set_center_y(self._inner_panel:h() - 32)
 
 	local progress_bar_background_params = {
 		name = "weapon_challenge_progress_bar_background",
@@ -191,7 +194,7 @@ function HUDTabWeaponChallenge:_create_progress_bar()
 	self._progress_text = self._progress_bar_panel:label(progress_bar_text_params)
 end
 
--- Lines 189-193
+-- Lines 192-196
 function HUDTabWeaponChallenge:set_challenges(challenges)
 	self._challenges = challenges
 
@@ -199,7 +202,7 @@ function HUDTabWeaponChallenge:set_challenges(challenges)
 	self:set_challenge(1)
 end
 
--- Lines 195-222
+-- Lines 198-225
 function HUDTabWeaponChallenge:_create_challenge_bullets()
 	self._index_bullet_panel:clear()
 
@@ -231,7 +234,7 @@ function HUDTabWeaponChallenge:_create_challenge_bullets()
 	end
 end
 
--- Lines 240-260
+-- Lines 227-244
 function HUDTabWeaponChallenge:set_challenge(index, animate)
 	if self._currently_shown_challenge == index then
 		animate = false
@@ -251,9 +254,9 @@ function HUDTabWeaponChallenge:set_challenge(index, animate)
 	end
 end
 
--- Lines 262-297
+-- Lines 246-282
 function HUDTabWeaponChallenge:_set_challenge(challenge_index)
-	local challenge, count, target = nil
+	local challenge, count, target, min_range = nil
 	local challenge_data = self._challenges[challenge_index]
 
 	if challenge_data.challenge_id then
@@ -261,6 +264,7 @@ function HUDTabWeaponChallenge:_set_challenge(challenge_index)
 		local tasks = challenge:tasks()
 		count = tasks[1]:current_count()
 		target = tasks[1]:target()
+		min_range = math.round(tasks[1]:min_range() / 100)
 	end
 
 	local skill_tweak_data = tweak_data.weapon_skills.skills[challenge_data.skill_name]
@@ -268,6 +272,7 @@ function HUDTabWeaponChallenge:_set_challenge(challenge_index)
 	self._title:set_text(utf8.to_upper(managers.localization:text(skill_tweak_data.name_id)))
 	self._description:set_text(managers.localization:text(challenge_data.challenge_briefing_id, {
 		AMOUNT = target,
+		RANGE = min_range,
 		WEAPON = managers.localization:text(tweak_data.weapon[challenge_data.weapon_id].name_id)
 	}))
 
@@ -298,65 +303,65 @@ function HUDTabWeaponChallenge:_set_challenge(challenge_index)
 	self._currently_shown_challenge = challenge_index
 end
 
--- Lines 300-303
+-- Lines 285-288
 function HUDTabWeaponChallenge:set_x(x)
 	self._object:set_x(x)
 
 	self._initial_x_position = self._object:x()
 end
 
--- Lines 305-307
+-- Lines 290-292
 function HUDTabWeaponChallenge:set_y(y)
 	self._object:set_y(y)
 end
 
--- Lines 309-311
+-- Lines 294-296
 function HUDTabWeaponChallenge:set_bottom(y)
 	self._object:set_bottom(y)
 end
 
--- Lines 313-315
+-- Lines 298-300
 function HUDTabWeaponChallenge:set_top(y)
 	self._object:set_top(y)
 end
 
--- Lines 317-320
+-- Lines 302-305
 function HUDTabWeaponChallenge:set_left(x)
 	self._object:set_left(x)
 
 	self._initial_x_position = self._object:x()
 end
 
--- Lines 322-325
+-- Lines 307-310
 function HUDTabWeaponChallenge:set_right(x)
 	self._object:set_right(x)
 
 	self._initial_x_position = self._object:x()
 end
 
--- Lines 327-330
+-- Lines 312-315
 function HUDTabWeaponChallenge:set_center_x(x)
 	self._object:set_center_x(x)
 
 	self._initial_x_position = self._object:x()
 end
 
--- Lines 332-334
+-- Lines 317-319
 function HUDTabWeaponChallenge:set_center_y(y)
 	self._object:set_center_y(y)
 end
 
--- Lines 336-338
+-- Lines 321-323
 function HUDTabWeaponChallenge:show()
 	self._object:set_visible(true)
 end
 
--- Lines 340-342
+-- Lines 325-327
 function HUDTabWeaponChallenge:hide()
 	self._object:set_visible(false)
 end
 
--- Lines 344-395
+-- Lines 329-382
 function HUDTabWeaponChallenge:_animate_data_change(panel, challenge_data)
 	local fade_out_duration = 0.3
 	local fade_in_duration = 0.3
@@ -373,6 +378,7 @@ function HUDTabWeaponChallenge:_animate_data_change(panel, challenge_data)
 		self._active_bullets[self._currently_shown_challenge]:set_center(self._inactive_bullets[self._currently_shown_challenge]:center())
 
 		local current_position = Easing.quartic_in(t, 0, HUDTabWeaponChallenge.ANIMATION_MOVE_X_DISTANCE, fade_out_duration)
+		current_position = math.round(current_position)
 
 		self._inner_panel:set_x(current_position)
 	end
@@ -403,6 +409,7 @@ function HUDTabWeaponChallenge:_animate_data_change(panel, challenge_data)
 		self._active_bullets[self._currently_shown_challenge]:set_center(self._inactive_bullets[self._currently_shown_challenge]:center())
 
 		local current_position = Easing.quartic_out(t, HUDTabWeaponChallenge.ANIMATION_MOVE_X_DISTANCE, -HUDTabWeaponChallenge.ANIMATION_MOVE_X_DISTANCE, fade_in_duration)
+		current_position = math.round(current_position)
 
 		self._inner_panel:set_x(current_position)
 	end

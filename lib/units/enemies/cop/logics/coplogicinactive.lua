@@ -1,12 +1,13 @@
 CopLogicInactive = class(CopLogicBase)
 
--- Lines 7-55
+-- Lines 7-74
 function CopLogicInactive.enter(data, new_logic_name, enter_params)
-	CopLogicBase.enter(data, new_logic_name, enter_params)
-
-	local old_internal_data = data.internal_data
 	data.internal_data = {}
 	local my_data = data.internal_data
+
+	CopLogicBase.enter(data, new_logic_name, enter_params, my_data)
+
+	local old_internal_data = data.internal_data
 
 	if data.has_outline then
 		data.unit:contour():remove("highlight")
@@ -32,6 +33,28 @@ function CopLogicInactive.enter(data, new_logic_name, enter_params)
 
 	data.brain:rem_all_pos_rsrv()
 
+	if my_data.nearest_cover then
+		managers.navigation:release_cover(my_data.nearest_cover[1])
+	end
+
+	if my_data.best_cover then
+		managers.navigation:release_cover(my_data.best_cover[1])
+	end
+
+	if old_internal_data then
+		if old_internal_data.nearest_cover then
+			my_data.nearest_cover = old_internal_data.nearest_cover
+
+			managers.navigation:reserve_cover(my_data.nearest_cover[1], data.pos_rsrv_id)
+		end
+
+		if old_internal_data.best_cover then
+			my_data.best_cover = old_internal_data.best_cover
+
+			managers.navigation:reserve_cover(my_data.best_cover[1], data.pos_rsrv_id)
+		end
+	end
+
 	if data.objective and data.objective.type == "follow" and data.objective.destroy_clbk_key then
 		data.objective.follow_unit:base():remove_destroy_listener(data.objective.destroy_clbk_key)
 
@@ -54,7 +77,7 @@ function CopLogicInactive.enter(data, new_logic_name, enter_params)
 	data.logic._set_interaction(data, my_data)
 end
 
--- Lines 59-66
+-- Lines 78-85
 function CopLogicInactive.exit(data, new_logic_name, enter_params)
 	CopLogicBase.exit(data, new_logic_name, enter_params)
 	data.unit:brain():set_update_enabled_state(true)
@@ -64,12 +87,12 @@ function CopLogicInactive.exit(data, new_logic_name, enter_params)
 	CopLogicBase.cancel_delayed_clbks(my_data)
 end
 
--- Lines 70-72
+-- Lines 89-91
 function CopLogicInactive.is_available_for_assignment(data)
 	return false
 end
 
--- Lines 76-83
+-- Lines 95-102
 function CopLogicInactive.on_enemy_weapons_hot(data)
 	local my_data = data.internal_data
 
@@ -82,7 +105,7 @@ function CopLogicInactive.on_enemy_weapons_hot(data)
 	end
 end
 
--- Lines 87-97
+-- Lines 106-116
 function CopLogicInactive._register_attention(data, my_data)
 	if data.unit:character_damage():dead() then
 		if managers.groupai:state():enemy_weapons_hot() then
@@ -99,7 +122,7 @@ function CopLogicInactive._register_attention(data, my_data)
 	end
 end
 
--- Lines 101-111
+-- Lines 120-130
 function CopLogicInactive._set_interaction(data, my_data)
 	if data.unit:character_damage():dead() and managers.groupai:state():whisper_mode() then
 		if data.unit:unit_data().has_alarm_pager then
@@ -111,7 +134,7 @@ function CopLogicInactive._set_interaction(data, my_data)
 	end
 end
 
--- Lines 115-124
+-- Lines 134-143
 function CopLogicInactive.on_new_objective(data, old_objective)
 	if not data.internal_data.removing_objective then
 		debug_pause_unit(data.unit, "[CopLogicInactive.on_new_objective]", data.unit, "new_objective", data.objective and inspect(data.objective), "old_objective", old_objective and inspect(old_objective))
@@ -124,6 +147,6 @@ function CopLogicInactive.on_new_objective(data, old_objective)
 	end
 end
 
--- Lines 129-130
+-- Lines 148-149
 function CopLogicInactive.on_intimidated(data, amount, aggressor_unit)
 end

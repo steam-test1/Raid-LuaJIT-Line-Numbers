@@ -217,12 +217,14 @@ function NewFlamethrowerBase:_fire_raycast(user_unit, from_pos, direction, dmg_m
 		weapon_unit = self._unit
 	})
 
-	for _, _ in pairs(hit_enemies) do
-		managers.statistics:shot_fired({
-			skip_bullet_count = true,
-			hit = true,
-			weapon_unit = self._unit
-		})
+	if next(hit_enemies) then
+		if true or false then
+			managers.statistics:shot_fired({
+				skip_bullet_count = true,
+				hit = true,
+				weapon_unit = self._unit
+			})
+		end
 	end
 
 	return result

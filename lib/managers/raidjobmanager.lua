@@ -157,12 +157,13 @@ function RaidJobManager:synced_on_restart_to_camp()
 	self:_on_restart_to_camp()
 end
 
--- Lines 151-168
+-- Lines 151-169
 function RaidJobManager:_on_restart_to_camp()
 	managers.statistics:stop_session({
 		success = false,
 		quit = true
 	})
+	managers.lootdrop:reset_loot_value_counters()
 	managers.global_state:reset_all_flags()
 
 	if managers.player:current_state() == "turret" then
@@ -178,12 +179,12 @@ function RaidJobManager:_on_restart_to_camp()
 	managers.savefile:save_game(SavefileManager.SETTING_SLOT)
 end
 
--- Lines 171-173
+-- Lines 172-174
 function RaidJobManager:start_selected_raid()
 	self:start_selected_job()
 end
 
--- Lines 175-183
+-- Lines 176-184
 function RaidJobManager:start_selected_operation()
 	Application:debug("[RaidJobManager:start_selected_operation()]")
 	self:start_selected_job()
@@ -195,32 +196,32 @@ function RaidJobManager:start_selected_operation()
 	end
 end
 
--- Lines 185-187
+-- Lines 186-188
 function RaidJobManager:selected_job()
 	return self._selected_job
 end
 
--- Lines 190-192
+-- Lines 191-193
 function RaidJobManager:current_job()
 	return self._current_job
 end
 
--- Lines 194-196
+-- Lines 195-197
 function RaidJobManager:is_in_tutorial()
 	return self._current_job and self._current_job.level_id == "tutorial"
 end
 
--- Lines 198-200
+-- Lines 199-201
 function RaidJobManager:current_job_id()
 	return self._current_job and self._current_job.job_id
 end
 
--- Lines 202-204
+-- Lines 203-205
 function RaidJobManager:current_level_id()
 	return self._current_job and self._current_job.level_id
 end
 
--- Lines 206-214
+-- Lines 207-215
 function RaidJobManager:current_job_type()
 	if self._selected_job then
 		return self._selected_job.job_type
@@ -231,13 +232,18 @@ function RaidJobManager:current_job_type()
 	return nil
 end
 
--- Lines 216-219
+-- Lines 217-226
 function RaidJobManager:on_mission_restart()
+	managers.challenge_cards:remove_active_challenge_card()
+	managers.greed:on_level_exited(false)
+	managers.consumable_missions:on_level_exited(false)
+	managers.statistics:reset_session()
+	managers.lootdrop:reset_loot_value_counters()
 	self:on_mission_ended()
 	self:on_mission_started()
 end
 
--- Lines 222-239
+-- Lines 229-246
 function RaidJobManager:external_start_mission()
 	if not Network:is_server() then
 		return
@@ -260,10 +266,9 @@ function RaidJobManager:external_start_mission()
 	self:do_external_start_mission(mission, event_index)
 end
 
--- Lines 241-271
+-- Lines 248-281
 function RaidJobManager:do_external_start_mission(mission, event_index)
 	managers.player:set_local_player_in_camp(false)
-	managers.consumable_missions:on_mission_started()
 
 	local data = {}
 
@@ -297,10 +302,12 @@ function RaidJobManager:do_external_start_mission(mission, event_index)
 		return
 	end
 
-	managers.menu:show_loading_screen(data, callback(self, self, "external_start_mission_clbk"))
+	managers.consumable_missions:on_mission_started()
+	managers.menu:show_loading_screen(data)
+	managers.queued_tasks:queue(nil, self.external_start_mission_clbk, self, nil, 0.6, nil, true)
 end
 
--- Lines 274-322
+-- Lines 284-332
 function RaidJobManager:external_start_mission_clbk()
 	Application:debug("[RaidJobManager:external_start_mission_clbk()]", self.reload_mission_flag)
 
@@ -352,7 +359,7 @@ function RaidJobManager:external_start_mission_clbk()
 	end
 end
 
--- Lines 326-340
+-- Lines 336-350
 function RaidJobManager:external_end_mission(restart_camp, is_failed)
 	managers.worldcollection.level_transition_in_progress = true
 
@@ -371,18 +378,18 @@ function RaidJobManager:external_end_mission(restart_camp, is_failed)
 	end
 end
 
--- Lines 342-345
+-- Lines 352-355
 function RaidJobManager:tutorial_ended()
 	self._tutorial_ended = true
 end
 
--- Lines 348-351
+-- Lines 358-361
 function RaidJobManager:set_temp_play_flag()
 	self._play_tutorial = true
 	self._temp_play_flag = true
 end
 
--- Lines 352-357
+-- Lines 362-367
 function RaidJobManager:revert_temp_play_flag()
 	if self._temp_play_flag then
 		self._play_tutorial = false
@@ -391,16 +398,17 @@ function RaidJobManager:revert_temp_play_flag()
 	self._temp_play_flag = nil
 end
 
--- Lines 359-361
+-- Lines 369-371
 function RaidJobManager:played_tutorial()
 	return not self._play_tutorial
 end
 
--- Lines 364-425
+-- Lines 374-448
 function RaidJobManager:do_external_end_mission(restart_camp)
 	Application:debug("[RaidJobManager:external_end_mission()]", restart_camp)
 	managers.player:set_local_player_in_camp(true)
 	managers.consumable_missions:on_level_exited(self._current_job and self:stage_success())
+	managers.greed:on_level_exited(self._current_job and self:stage_success())
 
 	if restart_camp then
 		self:restart_camp()
@@ -430,18 +438,30 @@ function RaidJobManager:do_external_end_mission(restart_camp)
 		local data = {}
 
 		if not managers.worldcollection:first_pass() and mission.loading_success then
+			local at_last_stage = false
+
 			if not self._current_job then
 				data.mission = mission
 			elseif self._current_job.job_type == OperationsTweakData.JOB_TYPE_RAID then
 				data.mission = tweak_data.operations.missions[self._current_job.job_id]
+				at_last_stage = true
 			else
 				local operation_tweak_data = tweak_data.operations.missions[self._current_job.job_id]
 				local current_event_id = self._current_job.events_index[self._current_job.current_event]
 				local event_tweak_data = operation_tweak_data.events[current_event_id]
 				data.mission = event_tweak_data
+				at_last_stage = self._current_job.current_event == #self._current_job.events_index
 			end
 
 			if self._current_job and self:stage_success() then
+				if at_last_stage then
+					local difficulty = Global.game_settings and Global.game_settings.difficulty or Global.DEFAULT_DIFFICULTY
+					local difficulty_index = tweak_data:difficulty_to_index(difficulty)
+
+					Application:trace("finished it on difficulty", difficulty)
+					managers.progression:complete_mission_on_difficulty(self._current_job.job_type, self._current_job.job_id, difficulty_index)
+				end
+
 				data.success = true
 			elseif self._current_job and not self:stage_success() then
 				data.success = false
@@ -461,23 +481,29 @@ function RaidJobManager:do_external_end_mission(restart_camp)
 			self:complete_job()
 		end
 
-		managers.menu:show_loading_screen(data, callback(self, self, "external_end_mission_clbk"))
+		managers.menu:show_loading_screen(data)
+		managers.queued_tasks:queue(nil, self.external_end_mission_clbk, self, nil, 0.6, nil, true)
 	end
 end
 
--- Lines 427-430
+-- Lines 450-453
 function RaidJobManager:save_tutorial_played_flag(value)
 	self._play_tutorial = not value
 
 	managers.savefile:save_game(SavefileManager.SETTING_SLOT)
 end
 
--- Lines 433-435
+-- Lines 455-457
+function RaidJobManager:set_tutorial_played_flag(value)
+	self._play_tutorial = not value
+end
+
+-- Lines 459-461
 function RaidJobManager:restart_camp()
 	self:deactivate_current_job()
 end
 
--- Lines 438-477
+-- Lines 464-503
 function RaidJobManager:external_end_mission_clbk()
 	Application:debug("[RaidJobManager:external_end_mission_clbk()]")
 
@@ -524,7 +550,7 @@ function RaidJobManager:external_end_mission_clbk()
 	end
 end
 
--- Lines 479-486
+-- Lines 505-512
 function RaidJobManager:is_camp_loaded()
 	local camp_wp = managers.mission:get_element_by_name(RaidJobManager.WORLD_POINT_CAMP)
 	local result = false
@@ -536,12 +562,12 @@ function RaidJobManager:is_camp_loaded()
 	return result
 end
 
--- Lines 488-490
+-- Lines 514-516
 function RaidJobManager:has_active_job()
 	return self._current_job and true or false
 end
 
--- Lines 493-504
+-- Lines 519-530
 function RaidJobManager:get_available_save_slot()
 	local available_save_slot = nil
 
@@ -556,12 +582,12 @@ function RaidJobManager:get_available_save_slot()
 	return available_save_slot
 end
 
--- Lines 507-509
+-- Lines 533-535
 function RaidJobManager:get_first_save_slot()
 	return self._save_slots and next(self._save_slots)
 end
 
--- Lines 511-519
+-- Lines 537-545
 function RaidJobManager:has_available_save_slot()
 	for i = 1, RaidJobManager.NUMBER_OF_SAVE_SLOTS do
 		if not self._save_slots[i] then
@@ -572,7 +598,7 @@ function RaidJobManager:has_available_save_slot()
 	return false
 end
 
--- Lines 521-536
+-- Lines 547-562
 function RaidJobManager:is_at_last_event()
 	local job = self._current_job
 
@@ -591,8 +617,10 @@ function RaidJobManager:is_at_last_event()
 	return false
 end
 
--- Lines 540-579
+-- Lines 566-606
 function RaidJobManager:complete_current_event()
+	Application:trace("[RaidJobManager][complete_current_event]")
+
 	if not self._current_job then
 		Application:error("[RaidJobManager:complete_current_event] It seems you are not in a mission.")
 
@@ -622,14 +650,16 @@ function RaidJobManager:complete_current_event()
 	self:on_mission_ended()
 end
 
--- Lines 581-584
+-- Lines 608-611
 function RaidJobManager:sync_current_event_index(current_event)
 	self:set_current_event(self._current_job, current_event)
 	self:on_mission_started()
 end
 
--- Lines 586-594
+-- Lines 613-623
 function RaidJobManager:sync_event_loot_data(loot_acquired, loot_spawned)
+	Application:trace("[RaidJobManager][sync_event_loot_data]")
+
 	local event_loot_data = {
 		acquired = loot_acquired,
 		spawned = loot_spawned
@@ -639,12 +669,12 @@ function RaidJobManager:sync_event_loot_data(loot_acquired, loot_spawned)
 	managers.system_event_listener:call_listeners(EventCompleteState.LOOT_DATA_READY_KEY)
 end
 
--- Lines 596-598
+-- Lines 625-627
 function RaidJobManager:job_loot_data()
 	return self._loot_data
 end
 
--- Lines 600-608
+-- Lines 629-637
 function RaidJobManager:loot_acquired_in_job()
 	local loot_acquired = 0
 
@@ -655,7 +685,7 @@ function RaidJobManager:loot_acquired_in_job()
 	return loot_acquired
 end
 
--- Lines 610-618
+-- Lines 639-647
 function RaidJobManager:loot_spawned_in_job()
 	local loot_spawned = 0
 
@@ -666,14 +696,14 @@ function RaidJobManager:loot_spawned_in_job()
 	return loot_spawned
 end
 
--- Lines 620-623
+-- Lines 649-652
 function RaidJobManager:is_at_checkpoint()
 	local current_event = self:current_operation_event()
 
 	return current_event and current_event.checkpoint
 end
 
--- Lines 626-631
+-- Lines 655-660
 function RaidJobManager:current_operation_event()
 	if not self._current_job then
 		return nil
@@ -682,7 +712,7 @@ function RaidJobManager:current_operation_event()
 	return self._current_job.events[self._current_job.events_index[self._current_job.current_event]]
 end
 
--- Lines 635-646
+-- Lines 664-675
 function RaidJobManager:start_next_event()
 	if self._current_job.current_event then
 		if self._stage_success then
@@ -697,7 +727,7 @@ function RaidJobManager:start_next_event()
 	self._stage_success = nil
 end
 
--- Lines 649-674
+-- Lines 678-703
 function RaidJobManager:start_event(event_id)
 	Application:debug("[RaidJobManager:start_event]", event_id)
 
@@ -727,10 +757,14 @@ function RaidJobManager:start_event(event_id)
 	self:on_mission_started()
 end
 
--- Lines 676-689
+-- Lines 705-721
 function RaidJobManager:complete_job()
-	if self._current_job.job_type == OperationsTweakData.JOB_TYPE_OPERATION then
+	if Network:is_server() and self._current_job.job_type == OperationsTweakData.JOB_TYPE_OPERATION then
 		self:delete_save(self._current_save_slot)
+	end
+
+	if Network:is_server() then
+		managers.network:session():send_to_peers_synched("sync_complete_job")
 	end
 
 	self._current_save_slot = nil
@@ -742,7 +776,7 @@ function RaidJobManager:complete_job()
 	managers.lootdrop:reset_loot_value_counters()
 end
 
--- Lines 692-724
+-- Lines 724-756
 function RaidJobManager:continue_operation(slot)
 	managers.global_state:reset_all_flags()
 	managers.global_state:set_global_states(self._save_slots[slot].global_states)
@@ -781,7 +815,7 @@ function RaidJobManager:continue_operation(slot)
 	self:start_event(self._current_job.current_event)
 end
 
--- Lines 726-733
+-- Lines 758-765
 function RaidJobManager:clear_operations_save_slots()
 	for i = 1, RaidJobManager.NUMBER_OF_SAVE_SLOTS do
 		self._save_slots[i] = nil
@@ -792,7 +826,7 @@ function RaidJobManager:clear_operations_save_slots()
 	managers.savefile:save_game(SavefileManager.SETTING_SLOT)
 end
 
--- Lines 735-739
+-- Lines 767-771
 function RaidJobManager:delete_save(slot)
 	self._save_slots[slot] = nil
 	self._current_save_slot = nil
@@ -800,12 +834,12 @@ function RaidJobManager:delete_save(slot)
 	managers.savefile:save_game(SavefileManager.SETTING_SLOT)
 end
 
--- Lines 741-743
+-- Lines 773-775
 function RaidJobManager:get_save_slots()
 	return self._save_slots
 end
 
--- Lines 746-751
+-- Lines 778-783
 function RaidJobManager:save_progress()
 	if self._current_job and self._current_job.job_type == OperationsTweakData.JOB_TYPE_OPERATION then
 		self._need_to_save = true
@@ -814,7 +848,7 @@ function RaidJobManager:save_progress()
 	end
 end
 
--- Lines 754-760
+-- Lines 786-792
 function RaidJobManager:on_challenge_card_failed()
 	if self._current_job and self._current_job.job_type == OperationsTweakData.JOB_TYPE_OPERATION then
 		self._save_slots[self._current_save_slot].active_card.status = ChallengeCardsManager.CARD_STATUS_FAILED
@@ -823,12 +857,12 @@ function RaidJobManager:on_challenge_card_failed()
 	end
 end
 
--- Lines 762-764
+-- Lines 794-796
 function RaidJobManager:get_current_save_slot()
 	return self._current_save_slot
 end
 
--- Lines 767-776
+-- Lines 799-808
 function RaidJobManager:load_game(data)
 	Application:trace("[RaidJobManager:load_game] ")
 
@@ -843,7 +877,7 @@ function RaidJobManager:load_game(data)
 	end
 end
 
--- Lines 779-858
+-- Lines 811-900
 function RaidJobManager:save_game(data)
 	data.job_manager = {
 		tutorial_played = not self._play_tutorial
@@ -902,6 +936,15 @@ function RaidJobManager:save_game(data)
 
 			save_data.difficulty = Global.game_settings.difficulty
 			save_data.difficulty_id = tweak_data:difficulty_to_index(save_data.difficulty)
+			save_data.permission = Global.game_settings.permission
+			save_data.drop_in_allowed = Global.game_settings.drop_in_allowed
+			save_data.team_ai = self._save_slots[self._current_save_slot].team_ai
+
+			if save_data.team_ai == nil then
+				save_data.team_ai = Global.game_settings.team_ai
+			end
+
+			save_data.auto_kick = Global.game_settings.auto_kick
 			save_data.events_index = current_job.events_index
 			self._save_slots[self._current_save_slot] = save_data
 		end
@@ -911,7 +954,7 @@ function RaidJobManager:save_game(data)
 	end
 end
 
--- Lines 860-889
+-- Lines 902-931
 function RaidJobManager:_prepare_peer_save_data()
 	local peer_save_data = {}
 	local local_player_data = {
@@ -927,7 +970,7 @@ function RaidJobManager:_prepare_peer_save_data()
 	table.insert(peer_save_data, local_player_data)
 
 	for index, peer in pairs(managers.network:session():all_peers()) do
-		if peer:unit() ~= managers.player:player_unit() then
+		if peer ~= managers.network:session():local_peer() then
 			local peer_data = {
 				name = peer:name(),
 				class = peer:class(),
@@ -944,7 +987,7 @@ function RaidJobManager:_prepare_peer_save_data()
 	return peer_save_data
 end
 
--- Lines 892-905
+-- Lines 934-947
 function RaidJobManager:sync_current_job(job_id)
 	self._selected_job = nil
 	self._current_job = nil
@@ -957,7 +1000,7 @@ function RaidJobManager:sync_current_job(job_id)
 	self:on_mission_started()
 end
 
--- Lines 907-914
+-- Lines 949-956
 function RaidJobManager:set_memory(key, value, is_shortterm)
 	if self.memory and not is_shortterm then
 		self.memory[key] = value
@@ -968,7 +1011,7 @@ function RaidJobManager:set_memory(key, value, is_shortterm)
 	return false
 end
 
--- Lines 916-922
+-- Lines 958-964
 function RaidJobManager:get_memory(key, is_shortterm)
 	if is_shortterm then
 		return self.shortterm_memory and self.shortterm_memory[key]
@@ -977,7 +1020,7 @@ function RaidJobManager:get_memory(key, is_shortterm)
 	end
 end
 
--- Lines 925-938
+-- Lines 967-980
 function RaidJobManager:sync_save(data)
 	local state = {
 		selected_job_id = self._selected_job and self._selected_job.job_id,
@@ -997,7 +1040,7 @@ function RaidJobManager:sync_save(data)
 	data.RaidJobManager = state
 end
 
--- Lines 941-962
+-- Lines 983-1004
 function RaidJobManager:sync_load(data)
 	local state = data.RaidJobManager
 
@@ -1029,7 +1072,7 @@ function RaidJobManager:sync_load(data)
 	end
 end
 
--- Lines 964-972
+-- Lines 1006-1014
 function RaidJobManager:cleanup()
 	self._current_save_slot = {}
 	self._selected_job = nil
@@ -1039,38 +1082,38 @@ function RaidJobManager:cleanup()
 	self._tutorial_spawned = nil
 end
 
--- Lines 974-977
+-- Lines 1016-1019
 function RaidJobManager:reset()
 	self:cleanup()
 
 	self._save_slots = {}
 end
 
--- Lines 980-983
+-- Lines 1022-1025
 function RaidJobManager:on_simulation_ended()
 	self._save_slots = {}
 
 	self:cleanup()
 end
 
--- Lines 985-987
+-- Lines 1027-1029
 function RaidJobManager:stop_sounds()
 	local cleanup = SoundDevice:create_source("cleanup")
 end
 
--- Lines 989-992
+-- Lines 1031-1034
 function RaidJobManager:set_stage_success(success)
 	print("[RaidJobManager:set_stage_success]", success)
 
 	self._stage_success = success
 end
 
--- Lines 994-996
+-- Lines 1036-1038
 function RaidJobManager:stage_success()
 	return self._stage_success
 end
 
--- Lines 998-1009
+-- Lines 1040-1051
 function RaidJobManager:deactivate_current_job()
 	self._current_job = nil
 	self._selected_job = nil
@@ -1085,7 +1128,7 @@ function RaidJobManager:deactivate_current_job()
 	managers.network.matchmake:set_job_info_by_current_job()
 end
 
--- Lines 1011-1015
+-- Lines 1053-1057
 function RaidJobManager:set_camp(job_id)
 	local job = tweak_data.operations.missions[job_id]
 	self._camp = job
@@ -1093,12 +1136,12 @@ function RaidJobManager:set_camp(job_id)
 	return true
 end
 
--- Lines 1017-1019
+-- Lines 1059-1061
 function RaidJobManager:camp()
 	return self._camp
 end
 
--- Lines 1021-1023
+-- Lines 1063-1065
 function RaidJobManager:has_active_job()
 	return self._current_job ~= nil
 end

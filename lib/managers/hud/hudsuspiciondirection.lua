@@ -4,6 +4,9 @@ HUDSuspicionDirection.H = 362
 HUDSuspicionDirection.RADIUS = 195
 HUDSuspicionDirection.ICON_FILL = "stealth_indicator_fill"
 HUDSuspicionDirection.ICON_STROKE = "stealth_indicator_stroke"
+HUDSuspicionDirection.PLAYER_ACTIVE_ALPHA = 1
+HUDSuspicionDirection.TEAMMATE_ACTIVE_ALPHA = 0.6
+HUDSuspicionDirection.USE_STATE_COLORS = true
 HUDSuspicionDirection.STATE_COLORS = {
 	heard_something = Color("ececec"),
 	saw_something = Color("ececec"),
@@ -12,7 +15,7 @@ HUDSuspicionDirection.STATE_COLORS = {
 	calling = Color("b8392e")
 }
 
--- Lines 19-31
+-- Lines 23-35
 function HUDSuspicionDirection:init(hud)
 	self._hud_panel = hud.panel
 	self._indicators = {}
@@ -26,7 +29,7 @@ function HUDSuspicionDirection:init(hud)
 	managers.hud:add_updator("suspicion_direction_panel", callback(self, self, "update_suspicion_indicators"))
 end
 
--- Lines 33-43
+-- Lines 37-47
 function HUDSuspicionDirection:_create_panel(hud)
 	local panel_params = {
 		layer = -5,
@@ -41,25 +44,28 @@ function HUDSuspicionDirection:_create_panel(hud)
 	self._suspicion_direction_panel:set_center(self._suspicion_direction_panel:parent():w() / 2, self._suspicion_direction_panel:parent():h() / 2)
 end
 
--- Lines 45-56
-function HUDSuspicionDirection:create_suspicion_indicator(observer_key, observer_position, initial_state)
+-- Lines 49-60
+function HUDSuspicionDirection:create_suspicion_indicator(observer_key, observer_position, initial_state, suspect)
 	if self._indicators[observer_key] then
 		return
 	end
 
 	local indicator = self:_create_suspicion_indicator(observer_key)
+	local indicator_active_alpha = HUDManager.DIFFERENT_SUSPICION_INDICATORS_FOR_TEAMMATES == true and suspect == "teammate" and HUDSuspicionDirection.TEAMMATE_ACTIVE_ALPHA or HUDSuspicionDirection.PLAYER_ACTIVE_ALPHA
 	self._indicators[observer_key] = {
-		need_to_init = true,
 		state = "heard_something",
+		need_to_init = true,
 		indicator = indicator,
-		position = observer_position
+		position = observer_position,
+		suspect = suspect,
+		active_alpha = indicator_active_alpha
 	}
 	self._number_of_indicators = self._number_of_indicators + 1
 
 	self:set_state(observer_key, initial_state)
 end
 
--- Lines 58-82
+-- Lines 62-86
 function HUDSuspicionDirection:_create_suspicion_indicator(id)
 	local indicator_panel_params = {
 		alpha = 0,
@@ -84,7 +90,7 @@ function HUDSuspicionDirection:_create_suspicion_indicator(id)
 	return indicator
 end
 
--- Lines 84-90
+-- Lines 88-94
 function HUDSuspicionDirection:need_to_init(observer_key)
 	if self._indicators[observer_key] ~= nil then
 		return self._indicators[observer_key].need_to_init
@@ -93,37 +99,42 @@ function HUDSuspicionDirection:need_to_init(observer_key)
 	return false
 end
 
--- Lines 92-97
+-- Lines 96-101
 function HUDSuspicionDirection:initialize(observer_key, alpha)
 	if alpha == 1 then
-		self._indicators[observer_key].indicator:animate(callback(self, self, "_animate_alpha"), 1, 0.5)
+		self._indicators[observer_key].indicator:animate(callback(self, self, "_animate_alpha"), self._indicators[observer_key].active_alpha, 0.5)
 	end
 
 	self._indicators[observer_key].need_to_init = false
 end
 
--- Lines 99-109
+-- Lines 103-114
 function HUDSuspicionDirection:set_state(observer_key, state)
 	if not self._indicators[observer_key] then
 		return
 	end
 
 	self._indicators[observer_key].state = state
-end
 
--- Lines 111-112
-function HUDSuspicionDirection:set_suspicion_indicator_progress(observer_key, progress)
-end
-
--- Lines 114-119
-function HUDSuspicionDirection:show_suspicion_indicator(observer_key)
-	if self._indicators[observer_key] ~= nil then
-		self._indicators[observer_key].indicator:stop()
-		self._indicators[observer_key].indicator:animate(callback(self, self, "_animate_alpha"), 1, 0.2)
+	if HUDSuspicionDirection.STATE_COLORS[state] and HUDSuspicionDirection.USE_STATE_COLORS then
+		self._indicators[observer_key].indicator:child("indicator_fill"):stop()
+		self._indicators[observer_key].indicator:child("indicator_fill"):animate(callback(self, self, "_animate_color"), HUDSuspicionDirection.STATE_COLORS[state])
 	end
 end
 
--- Lines 121-126
+-- Lines 116-117
+function HUDSuspicionDirection:set_suspicion_indicator_progress(observer_key, progress)
+end
+
+-- Lines 119-124
+function HUDSuspicionDirection:show_suspicion_indicator(observer_key)
+	if self._indicators[observer_key] ~= nil then
+		self._indicators[observer_key].indicator:stop()
+		self._indicators[observer_key].indicator:animate(callback(self, self, "_animate_alpha"), self._indicators[observer_key].active_alpha, 0.2)
+	end
+end
+
+-- Lines 126-131
 function HUDSuspicionDirection:hide_suspicion_indicator(observer_key)
 	if self._indicators[observer_key] ~= nil then
 		self._indicators[observer_key].indicator:stop()
@@ -131,7 +142,7 @@ function HUDSuspicionDirection:hide_suspicion_indicator(observer_key)
 	end
 end
 
--- Lines 128-132
+-- Lines 133-137
 function HUDSuspicionDirection:remove_suspicion_indicator(observer_key)
 	if self._indicators[observer_key] ~= nil and alive(self._indicators[observer_key].indicator) then
 		self._indicators[observer_key].indicator:animate(callback(self, self, "_animate_alpha"), 0, 0.5, self._remove_suspicion_indicator, {
@@ -140,7 +151,7 @@ function HUDSuspicionDirection:remove_suspicion_indicator(observer_key)
 	end
 end
 
--- Lines 134-143
+-- Lines 139-148
 function HUDSuspicionDirection:_remove_suspicion_indicator(observer_key)
 	self._indicators[observer_key].indicator:clear()
 	self._suspicion_direction_panel:remove(self._indicators[observer_key].indicator)
@@ -153,7 +164,7 @@ function HUDSuspicionDirection:_remove_suspicion_indicator(observer_key)
 	end
 end
 
--- Lines 145-172
+-- Lines 150-177
 function HUDSuspicionDirection:update_suspicion_indicators()
 	if self._number_of_indicators == 0 or self._number_of_indicators == nil or managers.player:player_unit() == nil then
 		return
@@ -181,7 +192,7 @@ function HUDSuspicionDirection:update_suspicion_indicators()
 	end
 end
 
--- Lines 174-183
+-- Lines 179-188
 function HUDSuspicionDirection:clean_up()
 	for u_key, u_data in pairs(self._indicators) do
 		u_data.indicator:stop()
@@ -193,7 +204,7 @@ function HUDSuspicionDirection:clean_up()
 	self._number_of_indicators = 0
 end
 
--- Lines 185-211
+-- Lines 190-216
 function HUDSuspicionDirection:_animate_alpha(indicator, new_alpha, duration, clbk, clbk_data)
 	local t = 0
 	local dt = nil
@@ -220,14 +231,33 @@ function HUDSuspicionDirection:_animate_alpha(indicator, new_alpha, duration, cl
 	end
 end
 
--- Lines 222-225
+-- Lines 218-234
+function HUDSuspicionDirection:_animate_color(indicator, new_color)
+	local duration = 0.2
+	local t = 0
+	local initial_color = indicator:color()
+
+	while t < duration do
+		local dt = coroutine.yield()
+		t = t + dt
+		local current_r = Easing.cubic_in_out(t, initial_color.r, new_color.r - initial_color.r, duration)
+		local current_g = Easing.cubic_in_out(t, initial_color.g, new_color.g - initial_color.g, duration)
+		local current_b = Easing.cubic_in_out(t, initial_color.b, new_color.b - initial_color.b, duration)
+
+		indicator:set_color(Color(current_r, current_g, current_b))
+	end
+
+	indicator:set_color(new_color)
+end
+
+-- Lines 243-246
 function HUDSuspicionDirection:_remove_indicator(id)
 	self._suspicion_direction_panel:remove(self._indicators[id].indicator)
 
 	self._indicators[id] = nil
 end
 
--- Lines 227-280
+-- Lines 248-301
 function HUDSuspicionDirection:_animate_suspicion(id)
 	local indicator_show_duration = tweak_data.player.damage_indicator_duration
 	local t = indicator_show_duration

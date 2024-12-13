@@ -234,9 +234,9 @@ function GroupAIRaidTweakData:init(difficulty_index)
 	elseif difficulty_index == TweakData.DIFFICULTY_2 then
 		self.assault.force_balance_mul = {
 			1,
-			1.25,
-			1.5,
-			2.25
+			1.3,
+			1.6,
+			2
 		}
 		self.assault.force_pool_balance_mul = {
 			0.8,
@@ -246,29 +246,29 @@ function GroupAIRaidTweakData:init(difficulty_index)
 		}
 	elseif difficulty_index == TweakData.DIFFICULTY_3 then
 		self.assault.force_balance_mul = {
-			1.5,
-			1.8,
-			2.2,
-			3
-		}
-		self.assault.force_pool_balance_mul = {
-			1.4,
 			2,
 			2.5,
-			2.8
+			3,
+			3.5
+		}
+		self.assault.force_pool_balance_mul = {
+			1.5,
+			2,
+			2.5,
+			3
 		}
 	elseif difficulty_index == TweakData.DIFFICULTY_4 then
 		self.assault.force_balance_mul = {
 			2.5,
 			3,
-			4,
-			5
+			3.5,
+			4.5
 		}
 		self.assault.force_pool_balance_mul = {
 			2,
 			3,
-			4,
-			5
+			3.5,
+			4
 		}
 	end
 
@@ -337,7 +337,7 @@ function GroupAIRaidTweakData:init(difficulty_index)
 			flamethrower = {
 				0,
 				0,
-				0
+				1
 			},
 			commanders = {
 				0,
@@ -413,9 +413,9 @@ function GroupAIRaidTweakData:init(difficulty_index)
 				0
 			},
 			flamethrower = {
-				3,
-				6,
-				9
+				1,
+				1,
+				2
 			},
 			commanders = {
 				0,
@@ -496,9 +496,9 @@ function GroupAIRaidTweakData:init(difficulty_index)
 				15
 			},
 			commanders = {
-				9,
-				12,
-				15
+				3,
+				6,
+				9
 			},
 			commander_squad = {
 				60,

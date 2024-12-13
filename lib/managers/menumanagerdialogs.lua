@@ -2633,3 +2633,26 @@ function MenuManager:show_really_quit_the_game_dialog(params)
 
 	managers.system_menu:show(dialog_data)
 end
+
+-- Lines 1897-1912
+function MenuManager:show_unlock_mission_confirm_dialog(params)
+	local dialog_data = {
+		title = managers.localization:text("mission_unlock_screen_confirm_unlock_title", {
+			RAID = params.mission_title
+		}),
+		text = managers.localization:text("mission_unlock_screen_confirm_unlock_subtitle")
+	}
+	local yes_button = {}
+	local no_button = {}
+	yes_button.text = managers.localization:text("dialog_yes")
+	yes_button.callback_func = params.yes_func
+	no_button.text = managers.localization:text("dialog_no")
+	no_button.class = RaidGUIControlButtonShortSecondary
+	no_button.cancel_button = true
+	dialog_data.button_list = {
+		yes_button,
+		no_button
+	}
+
+	managers.system_menu:show(dialog_data)
+end

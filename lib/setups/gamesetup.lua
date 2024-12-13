@@ -30,7 +30,6 @@ require("lib/managers/ExplosionManager")
 require("lib/managers/DOTManager")
 require("lib/managers/GlobalStateManager")
 require("lib/managers/BarrageManager")
-require("lib/managers/AirdropManager")
 require("lib/managers/DropLootManager")
 require("lib/managers/NotificationManager")
 core:import("SequenceManager")
@@ -96,7 +95,6 @@ require("lib/units/player_team/HuskTeamAIBase")
 require("lib/units/characters/CharacterCustomization")
 require("lib/units/characters/CharacterCustomizationFps")
 require("lib/units/vehicles/AnimatedVehicleBase")
-require("lib/units/vehicles/AirDropPlane")
 require("lib/units/props/PowerupShelf")
 require("lib/units/vehicles/VehicleDrivingExt")
 require("lib/units/vehicles/VehicleDamage")
@@ -108,6 +106,8 @@ require("lib/units/interactions/SpecialInteractionExt")
 require("lib/units/DramaExt")
 require("lib/units/DialogCharExt")
 require("lib/units/pickups/Loot")
+require("lib/units/pickups/GreedItem")
+require("lib/units/pickups/GreedCacheItem")
 require("lib/units/pickups/Pickup")
 require("lib/units/pickups/AmmoClip")
 require("lib/units/pickups/HealthPackPickup")
@@ -169,11 +169,14 @@ require("lib/units/weapons/WeaponSecondSight")
 require("lib/units/weapons/WeaponSimpleAnim")
 require("lib/units/weapons/WeaponLionGadget1")
 require("lib/units/weapons/FlamethrowerEffectExtension")
+require("lib/units/weapons/MountedWeapon")
 require("lib/units/weapons/TurretWeapon")
 require("lib/units/weapons/TankTurretWeapon")
 require("lib/network/NetworkSpawnPointExt")
+require("lib/managers/test/TestManager")
 require("lib/units/props/TvGui")
 require("lib/units/props/CarryData")
+require("lib/units/props/CorpseCarryData")
 require("lib/units/props/AmmoPickup")
 require("lib/units/props/ThrowableAmmoBag")
 require("lib/units/props/AIAttentionObject")
@@ -190,7 +193,7 @@ require("lib/units/characters/CharacterManageSpawnedUnits")
 
 GameSetup = GameSetup or class(Setup)
 
--- Lines 254-319
+-- Lines 262-327
 function GameSetup:load_packages()
 	Application:debug("[GameSetup:load_packages()]")
 	Setup.load_packages(self)
@@ -264,7 +267,7 @@ function GameSetup:load_packages()
 	end
 end
 
--- Lines 321-353
+-- Lines 329-361
 function GameSetup:gather_packages_to_unload()
 	Setup.unload_packages(self)
 
@@ -300,12 +303,12 @@ function GameSetup:gather_packages_to_unload()
 	end
 end
 
--- Lines 355-357
+-- Lines 363-365
 function GameSetup:unload_packages()
 	Setup.unload_packages(self)
 end
 
--- Lines 359-398
+-- Lines 367-407
 function GameSetup:init_managers(managers)
 	Setup.init_managers(self, managers)
 
@@ -331,16 +334,16 @@ function GameSetup:init_managers(managers)
 	managers.dot = DOTManager:new()
 	managers.global_state = GlobalStateManager:new()
 	managers.barrage = BarrageManager:new()
-	managers.airdrop = AirdropManager:new()
 	managers.drop_loot = DropLootManager:new()
 	managers.notification = NotificationManager:new()
+	managers.test = TestManager:new()
 
 	if SystemInfo:platform() == Idstring("X360") then
 		managers.blackmarket:load_equipped_weapons()
 	end
 end
 
--- Lines 400-443
+-- Lines 409-452
 function GameSetup:init_game()
 	local gsm = Setup.init_game(self)
 
@@ -378,7 +381,7 @@ function GameSetup:init_game()
 	return gsm
 end
 
--- Lines 445-479
+-- Lines 454-488
 function GameSetup:init_finalize()
 	if script_data.level_script and script_data.level_script.post_init then
 		script_data.level_script:post_init()
@@ -417,7 +420,7 @@ function GameSetup:init_finalize()
 	managers.network.account:set_playing(true)
 end
 
--- Lines 481-520
+-- Lines 490-530
 function GameSetup:update(t, dt)
 	Setup.update(self, t, dt)
 
@@ -445,6 +448,7 @@ function GameSetup:update(t, dt)
 	managers.voice_over:update(t, dt)
 	managers.barrage:update(t, dt)
 	managers.queued_tasks:update(t, dt)
+	managers.test:update(t, dt)
 
 	if script_data.level_script and script_data.level_script.update then
 		script_data.level_script:update(t, dt)
@@ -454,7 +458,7 @@ function GameSetup:update(t, dt)
 	managers.buff_effect:update(t, dt)
 end
 
--- Lines 522-535
+-- Lines 532-545
 function GameSetup:paused_update(t, dt)
 	Setup.paused_update(self, t, dt)
 	managers.groupai:paused_update(t, dt)
@@ -470,7 +474,7 @@ function GameSetup:paused_update(t, dt)
 	self:_update_debug_input()
 end
 
--- Lines 537-552
+-- Lines 547-562
 function GameSetup:destroy()
 	Setup.destroy(self)
 
@@ -483,13 +487,13 @@ function GameSetup:destroy()
 	managers.network.account:set_playing(false)
 end
 
--- Lines 554-559
+-- Lines 564-569
 function GameSetup:end_update(t, dt)
 	Setup.end_update(self, t, dt)
 	managers.game_play_central:end_update(t, dt)
 end
 
--- Lines 562-588
+-- Lines 572-598
 function GameSetup:save(data)
 	Setup.save(self, data)
 	managers.game_play_central:save(data)
@@ -517,7 +521,7 @@ function GameSetup:save(data)
 	managers.statistics:sync_save(data)
 end
 
--- Lines 591-617
+-- Lines 601-627
 function GameSetup:load(data)
 	Setup.load(self, data)
 	managers.hud:load(data)
@@ -545,7 +549,7 @@ function GameSetup:load(data)
 	managers.statistics:sync_load(data)
 end
 
--- Lines 620-645
+-- Lines 630-655
 function GameSetup:_update_debug_input()
 end
 

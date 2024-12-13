@@ -491,7 +491,7 @@ function RaidGUIControlBranchingProgressBar:_animate_giving_points(panel, new_po
 	self:set_points(starting_points + new_points)
 end
 
--- Lines 503-537
+-- Lines 503-538
 function RaidGUIControlBranchingProgressBar:on_mouse_moved(o, x, y)
 	if not self._draggable then
 		return
@@ -522,6 +522,7 @@ function RaidGUIControlBranchingProgressBar:on_mouse_moved(o, x, y)
 
 	self._mouse_travel = (x - self._mouse_last_x) * self._move_damping
 	local scrollable_panel_new_x = self._scrollable_panel:x() + (x - self._mouse_last_x) * self._move_damping
+	scrollable_panel_new_x = math.round(scrollable_panel_new_x)
 
 	self._scrollable_panel:set_x(scrollable_panel_new_x)
 
@@ -530,12 +531,12 @@ function RaidGUIControlBranchingProgressBar:on_mouse_moved(o, x, y)
 	return true, "grab"
 end
 
--- Lines 540-548
+-- Lines 541-549
 function RaidGUIControlBranchingProgressBar:on_mouse_over(x, y)
 	RaidGUIControlBranchingProgressBar.super.on_mouse_over(self, x, y)
 end
 
--- Lines 551-566
+-- Lines 552-567
 function RaidGUIControlBranchingProgressBar:on_mouse_out(x, y)
 	if not self._draggable then
 		return
@@ -547,7 +548,7 @@ function RaidGUIControlBranchingProgressBar:on_mouse_out(x, y)
 	self._dragging = false
 end
 
--- Lines 569-585
+-- Lines 570-586
 function RaidGUIControlBranchingProgressBar:on_mouse_pressed()
 	if not self._draggable then
 		return
@@ -564,7 +565,7 @@ function RaidGUIControlBranchingProgressBar:on_mouse_pressed()
 	self._controller_enabled = false
 end
 
--- Lines 588-604
+-- Lines 589-605
 function RaidGUIControlBranchingProgressBar:on_mouse_released()
 	if not self._draggable then
 		return
@@ -581,19 +582,19 @@ function RaidGUIControlBranchingProgressBar:on_mouse_released()
 	end
 end
 
--- Lines 606-609
+-- Lines 607-610
 function RaidGUIControlBranchingProgressBar:show()
 	self._object:show()
 	self._bar:show()
 end
 
--- Lines 611-614
+-- Lines 612-615
 function RaidGUIControlBranchingProgressBar:hide()
 	self._object:hide()
 	self._bar:hide()
 end
 
--- Lines 616-628
+-- Lines 617-629
 function RaidGUIControlBranchingProgressBar:_ease_in_out_quint(t, starting_value, change, duration)
 	if duration <= t then
 		return starting_value + change
@@ -610,7 +611,7 @@ function RaidGUIControlBranchingProgressBar:_ease_in_out_quint(t, starting_value
 	return change / 2 * (t * t * t * t * t + 2) + starting_value
 end
 
--- Lines 630-677
+-- Lines 631-678
 function RaidGUIControlBranchingProgressBar:update(t, dt)
 	if self._dragging or managers.controller:is_using_controller() or self._controller_enabled then
 		return
@@ -646,7 +647,7 @@ function RaidGUIControlBranchingProgressBar:update(t, dt)
 	self._scrollable_panel:set_x(math.floor(self._scrollable_panel_x))
 end
 
--- Lines 679-701
+-- Lines 680-702
 function RaidGUIControlBranchingProgressBar:clear_selection()
 	self._selected_nodes = {}
 	self._first_available_level = 2

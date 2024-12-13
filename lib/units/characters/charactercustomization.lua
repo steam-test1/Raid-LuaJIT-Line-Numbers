@@ -147,7 +147,7 @@ function CharacterCustomization:_part_loaded_callback(params)
 	end
 end
 
--- Lines 151-177
+-- Lines 151-178
 function CharacterCustomization:attach_all_parts_to_character(slot_index, current_version)
 	local slot_cache_data = Global.savefile_manager.meta_data_list[slot_index].cache
 
@@ -155,51 +155,51 @@ function CharacterCustomization:attach_all_parts_to_character(slot_index, curren
 		self:destroy_all_parts_on_character()
 
 		local player_manager_data = slot_cache_data.PlayerManager
-		local equiped_head_name = managers.character_customization:get_equiped_part_from_character_save_slot(slot_index, CharacterCustomizationTweakData.PART_TYPE_HEAD)
-		local equiped_upper_name = managers.character_customization:get_equiped_part_from_character_save_slot(slot_index, CharacterCustomizationTweakData.PART_TYPE_UPPER)
-		local equiped_lower_name = managers.character_customization:get_equiped_part_from_character_save_slot(slot_index, CharacterCustomizationTweakData.PART_TYPE_LOWER)
 		local character_nationality_name = player_manager_data.character_profile_nation
 		local owned_heads = managers.character_customization:get_owned_customizations_indexed(CharacterCustomizationTweakData.PART_TYPE_HEAD, character_nationality_name)
-		local owned_uppers = managers.character_customization:get_owned_customizations_indexed(CharacterCustomizationTweakData.PART_TYPE_UPPER, character_nationality_name)
-		local owned_lowers = managers.character_customization:get_owned_customizations_indexed(CharacterCustomizationTweakData.PART_TYPE_LOWER, character_nationality_name)
+		local equiped_head_name = managers.character_customization:get_equiped_part_from_character_save_slot(slot_index, CharacterCustomizationTweakData.PART_TYPE_HEAD)
 		local equiped_head_object = owned_heads[managers.character_customization:get_equiped_part_index(character_nationality_name, CharacterCustomizationTweakData.PART_TYPE_HEAD, equiped_head_name)]
+		local owned_uppers = managers.character_customization:get_owned_customizations_indexed(CharacterCustomizationTweakData.PART_TYPE_UPPER, character_nationality_name)
+		local equiped_upper_name = managers.character_customization:get_equiped_part_from_character_save_slot(slot_index, CharacterCustomizationTweakData.PART_TYPE_UPPER)
 		local equiped_upper_object = owned_uppers[managers.character_customization:get_equiped_part_index(character_nationality_name, CharacterCustomizationTweakData.PART_TYPE_UPPER, equiped_upper_name)]
+		local owned_lowers = managers.character_customization:get_owned_customizations_indexed(CharacterCustomizationTweakData.PART_TYPE_LOWER, character_nationality_name)
+		local equiped_lower_name = managers.character_customization:get_equiped_part_from_character_save_slot(slot_index, CharacterCustomizationTweakData.PART_TYPE_LOWER)
 		local equiped_lower_object = owned_lowers[managers.character_customization:get_equiped_part_index(character_nationality_name, CharacterCustomizationTweakData.PART_TYPE_LOWER, equiped_lower_name)]
 
 		self:_attach_unit_parts(equiped_head_object, equiped_upper_object, equiped_lower_object, current_version)
 	end
 end
 
--- Lines 179-191
+-- Lines 180-193
 function CharacterCustomization:attach_all_parts_to_character_by_parts(character_nationality_name, equiped_head_name, equiped_upper_name, equiped_lower_name)
 	local owned_heads = managers.character_customization:get_owned_customizations_indexed(CharacterCustomizationTweakData.PART_TYPE_HEAD, character_nationality_name)
-	local owned_uppers = managers.character_customization:get_owned_customizations_indexed(CharacterCustomizationTweakData.PART_TYPE_UPPER, character_nationality_name)
-	local owned_lowers = managers.character_customization:get_owned_customizations_indexed(CharacterCustomizationTweakData.PART_TYPE_LOWER, character_nationality_name)
 	local equiped_head_object = owned_heads[managers.character_customization:get_equiped_part_index(character_nationality_name, CharacterCustomizationTweakData.PART_TYPE_HEAD, equiped_head_name)]
+	local owned_uppers = managers.character_customization:get_owned_customizations_indexed(CharacterCustomizationTweakData.PART_TYPE_UPPER, character_nationality_name)
 	local equiped_upper_object = owned_uppers[managers.character_customization:get_equiped_part_index(character_nationality_name, CharacterCustomizationTweakData.PART_TYPE_UPPER, equiped_upper_name)]
+	local owned_lowers = managers.character_customization:get_owned_customizations_indexed(CharacterCustomizationTweakData.PART_TYPE_LOWER, character_nationality_name)
 	local equiped_lower_object = owned_lowers[managers.character_customization:get_equiped_part_index(character_nationality_name, CharacterCustomizationTweakData.PART_TYPE_LOWER, equiped_lower_name)]
 
 	self:_attach_unit_parts(equiped_head_object, equiped_upper_object, equiped_lower_object, managers.character_customization:get_current_version_to_attach())
 end
 
--- Lines 193-215
+-- Lines 195-218
 function CharacterCustomization:attach_all_parts_to_character_by_parts_for_husk(character_nationality_name, equiped_head_name, equiped_upper_name, equiped_lower_name, peer)
 	local head_name = managers.character_customization:get_default_part_key_name(peer:character(), CharacterCustomizationTweakData.PART_TYPE_HEAD)
 	local equiped_head_name = managers.character_customization:check_part_key_name(CharacterCustomizationTweakData.PART_TYPE_HEAD, head_name, peer:character())
-	local equiped_upper_name = managers.character_customization:check_part_key_name(CharacterCustomizationTweakData.PART_TYPE_UPPER, equiped_upper_name, character_nationality_name)
-	local equiped_lower_name = managers.character_customization:check_part_key_name(CharacterCustomizationTweakData.PART_TYPE_LOWER, equiped_lower_name, character_nationality_name)
 	local all_heads = managers.character_customization:get_all_parts(CharacterCustomizationTweakData.PART_TYPE_HEAD)
-	local all_uppers = managers.character_customization:get_all_parts(CharacterCustomizationTweakData.PART_TYPE_UPPER)
-	local all_lowers = managers.character_customization:get_all_parts(CharacterCustomizationTweakData.PART_TYPE_LOWER)
 	local equiped_head_object = all_heads[equiped_head_name]
+	local equiped_upper_name = managers.character_customization:check_part_key_name(CharacterCustomizationTweakData.PART_TYPE_UPPER, equiped_upper_name, character_nationality_name)
+	local all_uppers = managers.character_customization:get_all_parts(CharacterCustomizationTweakData.PART_TYPE_UPPER)
 	local equiped_upper_object = all_uppers[equiped_upper_name]
+	local equiped_lower_name = managers.character_customization:check_part_key_name(CharacterCustomizationTweakData.PART_TYPE_LOWER, equiped_lower_name, character_nationality_name)
+	local all_lowers = managers.character_customization:get_all_parts(CharacterCustomizationTweakData.PART_TYPE_LOWER)
 	local equiped_lower_object = all_lowers[equiped_lower_name]
 
 	self:destroy_all_parts_on_character()
 	self:_attach_unit_parts(equiped_head_object, equiped_upper_object, equiped_lower_object, managers.character_customization:get_current_version_to_attach())
 end
 
--- Lines 217-230
+-- Lines 220-233
 function CharacterCustomization:_attach_unit_parts(equiped_head_object, equiped_upper_object, equiped_lower_object, current_version)
 	local lower_path = equiped_upper_object.length == CharacterCustomizationTweakData.PART_LENGTH_SHORT and equiped_lower_object.path_long or equiped_lower_object.path_short
 	self._attached_units = {}
@@ -213,7 +213,7 @@ function CharacterCustomization:_attach_unit_parts(equiped_head_object, equiped_
 	end
 end
 
--- Lines 232-247
+-- Lines 235-250
 function CharacterCustomization:attach_head_for_husk(head_path)
 	local head_unit = self._attached_units[CharacterCustomizationTweakData.PART_TYPE_HEAD]
 
@@ -230,7 +230,7 @@ function CharacterCustomization:attach_head_for_husk(head_path)
 	end
 end
 
--- Lines 249-271
+-- Lines 252-274
 function CharacterCustomization:destroy_all_parts_on_character()
 	if self._loading_units then
 		for unit_name, _ in pairs(self._loading_units) do
@@ -252,7 +252,7 @@ function CharacterCustomization:destroy_all_parts_on_character()
 	end
 end
 
--- Lines 273-276
+-- Lines 276-279
 function CharacterCustomization:destroy()
 	Application:trace("[CharacterCustomization][destroy]")
 	self:destroy_all_parts_on_character()

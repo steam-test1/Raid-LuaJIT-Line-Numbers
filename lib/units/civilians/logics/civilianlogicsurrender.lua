@@ -4,15 +4,16 @@ CivilianLogicSurrender.on_new_objective = CivilianLogicIdle.on_new_objective
 CivilianLogicSurrender.on_rescue_allowed_state = CivilianLogicFlee.on_rescue_allowed_state
 CivilianLogicSurrender.wants_rescue = CivilianLogicFlee.wants_rescue
 
--- Lines 15-100
+-- Lines 15-101
 function CivilianLogicSurrender.enter(data, new_logic_name, enter_params)
-	CopLogicBase.enter(data, new_logic_name, enter_params)
-	data.unit:brain():cancel_all_pathing_searches()
-
-	local old_internal_data = data.internal_data
 	local my_data = {
 		unit = data.unit
 	}
+
+	CopLogicBase.enter(data, new_logic_name, enter_params, my_data)
+	data.unit:brain():cancel_all_pathing_searches()
+
+	local old_internal_data = data.internal_data
 	data.internal_data = my_data
 
 	if data.is_tied then
@@ -90,7 +91,7 @@ function CivilianLogicSurrender.enter(data, new_logic_name, enter_params)
 	end
 end
 
--- Lines 104-144
+-- Lines 105-145
 function CivilianLogicSurrender.exit(data, new_logic_name, enter_params)
 	CopLogicBase.exit(data, new_logic_name, enter_params)
 
@@ -134,7 +135,7 @@ function CivilianLogicSurrender.exit(data, new_logic_name, enter_params)
 	end
 end
 
--- Lines 148-171
+-- Lines 149-172
 function CivilianLogicSurrender.queued_update(rubbish, data)
 	local my_data = data.internal_data
 
@@ -169,7 +170,7 @@ function CivilianLogicSurrender.queued_update(rubbish, data)
 	end
 end
 
--- Lines 175-243
+-- Lines 176-244
 function CivilianLogicSurrender.on_tied(data, aggressor_unit, not_tied)
 	local my_data = data.internal_data
 
@@ -251,7 +252,7 @@ function CivilianLogicSurrender.on_tied(data, aggressor_unit, not_tied)
 	end
 end
 
--- Lines 247-257
+-- Lines 248-258
 function CivilianLogicSurrender._do_initial_act(data, amount, aggressor_unit, initial_act)
 	local my_data = data.internal_data
 	local adj_sumbission = amount * data.char_tweak.submission_intimidate
@@ -268,7 +269,7 @@ function CivilianLogicSurrender._do_initial_act(data, amount, aggressor_unit, in
 	data.unit:brain():action_request(action_data)
 end
 
--- Lines 261-271
+-- Lines 262-272
 function CivilianLogicSurrender.on_action_completed(data, action)
 	local my_data = data.internal_data
 	local action_type = action:type()
@@ -280,7 +281,7 @@ function CivilianLogicSurrender.on_action_completed(data, action)
 	end
 end
 
--- Lines 275-297
+-- Lines 276-298
 function CivilianLogicSurrender.on_intimidated(data, amount, aggressor_unit, skip_delay)
 	if data.is_tied then
 		return
@@ -312,7 +313,7 @@ function CivilianLogicSurrender.on_intimidated(data, amount, aggressor_unit, ski
 	end
 end
 
--- Lines 301-348
+-- Lines 302-349
 function CivilianLogicSurrender._delayed_intimidate_clbk(ignore_this, params)
 	local data = params[1]
 	local my_data = data.internal_data
@@ -383,7 +384,7 @@ function CivilianLogicSurrender._delayed_intimidate_clbk(ignore_this, params)
 	end
 end
 
--- Lines 352-429
+-- Lines 353-430
 function CivilianLogicSurrender.on_alert(data, alert_data)
 	local alert_type = alert_data[1]
 
@@ -477,7 +478,7 @@ function CivilianLogicSurrender.on_alert(data, alert_data)
 	end
 end
 
--- Lines 433-532
+-- Lines 434-533
 function CivilianLogicSurrender._update_enemy_detection(data, my_data)
 	managers.groupai:state():on_unit_detection_updated(data.unit)
 
@@ -554,7 +555,7 @@ function CivilianLogicSurrender._update_enemy_detection(data, my_data)
 	my_data.last_upd_t = t
 end
 
--- Lines 536-542
+-- Lines 537-543
 function CivilianLogicSurrender.is_available_for_assignment(data, objective)
 	if objective and objective.forced then
 		return true

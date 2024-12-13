@@ -25,7 +25,7 @@ function RaidGUIControlWeaponSkillDesc:init(parent, params)
 	self:_create_progress_bar()
 end
 
--- Lines 33-83
+-- Lines 33-84
 function RaidGUIControlWeaponSkillDesc:set_weapon_skill(skill_data)
 	local skill = skill_data.value
 	local skill_info = tweak_data.weapon_skills.skills[skill.skill_name]
@@ -37,13 +37,14 @@ function RaidGUIControlWeaponSkillDesc:set_weapon_skill(skill_data)
 
 	self._desc_label:set_text(self:translate(desc_id, false))
 
-	local challenge, count, target = nil
+	local challenge, count, target, min_range = nil
 
 	if skill.challenge_id then
 		challenge = managers.challenge:get_challenge(ChallengeManager.CATEGORY_WEAPON_UPGRADE, skill.challenge_id)
 		local tasks = challenge:tasks()
 		count = tasks[1]:current_count()
 		target = tasks[1]:target()
+		min_range = math.round(tasks[1]:min_range() / 100)
 	end
 
 	self._challenge_locked_label:set_visible(false)
@@ -86,6 +87,7 @@ function RaidGUIControlWeaponSkillDesc:set_weapon_skill(skill_data)
 		self._status_label:set_text(self:translate(RaidGUIControlWeaponSkillDesc.CHALLENGE_IN_PROGRESS_TEXT, true))
 		self._desc_label:set_text(managers.localization:text(skill.challenge_briefing_id, {
 			AMOUNT = target,
+			RANGE = min_range,
 			WEAPON = self:translate(tweak_data.weapon[skill.weapon_id].name_id)
 		}))
 		self._progress_bar_panel:set_visible(true)
@@ -94,6 +96,7 @@ function RaidGUIControlWeaponSkillDesc:set_weapon_skill(skill_data)
 		self._status_label:set_text(self:translate(RaidGUIControlWeaponSkillDesc.CHALLENGE_COMPLETED_TEXT, true))
 		self._desc_label:set_text(managers.localization:text(skill.challenge_done_text_id, {
 			AMOUNT = target,
+			RANGE = min_range,
 			WEAPON = self:translate(tweak_data.weapon[skill.weapon_id].name_id)
 		}))
 		self._progress_bar_panel:set_visible(true)
@@ -101,7 +104,7 @@ function RaidGUIControlWeaponSkillDesc:set_weapon_skill(skill_data)
 	end
 end
 
--- Lines 85-133
+-- Lines 86-134
 function RaidGUIControlWeaponSkillDesc:_create_labels()
 	local params_name_label = {
 		text = "UNKNOWN SKILL NAME",
@@ -160,7 +163,7 @@ function RaidGUIControlWeaponSkillDesc:_create_labels()
 	self._challenge_locked_label = self._object:label(tier_unlocks_at_level_label_params)
 end
 
--- Lines 135-195
+-- Lines 136-196
 function RaidGUIControlWeaponSkillDesc:_create_progress_bar()
 	local progress_bar_panel_params = {
 		vertical = "bottom",
@@ -225,7 +228,7 @@ function RaidGUIControlWeaponSkillDesc:_create_progress_bar()
 	self._progress_text = self._progress_bar_panel:label(progress_bar_text_params)
 end
 
--- Lines 197-204
+-- Lines 198-205
 function RaidGUIControlWeaponSkillDesc:set_progress(count, target)
 	self._progress_bar_foreground_panel:set_w(self._progress_bar_panel:w() * count / target)
 
@@ -236,14 +239,14 @@ function RaidGUIControlWeaponSkillDesc:set_progress(count, target)
 	end
 end
 
--- Lines 206-207
+-- Lines 207-208
 function RaidGUIControlWeaponSkillDesc:on_click_weapon_skill_button()
 end
 
--- Lines 209-210
+-- Lines 210-211
 function RaidGUIControlWeaponSkillDesc:on_mouse_enter_weapon_skill_button()
 end
 
--- Lines 212-213
+-- Lines 213-214
 function RaidGUIControlWeaponSkillDesc:on_mouse_exit_weapon_skill_button()
 end

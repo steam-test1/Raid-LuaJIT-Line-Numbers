@@ -12,15 +12,16 @@ TeamAILogicAssault.on_objective_unit_destroyed = TeamAILogicBase.on_objective_un
 TeamAILogicAssault.is_available_for_assignment = TeamAILogicIdle.is_available_for_assignment
 TeamAILogicAssault.clbk_heat = TeamAILogicIdle.clbk_heat
 
--- Lines 22-67
+-- Lines 22-68
 function TeamAILogicAssault.enter(data, new_logic_name, enter_params)
-	TeamAILogicBase.enter(data, new_logic_name, enter_params)
-	data.unit:brain():cancel_all_pathing_searches()
-
-	local old_internal_data = data.internal_data
 	local my_data = {
 		unit = data.unit
 	}
+
+	TeamAILogicBase.enter(data, new_logic_name, enter_params, my_data)
+	data.unit:brain():cancel_all_pathing_searches()
+
+	local old_internal_data = data.internal_data
 	data.internal_data = my_data
 	my_data.detection = data.char_tweak.detection.combat
 	my_data.vision = data.char_tweak.vision.combat
@@ -50,7 +51,7 @@ function TeamAILogicAssault.enter(data, new_logic_name, enter_params)
 	my_data.weapon_range = data.char_tweak.weapon[data.unit:inventory():equipped_unit():base():weapon_tweak_data().usage].range
 end
 
--- Lines 71-89
+-- Lines 72-83
 function TeamAILogicAssault.exit(data, new_logic_name, enter_params)
 	TeamAILogicBase.exit(data, new_logic_name, enter_params)
 
@@ -59,19 +60,10 @@ function TeamAILogicAssault.exit(data, new_logic_name, enter_params)
 	data.unit:brain():cancel_all_pathing_searches()
 	CopLogicBase.cancel_queued_tasks(my_data)
 	CopLogicBase.cancel_delayed_clbks(my_data)
-
-	if my_data.best_cover then
-		managers.navigation:release_cover(my_data.best_cover[1])
-	end
-
-	if my_data.nearest_cover then
-		managers.navigation:release_cover(my_data.nearest_cover[1])
-	end
-
 	data.brain:rem_pos_rsrv("path")
 end
 
--- Lines 93-159
+-- Lines 87-153
 function TeamAILogicAssault.update(data)
 	TeamAILogicTravel._upd_ai_perceptors(data)
 
@@ -139,7 +131,7 @@ function TeamAILogicAssault.update(data)
 	end
 end
 
--- Lines 163-246
+-- Lines 157-240
 function TeamAILogicAssault._upd_enemy_detection(data, is_synchronous)
 	managers.groupai:state():on_unit_detection_updated(data.unit)
 
@@ -211,7 +203,7 @@ function TeamAILogicAssault._upd_enemy_detection(data, is_synchronous)
 	end
 end
 
--- Lines 250-270
+-- Lines 244-264
 function TeamAILogicAssault.find_enemy_to_mark(enemies)
 	local best_nmy, best_nmy_wgt = nil
 
@@ -225,7 +217,7 @@ function TeamAILogicAssault.find_enemy_to_mark(enemies)
 	return best_nmy
 end
 
--- Lines 274-288
+-- Lines 268-282
 function TeamAILogicAssault.mark_enemy(data, criminal, to_mark, play_sound, play_action)
 	if play_sound then
 		criminal:sound():say(to_mark:base():char_tweak().priority_shout, true)
@@ -247,7 +239,7 @@ function TeamAILogicAssault.mark_enemy(data, criminal, to_mark, play_sound, play
 	to_mark:contour():add("mark_enemy", true)
 end
 
--- Lines 292-331
+-- Lines 286-325
 function TeamAILogicAssault.on_action_completed(data, action)
 	local my_data = data.internal_data
 	local action_type = action:type()
@@ -289,21 +281,21 @@ function TeamAILogicAssault.on_action_completed(data, action)
 	end
 end
 
--- Lines 335-337
+-- Lines 329-331
 function TeamAILogicAssault.damage_clbk(data, damage_info)
 	TeamAILogicIdle.damage_clbk(data, damage_info)
 end
 
--- Lines 341-342
+-- Lines 335-336
 function TeamAILogicAssault.death_clbk(data, damage_info)
 end
 
--- Lines 346-348
+-- Lines 340-342
 function TeamAILogicAssault.on_detected_enemy_destroyed(data, enemy_unit)
 	TeamAILogicIdle.on_cop_neutralized(data, enemy_unit:key())
 end
 
--- Lines 352-362
+-- Lines 346-356
 function TeamAILogicAssault._chk_request_combat_chatter(data, my_data)
 	local focus_enemy = data.attention_obj
 
@@ -312,7 +304,7 @@ function TeamAILogicAssault._chk_request_combat_chatter(data, my_data)
 	end
 end
 
--- Lines 366-378
+-- Lines 360-372
 function TeamAILogicAssault._chk_exit_attack_logic(data, new_reaction)
 	local wanted_state = TeamAILogicBase._get_logic_state_from_reaction(data, new_reaction)
 

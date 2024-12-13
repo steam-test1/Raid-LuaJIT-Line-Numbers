@@ -19,32 +19,21 @@ TeamAILogicTravel.get_pathing_prio = CopLogicTravel.get_pathing_prio
 TeamAILogicTravel.on_action_completed = CopLogicTravel.on_action_completed
 TeamAILogicTravel.on_intimidated = TeamAILogicIdle.on_intimidated
 
--- Lines 27-100
+-- Lines 27-91
 function TeamAILogicTravel.enter(data, new_logic_name, enter_params)
-	CopLogicBase.enter(data, new_logic_name, enter_params)
+	local my_data = {
+		unit = data.unit
+	}
+
+	CopLogicBase.enter(data, new_logic_name, enter_params, my_data)
 	data.unit:brain():cancel_all_pathing_searches()
 
 	local old_internal_data = data.internal_data
-	local my_data = {
-		unit = data.unit,
-		detection = data.char_tweak.detection.recon,
-		vision = data.char_tweak.vision.idle
-	}
+	my_data.detection = data.char_tweak.detection.recon
+	my_data.vision = data.char_tweak.vision.idle
 
 	if old_internal_data then
 		my_data.attention_unit = old_internal_data.attention_unit
-
-		if old_internal_data.nearest_cover then
-			my_data.nearest_cover = old_internal_data.nearest_cover
-
-			managers.navigation:reserve_cover(my_data.nearest_cover[1], data.pos_rsrv_id)
-		end
-
-		if old_internal_data.best_cover then
-			my_data.best_cover = old_internal_data.best_cover
-
-			managers.navigation:reserve_cover(my_data.best_cover[1], data.pos_rsrv_id)
-		end
 	end
 
 	data.internal_data = my_data
@@ -103,7 +92,7 @@ function TeamAILogicTravel.enter(data, new_logic_name, enter_params)
 	end
 end
 
--- Lines 104-125
+-- Lines 95-106
 function TeamAILogicTravel.exit(data, new_logic_name, enter_params)
 	TeamAILogicBase.exit(data, new_logic_name, enter_params)
 
@@ -112,30 +101,17 @@ function TeamAILogicTravel.exit(data, new_logic_name, enter_params)
 	data.unit:brain():cancel_all_pathing_searches()
 	CopLogicBase.cancel_queued_tasks(my_data)
 	CopLogicBase.cancel_delayed_clbks(my_data)
-
-	if my_data.moving_to_cover then
-		managers.navigation:release_cover(my_data.moving_to_cover[1])
-	end
-
-	if my_data.nearest_cover then
-		managers.navigation:release_cover(my_data.nearest_cover[1])
-	end
-
-	if my_data.best_cover then
-		managers.navigation:release_cover(my_data.best_cover[1])
-	end
-
 	data.brain:rem_pos_rsrv("path")
 end
 
--- Lines 129-134
+-- Lines 110-115
 function TeamAILogicTravel.update(data)
 	TeamAILogicTravel._upd_ai_perceptors(data)
 
 	return CopLogicTravel.upd_advance(data)
 end
 
--- Lines 138-207
+-- Lines 119-188
 function TeamAILogicTravel._upd_enemy_detection(data)
 	data.t = TimerManager:game():time()
 	local my_data = data.internal_data
@@ -198,7 +174,7 @@ function TeamAILogicTravel._upd_enemy_detection(data)
 	CopLogicBase.queue_task(my_data, my_data.detection_task_key, TeamAILogicTravel._upd_enemy_detection, data, data.t + delay)
 end
 
--- Lines 211-218
+-- Lines 192-199
 function TeamAILogicTravel._remove_enemy_attention(param)
 	local data = param.data
 
@@ -209,7 +185,7 @@ function TeamAILogicTravel._remove_enemy_attention(param)
 	CopLogicBase._reset_attention(data)
 end
 
--- Lines 222-233
+-- Lines 203-214
 function TeamAILogicTravel.is_available_for_assignment(data, new_objective)
 	if new_objective and new_objective.forced then
 		return true
@@ -224,7 +200,7 @@ function TeamAILogicTravel.is_available_for_assignment(data, new_objective)
 	end
 end
 
--- Lines 241-337
+-- Lines 222-318
 function TeamAILogicTravel._upd_ai_perceptors(data)
 	if not TeamAILogicTravel._ai_perceptors_t then
 		TeamAILogicTravel._ai_perceptors_t = data.t
@@ -292,7 +268,7 @@ function TeamAILogicTravel._upd_ai_perceptors(data)
 	TeamAILogicTravel._ai_perceptors_t = TeamAILogicTravel._ai_perceptors_t + 0.5
 end
 
--- Lines 349-356
+-- Lines 330-337
 function TeamAILogicTravel._is_player_camping(p)
 	if not TeamAILogicTravel._ai_perceptors then
 		return
@@ -303,7 +279,7 @@ function TeamAILogicTravel._is_player_camping(p)
 	return not TeamAILogicTravel._ai_perceptors[id].is_moving and not TeamAILogicTravel._ai_perceptors[id].is_rotating
 end
 
--- Lines 360-369
+-- Lines 341-350
 function TeamAILogicTravel._players_that_are_camping()
 	local players = managers.player:players()
 	local campers = {}
@@ -317,7 +293,7 @@ function TeamAILogicTravel._players_that_are_camping()
 	return campers
 end
 
--- Lines 374-389
+-- Lines 355-370
 function TeamAILogicTravel._unit_cones(units, cone_depth)
 	local cones = {}
 
@@ -348,7 +324,7 @@ function TeamAILogicTravel._unit_cones(units, cone_depth)
 	return cones
 end
 
--- Lines 391-526
+-- Lines 372-507
 function TeamAILogicTravel._determine_destination_occupation(data, objective)
 	local occupation = nil
 
@@ -528,7 +504,7 @@ function TeamAILogicTravel._determine_destination_occupation(data, objective)
 	return occupation
 end
 
--- Lines 533-542
+-- Lines 514-523
 function TeamAILogicTravel._draw_debug_unit_cones(cones)
 	local brush = Draw:brush(Color.green:with_alpha(0.5), 2)
 

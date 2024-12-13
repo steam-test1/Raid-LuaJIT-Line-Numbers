@@ -23,7 +23,7 @@ local function f2s(value)
 	end
 end
 
--- Lines 28-45
+-- Lines 28-39
 function WeaponSelectionGui:init(ws, fullscreen_ws, node, component_name)
 	WeaponSelectionGui.super.init(self, ws, fullscreen_ws, node, component_name)
 
@@ -35,7 +35,7 @@ function WeaponSelectionGui:init(ws, fullscreen_ws, node, component_name)
 	self._cached_owned_melee_weapons = managers.weapon_inventory:get_owned_melee_weapons()
 end
 
--- Lines 47-52
+-- Lines 41-46
 function WeaponSelectionGui:_setup_properties()
 	WeaponSelectionGui.super._setup_properties(self)
 
@@ -43,7 +43,7 @@ function WeaponSelectionGui:_setup_properties()
 	self._background_rect = nil
 end
 
--- Lines 54-61
+-- Lines 48-55
 function WeaponSelectionGui:_set_initial_data()
 	self._node.components.raid_menu_header:set_screen_name("menu_header_weapons_screen_name")
 
@@ -51,18 +51,18 @@ function WeaponSelectionGui:_set_initial_data()
 	self._loading_parts_units = {}
 end
 
--- Lines 63-68
+-- Lines 57-62
 function WeaponSelectionGui:_set_screen_state(state)
 	self._screen_state = state
 
 	managers.raid_menu:register_on_escape_callback(callback(self, self, "back_pressed"))
 end
 
--- Lines 70-71
+-- Lines 64-65
 function WeaponSelectionGui:update(t, dt)
 end
 
--- Lines 73-126
+-- Lines 67-125
 function WeaponSelectionGui:close()
 	if self._parts_being_loaded then
 		managers.weapon_factory:disassemble(self._parts_being_loaded)
@@ -83,6 +83,8 @@ function WeaponSelectionGui:close()
 	managers.weapon_skills:update_weapon_skills(WeaponInventoryManager.BM_CATEGORY_PRIMARY_ID, equipped_primary_weapon_id, WeaponSkillsManager.UPGRADE_ACTION_ACTIVATE)
 	managers.weapon_skills:update_weapon_skills(WeaponInventoryManager.BM_CATEGORY_SECONDARY_ID, equipped_secondary_weapon_id, WeaponSkillsManager.UPGRADE_ACTION_ACTIVATE)
 	managers.player:_internal_load()
+	managers.challenge:deactivate_all_challenges()
+	managers.weapon_skills:activate_current_challenges_for_weapon(managers.blackmarket:equipped_primary().weapon_id)
 	managers.player:local_player():camera():play_redirect(PlayerStandard.IDS_EQUIP)
 	self._rotate_weapon:set_unit(nil)
 	self:_enable_dof()
@@ -93,7 +95,7 @@ function WeaponSelectionGui:close()
 	managers.savefile:save_game(Global.savefile_manager.save_progress_slot)
 end
 
--- Lines 128-163
+-- Lines 127-162
 function WeaponSelectionGui:_layout()
 	WeaponSelectionGui.super._layout(self)
 	self:_disable_dof()
@@ -114,7 +116,7 @@ function WeaponSelectionGui:_layout()
 	self:on_weapon_category_selected(WeaponInventoryManager.BM_CATEGORY_PRIMARY_ID)
 end
 
--- Lines 165-170
+-- Lines 164-169
 function WeaponSelectionGui:set_weapon_select_allowed(value)
 	self._weapon_select_allowed = value
 
@@ -122,7 +124,7 @@ function WeaponSelectionGui:set_weapon_select_allowed(value)
 	self._weapon_list:set_abort_selection(not value)
 end
 
--- Lines 175-189
+-- Lines 174-188
 function WeaponSelectionGui:_layout_left_side_panels()
 	self._weapon_selection_panel = self._root_panel:panel({
 		name = "weapon_selection_panel",
@@ -143,7 +145,7 @@ function WeaponSelectionGui:_layout_left_side_panels()
 	})
 end
 
--- Lines 191-256
+-- Lines 190-255
 function WeaponSelectionGui:_layout_category_tabs()
 	local category_tabs_params = {
 		tab_align = "center",
@@ -216,7 +218,7 @@ function WeaponSelectionGui:_layout_category_tabs()
 	self._selected_filter = "equippable"
 end
 
--- Lines 258-286
+-- Lines 257-285
 function WeaponSelectionGui:_layout_lists()
 	local weapon_list_scrollable_area_params = {
 		name = "weapon_list_scrollable_area",
@@ -247,7 +249,7 @@ function WeaponSelectionGui:_layout_lists()
 	self._weapon_list = self._weapon_list_scrollable_area:get_panel():list_active(weapon_list_params)
 end
 
--- Lines 288-312
+-- Lines 287-311
 function WeaponSelectionGui:_layout_weapon_stats()
 	local weapon_stats_params = {
 		selection_enabled = false,
@@ -271,7 +273,7 @@ function WeaponSelectionGui:_layout_weapon_stats()
 	self._melee_weapon_stats = self._root_panel:create_custom_control(RaidGUIControlMeleeWeaponStats, melee_weapon_stats_params)
 end
 
--- Lines 314-337
+-- Lines 313-336
 function WeaponSelectionGui:_layout_equip_button()
 	local equip_button_params = {
 		name = "equip_button",
@@ -312,7 +314,7 @@ function WeaponSelectionGui:_layout_equip_button()
 	self._cant_equip_explanation_label = self._weapon_selection_panel:label(cant_equip_explanation_label_params)
 end
 
--- Lines 339-406
+-- Lines 338-405
 function WeaponSelectionGui:_layout_skill_panel()
 	local weapon_skills_params = {
 		name = "weapon_skills",
@@ -388,7 +390,7 @@ function WeaponSelectionGui:_layout_skill_panel()
 	self._upgrade_cost_label = self._weapon_skills_panel:label_named_value(upgrade_cost_params)
 end
 
--- Lines 408-420
+-- Lines 407-419
 function WeaponSelectionGui:_layout_rotate_unit()
 	local params_rotate_weapon = {
 		x = 470,
@@ -405,7 +407,7 @@ function WeaponSelectionGui:_layout_rotate_unit()
 	self._rotate_weapon = self._root_panel:rotate_unit(params_rotate_weapon)
 end
 
--- Lines 422-434
+-- Lines 421-433
 function WeaponSelectionGui:_layout_scope_switch()
 	local scope_switch_params = {
 		name = "scope_switch",
@@ -422,12 +424,12 @@ function WeaponSelectionGui:_layout_scope_switch()
 	self._scope_switch = self._root_panel:switch_button(scope_switch_params)
 end
 
--- Lines 436-438
+-- Lines 435-437
 function WeaponSelectionGui:toggle_scope_switch()
 	self._scope_switch:confirm_pressed()
 end
 
--- Lines 440-453
+-- Lines 439-452
 function WeaponSelectionGui:_layout_available_points()
 	local available_points_params = {
 		w = 192,
@@ -446,7 +448,7 @@ function WeaponSelectionGui:_layout_available_points()
 	self._available_points_label:hide()
 end
 
--- Lines 455-465
+-- Lines 454-464
 function WeaponSelectionGui:_layout_upgrade_button()
 	local upgrade_button_params = {
 		name = "upgrade_button",
@@ -461,7 +463,7 @@ function WeaponSelectionGui:_layout_upgrade_button()
 	self._upgrade_button:hide()
 end
 
--- Lines 467-491
+-- Lines 466-490
 function WeaponSelectionGui:_show_weapon_list_panel()
 	self._weapon_selection_panel:show()
 	self._weapon_skills_panel:hide()
@@ -485,7 +487,7 @@ function WeaponSelectionGui:_show_weapon_list_panel()
 	self:bind_controller_inputs_choose_weapon()
 end
 
--- Lines 493-507
+-- Lines 492-506
 function WeaponSelectionGui:_layout_weapon_name()
 	local weapon_name_params = {
 		name = "weapon_name",
@@ -505,7 +507,7 @@ function WeaponSelectionGui:_layout_weapon_name()
 	self._weapon_name_label:set_bottom(58)
 end
 
--- Lines 513-523
+-- Lines 512-522
 function WeaponSelectionGui:_update_scope_switch()
 	if managers.player:upgrade_value("player", "can_use_scope") == true and managers.weapon_skills:get_scope_weapon_part_name(self._selected_weapon_id) then
 		self._scope_switch:show()
@@ -518,7 +520,7 @@ function WeaponSelectionGui:_update_scope_switch()
 	end
 end
 
--- Lines 527-556
+-- Lines 526-555
 function WeaponSelectionGui:on_weapon_category_selected(selected_category)
 	if selected_category == WeaponInventoryManager.BM_CATEGORY_PRIMARY_ID or selected_category == WeaponInventoryManager.BM_CATEGORY_SECONDARY_ID then
 		self._upgrade_button:show()
@@ -543,7 +545,7 @@ function WeaponSelectionGui:on_weapon_category_selected(selected_category)
 	self:_equip_weapon()
 end
 
--- Lines 559-576
+-- Lines 558-575
 function WeaponSelectionGui:_get_weapon_id_from_selected_category()
 	local data = self._weapon_list:get_data()
 	local result = nil
@@ -561,7 +563,7 @@ function WeaponSelectionGui:_get_weapon_id_from_selected_category()
 	return result
 end
 
--- Lines 578-588
+-- Lines 577-587
 function WeaponSelectionGui:on_click_filter_equippable(selected_filter)
 	self._selected_filter = selected_filter
 
@@ -572,7 +574,7 @@ function WeaponSelectionGui:on_click_filter_equippable(selected_filter)
 	self._weapon_list_scrollable_area:setup_scroll_area()
 end
 
--- Lines 590-598
+-- Lines 589-597
 function WeaponSelectionGui:on_item_clicked_weapon_list(weapon_data)
 	if not self._weapon_select_allowed then
 		return
@@ -581,7 +583,7 @@ function WeaponSelectionGui:on_item_clicked_weapon_list(weapon_data)
 	self:_select_weapon(weapon_data.value.weapon_id, false)
 end
 
--- Lines 600-607
+-- Lines 599-606
 function WeaponSelectionGui:on_item_selected_weapon_list(weapon_data)
 	if not self._weapon_select_allowed then
 		return
@@ -590,13 +592,13 @@ function WeaponSelectionGui:on_item_selected_weapon_list(weapon_data)
 	self:_select_weapon(weapon_data.value.weapon_id, false)
 end
 
--- Lines 609-614
+-- Lines 608-613
 function WeaponSelectionGui:on_item_double_click()
 	self:_equip_weapon()
 	managers.menu_component:post_event(WeaponSelectionGui.WEAPON_EQUIP_SOUND)
 end
 
--- Lines 616-734
+-- Lines 615-733
 function WeaponSelectionGui:data_source_weapon_list()
 	local result = {}
 	local temp_result = {}
@@ -728,12 +730,12 @@ function WeaponSelectionGui:data_source_weapon_list()
 	end)
 end
 
--- Lines 736-739
+-- Lines 735-738
 function WeaponSelectionGui:on_equip_button_click()
 	self:_equip_weapon()
 end
 
--- Lines 741-748
+-- Lines 740-747
 function WeaponSelectionGui:on_enable_scope_click()
 	local checked = self._scope_switch:get_value()
 
@@ -746,8 +748,12 @@ function WeaponSelectionGui:on_enable_scope_click()
 	self:_equip_weapon()
 end
 
--- Lines 750-782
+-- Lines 749-784
 function WeaponSelectionGui:on_upgrade_button_click()
+	if not self._weapon_select_allowed then
+		return
+	end
+
 	local weapon_factory_id = managers.weapon_factory:get_factory_id_by_weapon_id(self._selected_weapon_id)
 	local weapon_part_names = tweak_data.weapon.factory[weapon_factory_id].uses_parts
 	local weapon_part_unit_path = ""
@@ -771,7 +777,7 @@ function WeaponSelectionGui:on_upgrade_button_click()
 	self._apply_button:disable()
 end
 
--- Lines 784-803
+-- Lines 786-805
 function WeaponSelectionGui:on_apply_button_click()
 	self._apply_button:disable()
 
@@ -782,7 +788,7 @@ function WeaponSelectionGui:on_apply_button_click()
 	managers.statistics:publish_camp_stats_to_steam()
 end
 
--- Lines 808-846
+-- Lines 810-848
 function WeaponSelectionGui:_on_click_weapon_skill_callback(button, data)
 	Application:trace("[WeaponSelectionGui:_on_click_weapon_skill_callback] ", button._state, button._name, inspect(data))
 
@@ -814,7 +820,7 @@ function WeaponSelectionGui:_on_click_weapon_skill_callback(button, data)
 	end
 end
 
--- Lines 848-852
+-- Lines 850-854
 function WeaponSelectionGui:_add_temp_points(value)
 	local temp_weapon_points = self._weapon_skills:get_temp_points()
 	temp_weapon_points = temp_weapon_points + value
@@ -822,14 +828,14 @@ function WeaponSelectionGui:_add_temp_points(value)
 	self._weapon_skills:set_temp_points(temp_weapon_points)
 end
 
--- Lines 854-857
+-- Lines 856-859
 function WeaponSelectionGui:_refresh_available_points()
 	local available_points = self._weapon_skills:get_available_points()
 
 	self._available_points_skills_label:set_value("" .. available_points)
 end
 
--- Lines 859-896
+-- Lines 861-898
 function WeaponSelectionGui:_selected_weapon_skill_button(button, data, tier)
 	if data and data.value then
 		self._skill_desc:set_weapon_skill(data)
@@ -854,7 +860,7 @@ function WeaponSelectionGui:_selected_weapon_skill_button(button, data, tier)
 	self:_update_weapon_stats(false)
 end
 
--- Lines 898-936
+-- Lines 900-938
 function WeaponSelectionGui:_unselected_weapon_skill_button(button, data)
 	local button_state = button:get_state()
 
@@ -879,27 +885,27 @@ function WeaponSelectionGui:_unselected_weapon_skill_button(button, data)
 	end
 end
 
--- Lines 938-943
+-- Lines 940-945
 function WeaponSelectionGui:_on_mouse_enter_weapon_skill_button(button, data)
 	self:_selected_weapon_skill_button(button, data)
 end
 
--- Lines 945-950
+-- Lines 947-952
 function WeaponSelectionGui:_on_mouse_exit_weapon_skill_button(button, data)
 	self:_unselected_weapon_skill_button(button, data)
 end
 
--- Lines 952-956
+-- Lines 954-958
 function WeaponSelectionGui:_on_selected_weapon_skill_callback(button, data, tier)
 	self:_selected_weapon_skill_button(button, data)
 end
 
--- Lines 958-962
+-- Lines 960-964
 function WeaponSelectionGui:_on_unselected_weapon_skill_callback(button, data)
 	self:_unselected_weapon_skill_button(button, data)
 end
 
--- Lines 964-973
+-- Lines 966-975
 function WeaponSelectionGui:_add_weapon_skill_to_temp_skills(data_value, view_part_only)
 	local temp_skills = self._weapon_skills:get_temp_skills()
 
@@ -912,7 +918,7 @@ function WeaponSelectionGui:_add_weapon_skill_to_temp_skills(data_value, view_pa
 	self:_recreate_and_show_weapon_parts(temp_skills)
 end
 
--- Lines 975-984
+-- Lines 977-986
 function WeaponSelectionGui:_remove_weapon_skill_from_temp_skills(data_value, view_part_only)
 	local temp_skills = self._weapon_skills:get_temp_skills()
 
@@ -925,12 +931,12 @@ function WeaponSelectionGui:_remove_weapon_skill_from_temp_skills(data_value, vi
 	self:_recreate_and_show_weapon_parts(temp_skills)
 end
 
--- Lines 988-992
+-- Lines 990-994
 function WeaponSelectionGui:_on_weapon_part_unit_loaded(params)
 	self._preloaded_weapon_part_names[params] = true
 end
 
--- Lines 999-1053
+-- Lines 1001-1055
 function WeaponSelectionGui:_update_weapon_stats(reset_applied_stats)
 	local result = {}
 	local selected_weapon_data = self._weapon_list:selected_item():data().value
@@ -984,7 +990,7 @@ function WeaponSelectionGui:_update_weapon_stats(reset_applied_stats)
 	self._weapon_name_label:set_text(self:translate(weapon_name, true))
 end
 
--- Lines 1055-1066
+-- Lines 1057-1068
 function WeaponSelectionGui:_recreate_and_show_weapon_parts(temp_skills)
 	local position = self._rotate_weapon:current_position()
 	local rotation = self._rotate_weapon:current_rotation()
@@ -995,7 +1001,7 @@ function WeaponSelectionGui:_recreate_and_show_weapon_parts(temp_skills)
 	self._rotate_weapon:set_rotation(rotation)
 end
 
--- Lines 1069-1095
+-- Lines 1071-1097
 function WeaponSelectionGui:_get_marked_row_skill_button(i_skill)
 	local weapon_skills_row = self._weapon_skills:get_rows()[i_skill]
 	local max_skill_value = 0
@@ -1020,7 +1026,7 @@ function WeaponSelectionGui:_get_marked_row_skill_button(i_skill)
 	return weapon_skill_button
 end
 
--- Lines 1097-1140
+-- Lines 1099-1126
 function WeaponSelectionGui:_equip_weapon()
 	local selected_weapon_data = self._weapon_list:selected_item():data().value
 
@@ -1039,7 +1045,7 @@ function WeaponSelectionGui:_equip_weapon()
 	self:_update_weapon_stats(true)
 end
 
--- Lines 1142-1248
+-- Lines 1128-1234
 function WeaponSelectionGui:_select_weapon(weapon_id, weapon_category_switched)
 	Application:trace("[WeaponSelectionGui:_select_weapon] weapon_id ", weapon_id)
 
@@ -1140,7 +1146,7 @@ function WeaponSelectionGui:_select_weapon(weapon_id, weapon_category_switched)
 	end
 end
 
--- Lines 1250-1262
+-- Lines 1236-1248
 function WeaponSelectionGui:_reselect_weapons_in_list()
 	local selected_weapon_id = self._selected_weapon_id
 	local selected_weapon_data = self._weapon_list:selected_item():data()
@@ -1153,14 +1159,14 @@ function WeaponSelectionGui:_reselect_weapons_in_list()
 	self._weapon_list:select_item_by_value(selected_weapon_data.value)
 end
 
--- Lines 1267-1271
+-- Lines 1253-1257
 function WeaponSelectionGui:destroy_weapon()
 	if self._spawned_unit and alive(self._spawned_unit) then
 		self._spawned_unit:set_slot(0)
 	end
 end
 
--- Lines 1273-1281
+-- Lines 1259-1267
 function WeaponSelectionGui:destroy_weapon_parts()
 	if self._spawned_weapon_parts then
 		for _, part in pairs(self._spawned_weapon_parts) do
@@ -1171,7 +1177,7 @@ function WeaponSelectionGui:destroy_weapon_parts()
 	end
 end
 
--- Lines 1283-1287
+-- Lines 1269-1273
 function WeaponSelectionGui:pix_to_screen(px_x, px_y)
 	local sx = 2 * px_x / self._root_panel:w() - 1
 	local sy = 2 * px_y / self._root_panel:h() - 1
@@ -1179,7 +1185,7 @@ function WeaponSelectionGui:pix_to_screen(px_x, px_y)
 	return sx, sy
 end
 
--- Lines 1289-1321
+-- Lines 1275-1307
 function WeaponSelectionGui:_show_weapon(weapon_id, pre_created_blueprint, weapon_switched)
 	self:destroy_weapon_parts()
 
@@ -1218,7 +1224,7 @@ function WeaponSelectionGui:_show_weapon(weapon_id, pre_created_blueprint, weapo
 	}))
 end
 
--- Lines 1323-1364
+-- Lines 1309-1350
 function WeaponSelectionGui:_unit_loading_complete(params)
 	self._loading_units[params.unit_path] = nil
 	local camera = managers.viewport:get_current_camera()
@@ -1257,7 +1263,7 @@ function WeaponSelectionGui:_unit_loading_complete(params)
 	self._parts_being_loaded = parts
 end
 
--- Lines 1366-1377
+-- Lines 1352-1363
 function WeaponSelectionGui:_preload_blueprint_completed(params)
 	local parts, blueprint = managers.weapon_factory:assemble_from_blueprint(params.weapon_factory_id, self._spawned_unit, params.weapon_blueprint, false, callback(self, self, "_assemble_completed"), false)
 	self._spawned_weapon_parts = parts
@@ -1266,7 +1272,7 @@ function WeaponSelectionGui:_preload_blueprint_completed(params)
 	self._rotate_weapon:set_unit(self._spawned_unit, self._spawned_unit_position, 90, self._spawned_unit_offset, self._spawned_unit_screen_offset)
 end
 
--- Lines 1379-1384
+-- Lines 1365-1370
 function WeaponSelectionGui:_assemble_completed()
 	self._rotate_weapon:set_unit(self._spawned_unit, self._spawned_unit_position, 90, self._spawned_unit_offset, self._spawned_unit_screen_offset)
 	self:set_weapon_select_allowed(true)
@@ -1274,7 +1280,7 @@ function WeaponSelectionGui:_assemble_completed()
 	self._parts_being_loaded = nil
 end
 
--- Lines 1386-1437
+-- Lines 1372-1423
 function WeaponSelectionGui:_show_unit(weapon_id)
 	self:destroy_weapon()
 
@@ -1322,7 +1328,7 @@ function WeaponSelectionGui:_show_unit(weapon_id)
 	self._rotate_weapon:set_unit(self._spawned_unit, self._spawned_unit_position, 90, self._spawned_unit_offset, self._spawned_unit_screen_offset)
 end
 
--- Lines 1439-1447
+-- Lines 1425-1433
 function WeaponSelectionGui:_despawn_parts(parts)
 	if parts then
 		for _, part in pairs(parts) do
@@ -1333,7 +1339,7 @@ function WeaponSelectionGui:_despawn_parts(parts)
 	end
 end
 
--- Lines 1458-1490
+-- Lines 1444-1476
 function WeaponSelectionGui:bind_controller_inputs_choose_weapon()
 	local bindings = {
 		{
@@ -1390,7 +1396,7 @@ function WeaponSelectionGui:bind_controller_inputs_choose_weapon()
 	self:set_legend(legend)
 end
 
--- Lines 1492-1522
+-- Lines 1478-1508
 function WeaponSelectionGui:bind_controller_inputs_choose_weapon_no_upgrade()
 	local bindings = {
 		{
@@ -1442,7 +1448,7 @@ function WeaponSelectionGui:bind_controller_inputs_choose_weapon_no_upgrade()
 	self:set_legend(legend)
 end
 
--- Lines 1524-1541
+-- Lines 1510-1527
 function WeaponSelectionGui:bind_controller_inputs_upgrade_weapon()
 	local bindings = {
 		{
@@ -1470,7 +1476,7 @@ function WeaponSelectionGui:bind_controller_inputs_upgrade_weapon()
 	self:set_legend(legend)
 end
 
--- Lines 1543-1560
+-- Lines 1529-1546
 function WeaponSelectionGui:bind_controller_inputs_upgrade_weapon_upgrade_forbiden()
 	local bindings = {}
 
@@ -1492,49 +1498,49 @@ function WeaponSelectionGui:bind_controller_inputs_upgrade_weapon_upgrade_forbid
 	self:set_legend(legend)
 end
 
--- Lines 1562-1566
+-- Lines 1548-1552
 function WeaponSelectionGui:_on_weapon_category_tab_left()
 	self._list_tabs:_move_left()
 
 	return true, nil
 end
 
--- Lines 1568-1572
+-- Lines 1554-1558
 function WeaponSelectionGui:_on_weapon_category_tab_right()
 	self._list_tabs:_move_right()
 
 	return true, nil
 end
 
--- Lines 1574-1578
+-- Lines 1560-1564
 function WeaponSelectionGui:_on_equipable_tab_left()
 	self._equippable_filters_tabs:_move_left()
 
 	return true, nil
 end
 
--- Lines 1580-1584
+-- Lines 1566-1570
 function WeaponSelectionGui:_on_equipable_tab_right()
 	self._equippable_filters_tabs:_move_right()
 
 	return true, nil
 end
 
--- Lines 1586-1596
+-- Lines 1572-1582
 function WeaponSelectionGui:_on_upgrade_weapon_click()
 	self:on_upgrade_button_click()
 
 	return true, nil
 end
 
--- Lines 1598-1611
+-- Lines 1584-1597
 function WeaponSelectionGui:_on_apply_weapon_skills_click()
 	self:on_apply_button_click()
 
 	return true, nil
 end
 
--- Lines 1613-1626
+-- Lines 1599-1612
 function WeaponSelectionGui:confirm_pressed()
 	if self._weapon_selection_panel:visible() then
 		self:on_equip_button_click(nil, nil, nil)
@@ -1545,7 +1551,7 @@ function WeaponSelectionGui:confirm_pressed()
 	return true
 end
 
--- Lines 1628-1634
+-- Lines 1614-1620
 function WeaponSelectionGui:_upgrade_status()
 	if self._selected_weapon_category_id == WeaponInventoryManager.BM_CATEGORY_PRIMARY_ID or self._selected_weapon_category_id == WeaponInventoryManager.BM_CATEGORY_SECONDARY_ID then
 		self:bind_controller_inputs_choose_weapon()
@@ -1554,7 +1560,7 @@ function WeaponSelectionGui:_upgrade_status()
 	end
 end
 
--- Lines 1636-1689
+-- Lines 1622-1695
 function WeaponSelectionGui:back_pressed()
 	if not managers.raid_menu:is_pc_controller() then
 		if self._weapon_selection_panel:visible() then

@@ -346,7 +346,7 @@ function NetworkAccountSTEAM:publish_statistics(stats, force_store)
 	end
 end
 
--- Lines 413-421
+-- Lines 413-430
 function NetworkAccountSTEAM._on_disconnected(lobby_id, friend_id)
 	print("[NetworkAccountSTEAM._on_disconnected]", lobby_id, friend_id)
 
@@ -354,15 +354,25 @@ function NetworkAccountSTEAM._on_disconnected(lobby_id, friend_id)
 		return
 	end
 
+	if Network:is_server() then
+		managers.raid_menu:show_dialog_disconnected_from_steam()
+
+		Global.game_settings.single_player = true
+
+		if managers.network.matchmake.lobby_handler then
+			managers.network.matchmake.lobby_handler:leave_lobby()
+		end
+	end
+
 	Application:warn("Disconnected from Steam!! Please wait", 12)
 end
 
--- Lines 423-425
+-- Lines 432-434
 function NetworkAccountSTEAM._on_ipc_fail(lobby_id, friend_id)
 	print("[NetworkAccountSTEAM._on_ipc_fail]")
 end
 
--- Lines 428-474
+-- Lines 437-483
 function NetworkAccountSTEAM._on_join_request(lobby_id, friend_id)
 	Application:trace("[NetworkAccountSTEAM._on_join_request]")
 
@@ -422,17 +432,17 @@ function NetworkAccountSTEAM._on_join_request(lobby_id, friend_id)
 	end
 end
 
--- Lines 476-479
+-- Lines 485-488
 function NetworkAccountSTEAM._on_server_request(ip, pw)
 	print("[NetworkAccountSTEAM._on_server_request]")
 end
 
--- Lines 481-484
+-- Lines 490-493
 function NetworkAccountSTEAM._on_connect_fail(ip, pw)
 	print("[NetworkAccountSTEAM._on_connect_fail]")
 end
 
--- Lines 488-493
+-- Lines 497-502
 function NetworkAccountSTEAM:signin_state()
 	if self:local_signin_state() == true then
 		return "signed in"
@@ -441,42 +451,42 @@ function NetworkAccountSTEAM:signin_state()
 	return "not signed in"
 end
 
--- Lines 495-497
+-- Lines 504-506
 function NetworkAccountSTEAM:local_signin_state()
 	return Steam:logged_on()
 end
 
--- Lines 499-501
+-- Lines 508-510
 function NetworkAccountSTEAM:username_id()
 	return Steam:username()
 end
 
--- Lines 503-505
+-- Lines 512-514
 function NetworkAccountSTEAM:username_by_id(id)
 	return Steam:username(id)
 end
 
--- Lines 507-509
+-- Lines 516-518
 function NetworkAccountSTEAM:player_id()
 	return Steam:userid()
 end
 
--- Lines 511-513
+-- Lines 520-522
 function NetworkAccountSTEAM:is_connected()
 	return true
 end
 
--- Lines 515-517
+-- Lines 524-526
 function NetworkAccountSTEAM:lan_connection()
 	return true
 end
 
--- Lines 519-521
+-- Lines 528-530
 function NetworkAccountSTEAM:set_playing(state)
 	Steam:set_playing(state)
 end
 
--- Lines 524-534
+-- Lines 533-543
 function NetworkAccountSTEAM:_load_globals()
 	if Global.steam and Global.steam.account then
 		self._outfit_signature = Global.steam.account.outfit_signature and Global.steam.account.outfit_signature:get_data()
@@ -489,7 +499,7 @@ function NetworkAccountSTEAM:_load_globals()
 	end
 end
 
--- Lines 536-541
+-- Lines 545-550
 function NetworkAccountSTEAM:_save_globals()
 	Global.steam = Global.steam or {}
 	Global.steam.account = {
@@ -497,14 +507,20 @@ function NetworkAccountSTEAM:_save_globals()
 	}
 end
 
--- Lines 543-545
+-- Lines 552-554
 function NetworkAccountSTEAM:is_ready_to_close()
 	return not self._inventory_is_loading and not self._inventory_outfit_refresh_requested and not self._inventory_outfit_refresh_in_progress
 end
 
--- Lines 551-569
+-- Lines 560-585
 function NetworkAccountSTEAM:inventory_load(callback_ref)
 	if self._inventory_is_loading then
+		return
+	end
+
+	if managers.raid_menu:is_offline_mode() then
+		self:_clbk_inventory_load(nil, {})
+
 		return
 	end
 
@@ -515,7 +531,7 @@ function NetworkAccountSTEAM:inventory_load(callback_ref)
 	end
 end
 
--- Lines 572-584
+-- Lines 587-599
 function NetworkAccountSTEAM:_clbk_inventory_load(error, list)
 	self._inventory_is_loading = nil
 
@@ -531,7 +547,7 @@ function NetworkAccountSTEAM:_clbk_inventory_load(error, list)
 	})
 end
 
--- Lines 586-624
+-- Lines 601-639
 function NetworkAccountSTEAM:_verify_filter_cards(card_list)
 	local filtered_list = {}
 	local result = {}
@@ -562,12 +578,12 @@ function NetworkAccountSTEAM:_verify_filter_cards(card_list)
 	return result
 end
 
--- Lines 626-628
+-- Lines 641-643
 function NetworkAccountSTEAM:inventory_is_loading()
 	return self._inventory_is_loading
 end
 
--- Lines 630-652
+-- Lines 645-667
 function NetworkAccountSTEAM:inventory_reward(item_def_id, callback_ref)
 	item_def_id = item_def_id or 1
 
@@ -580,34 +596,34 @@ function NetworkAccountSTEAM:inventory_reward(item_def_id, callback_ref)
 	return true
 end
 
--- Lines 654-661
+-- Lines 669-676
 function NetworkAccountSTEAM:_clbk_inventory_reward(error, tradable_list)
 	Application:trace("[NetworkAccountSTEAM:_clbk_inventory_reward]")
 	Application:trace("error ", inspect(error))
 	Application:trace("tradable_list ", inspect(tradable_list))
 end
 
--- Lines 663-668
+-- Lines 678-683
 function NetworkAccountSTEAM:inventory_remove(instance_id)
 	Application:trace("[ChallengeCardsManager:inventory_remove] instance_id ", instance_id)
 
 	local return_status = Steam:inventory_remove(instance_id)
 end
 
--- Lines 670-671
+-- Lines 685-686
 function NetworkAccount:inventory_reward_open(safe, safe_instance_id, reward_unlock_callback)
 end
 
--- Lines 673-681
+-- Lines 688-696
 function NetworkAccountSTEAM:inventory_reward_dlc(def_id, reward_promo_callback)
 end
 
--- Lines 683-692
+-- Lines 698-707
 function NetworkAccountSTEAM:inventory_outfit_refresh()
 	self._inventory_outfit_refresh_requested = true
 end
 
--- Lines 694-706
+-- Lines 709-721
 function NetworkAccountSTEAM:_inventory_outfit_refresh()
 	local outfit = managers.blackmarket:tradable_outfit()
 
@@ -625,7 +641,7 @@ function NetworkAccountSTEAM:_inventory_outfit_refresh()
 	end
 end
 
--- Lines 708-720
+-- Lines 723-735
 function NetworkAccountSTEAM:_chk_inventory_outfit_refresh()
 	if not self._inventory_outfit_refresh_requested then
 		return
@@ -640,7 +656,7 @@ function NetworkAccountSTEAM:_chk_inventory_outfit_refresh()
 	self:_inventory_outfit_refresh()
 end
 
--- Lines 722-728
+-- Lines 737-743
 function NetworkAccountSTEAM:inventory_outfit_verify(steam_id, outfit_data, outfit_callback)
 	if outfit_data == "" then
 		return outfit_callback and outfit_callback(nil, false, {})
@@ -649,16 +665,16 @@ function NetworkAccountSTEAM:inventory_outfit_verify(steam_id, outfit_data, outf
 	Steam:inventory_signature_verify(steam_id, outfit_data, outfit_callback)
 end
 
--- Lines 730-732
+-- Lines 745-747
 function NetworkAccountSTEAM:inventory_outfit_signature()
 	return self._outfit_signature
 end
 
--- Lines 734-735
+-- Lines 749-750
 function NetworkAccountSTEAM:inventory_repair_list(list)
 end
 
--- Lines 737-754
+-- Lines 752-769
 function NetworkAccountSTEAM:_clbk_tradable_outfit_data(error, outfit_signature)
 	print("[NetworkAccountSTEAM:_clbk_tradable_outfit_data] error: ", error, ", self._outfit_signature: ", self._outfit_signature, "\n outfit_signature: ", outfit_signature, "\n")
 
@@ -679,7 +695,7 @@ function NetworkAccountSTEAM:_clbk_tradable_outfit_data(error, outfit_signature)
 	end
 end
 
--- Lines 762-881
+-- Lines 777-896
 function NetworkAccountSTEAM.output_global_stats(file)
 	local num_days = 100
 	local sa = Steam:sa_handler()
@@ -693,7 +709,7 @@ function NetworkAccountSTEAM.output_global_stats(file)
 	invalid[51] = 1
 	invalid[57] = 1
 
-	-- Lines 778-800
+	-- Lines 793-815
 	local function get_lvl_stat(diff, heist, stat, i)
 		if i == 0 then
 			local st = NetworkAccountSTEAM.lb_levels[heist] .. ", " .. NetworkAccountSTEAM.lb_diffs[diff] .. " - "
@@ -718,7 +734,7 @@ function NetworkAccountSTEAM.output_global_stats(file)
 		return num
 	end
 
-	-- Lines 803-825
+	-- Lines 818-840
 	local function get_weapon_stat(weapon, stat, i)
 		if i == 0 then
 			local st = weapon .. " - "

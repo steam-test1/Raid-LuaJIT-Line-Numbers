@@ -257,7 +257,6 @@ function ChallengeCardsGui:_layout()
 	if not managers.raid_menu:is_pc_controller() then
 		self._suggest_card_button:hide()
 		self._clear_card_button:hide()
-		self:bind_controller_inputs()
 	end
 
 	if ChallengeCardsGui.PHASE == 2 then
@@ -290,6 +289,7 @@ function ChallengeCardsGui:_layout()
 		self:redirect_to_phase_two_screen()
 	end
 
+	self:bind_controller_inputs()
 	managers.challenge_cards:set_automatic_steam_inventory_refresh(true)
 	managers.network.account:inventory_load()
 	self:_players_inventory_processed({
@@ -627,7 +627,7 @@ function ChallengeCardsGui:redirect_to_level_loading()
 	managers.global_state:fire_event(GlobalStateManager.EVENT_START_RAID)
 end
 
--- Lines 603-653
+-- Lines 603-654
 function ChallengeCardsGui:bind_controller_inputs()
 	local legend = {
 		controller = {},
@@ -703,7 +703,12 @@ function ChallengeCardsGui:bind_controller_inputs()
 				"menu_legend_challenge_cards_select_card",
 				"menu_legend_challenge_cards_continue_without_card"
 			},
-			keyboard = {}
+			keyboard = {
+				{
+					key = "footer_back",
+					callback = callback(self, self, "_on_legend_pc_back", nil)
+				}
+			}
 		}
 	end
 
@@ -711,21 +716,21 @@ function ChallengeCardsGui:bind_controller_inputs()
 	self:set_legend(legend)
 end
 
--- Lines 655-659
+-- Lines 656-660
 function ChallengeCardsGui:_on_tabs_rarity_left()
 	self._rarity_filters_tabs:_move_left()
 
 	return true, nil
 end
 
--- Lines 661-665
+-- Lines 662-666
 function ChallengeCardsGui:_on_tabs_rarity_right()
 	self._rarity_filters_tabs:_move_right()
 
 	return true, nil
 end
 
--- Lines 667-671
+-- Lines 668-672
 function ChallengeCardsGui:_on_select_card_left()
 	local item_data = self._host_activates_card_grid:move_selection_left()
 
@@ -734,7 +739,7 @@ function ChallengeCardsGui:_on_select_card_left()
 	return true, nil
 end
 
--- Lines 673-677
+-- Lines 674-678
 function ChallengeCardsGui:_on_select_card_right()
 	local item_data = self._host_activates_card_grid:move_selection_right()
 
@@ -743,7 +748,7 @@ function ChallengeCardsGui:_on_select_card_right()
 	return true, nil
 end
 
--- Lines 680-689
+-- Lines 681-690
 function ChallengeCardsGui:back_pressed()
 	if ChallengeCardsGui.PHASE == 2 then
 		return true
@@ -755,7 +760,7 @@ function ChallengeCardsGui:back_pressed()
 	end
 end
 
--- Lines 691-699
+-- Lines 692-700
 function ChallengeCardsGui:confirm_pressed()
 	if ChallengeCardsGui.PHASE == 1 then
 		self:suggest_card()

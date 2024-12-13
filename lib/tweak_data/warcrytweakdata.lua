@@ -26,28 +26,33 @@ function WarcryTweakData:_init_data_sharpshooter()
 			{
 				"warcry_player_aim_assist",
 				"warcry_player_aim_assist_radius_1",
+				"warcry_player_nullify_spread",
 				"warcry_team_damage_multiplier_1"
 			},
 			{
 				"warcry_player_aim_assist",
 				"warcry_player_aim_assist_radius_2",
+				"warcry_player_nullify_spread",
 				"warcry_team_damage_multiplier_1"
 			},
 			{
 				"warcry_player_aim_assist",
 				"warcry_player_aim_assist_radius_2",
+				"warcry_player_nullify_spread",
 				"warcry_player_sniper_shoot_through_enemies",
 				"warcry_team_damage_multiplier_1"
 			},
 			{
 				"warcry_player_aim_assist",
 				"warcry_player_aim_assist_radius_3",
+				"warcry_player_nullify_spread",
 				"warcry_player_sniper_shoot_through_enemies",
 				"warcry_team_damage_multiplier_1"
 			},
 			{
 				"warcry_player_aim_assist",
 				"warcry_player_aim_assist_radius_3",
+				"warcry_player_nullify_spread",
 				"warcry_player_sniper_shoot_through_enemies",
 				"warcry_player_aim_assist_aim_at_head",
 				"warcry_team_damage_multiplier_1"
@@ -77,7 +82,7 @@ function WarcryTweakData:_init_data_berserk()
 		low_health_multiplier_activation_percentage = 0.4,
 		low_health_multiplier_min = 0.2,
 		low_health_multiplier_max = 0.5,
-		base_team_heal_percentage = 40,
+		base_team_heal_percentage = 25,
 		buffs = {
 			{
 				"warcry_player_ammo_consumption_1",

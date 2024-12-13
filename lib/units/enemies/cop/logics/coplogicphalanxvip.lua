@@ -30,11 +30,13 @@ CopLogicPhalanxVip.allowed_transitional_actions = {
 -- Lines 23-80
 function CopLogicPhalanxVip.enter(data, new_logic_name, enter_params)
 	print("CopLogicPhalanxVip.enter")
-	CopLogicBase.enter(data, new_logic_name, enter_params)
 
 	local my_data = {
 		unit = data.unit
 	}
+
+	CopLogicBase.enter(data, new_logic_name, enter_params, my_data)
+
 	local is_cool = data.unit:movement():cool()
 	my_data.detection = data.char_tweak.detection.combat
 	local old_internal_data = data.internal_data

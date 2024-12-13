@@ -304,12 +304,21 @@ function ElementNavLink:operation_remove()
 	end
 end
 
--- Lines 265-267
+-- Lines 265-277
 function ElementNavLink:destroy()
+	ElementNavLink.super.destroy(self)
 	managers.navigation:unregister_anim_nav_link(self)
+
+	if self._pos_rsrv then
+		for _, unit_rsrv in pairs(self._pos_rsrv) do
+			managers.navigation:unreserve_pos(unit_rsrv)
+		end
+
+		self._pos_rsrv = nil
+	end
 end
 
--- Lines 271-336
+-- Lines 281-346
 function ElementNavLink:get_objective(instigator)
 	local is_AI_SO = self._is_AI_SO or string.begins(self._values.so_action, "AI")
 	local pose, stance, attitude, path_style, pos, rot, interrupt_dis, interrupt_health, haste, trigger_on, interaction_voice = self:_get_misc_SO_params()
@@ -377,7 +386,7 @@ function ElementNavLink:get_objective(instigator)
 	return objective
 end
 
--- Lines 340-357
+-- Lines 350-367
 function ElementNavLink:_get_misc_SO_params()
 	local pose, stance, attitude, path_style, pos, rot, interrupt_dis, interrupt_health, haste, trigger_on, interaction_voice = nil
 	local values = self._values
@@ -395,57 +404,57 @@ function ElementNavLink:_get_misc_SO_params()
 	return pose, stance, attitude, path_style, pos, rot, -1, interrupt_health, haste, trigger_on, interaction_voice
 end
 
--- Lines 361-363
+-- Lines 371-373
 function ElementNavLink:nav_link_end_pos()
 	return self._values.search_position
 end
 
--- Lines 367-369
+-- Lines 377-379
 function ElementNavLink:nav_link_access()
 	return tonumber(self._values.SO_access)
 end
 
--- Lines 373-375
+-- Lines 383-385
 function ElementNavLink:chance()
 	return self:_get_default_value_if_nil("base_chance")
 end
 
--- Lines 379-381
+-- Lines 389-391
 function ElementNavLink:nav_link_delay()
 	return self:_get_default_value_if_nil("interval")
 end
 
--- Lines 385-387
+-- Lines 395-397
 function ElementNavLink:nav_link()
 	return self._nav_link
 end
 
--- Lines 391-393
+-- Lines 401-403
 function ElementNavLink:id()
 	return self._id
 end
 
--- Lines 397-399
+-- Lines 407-409
 function ElementNavLink:_is_nav_link()
 	return true
 end
 
--- Lines 403-405
+-- Lines 413-415
 function ElementNavLink:set_nav_link(nav_link)
 	self._nav_link = nav_link
 end
 
--- Lines 409-411
+-- Lines 419-421
 function ElementNavLink:nav_link_wants_align_pos()
 	return self._values.align_position
 end
 
--- Lines 415-417
+-- Lines 425-427
 function ElementNavLink:get_objective_trigger()
 	return self._values.trigger_on
 end
 
--- Lines 421-455
+-- Lines 431-465
 function ElementNavLink:_administer_objective(unit, objective)
 	if objective.type == "phalanx" then
 		GroupAIStateBase:register_phalanx_unit(unit)
@@ -483,7 +492,7 @@ function ElementNavLink:_administer_objective(unit, objective)
 	end
 end
 
--- Lines 460-516
+-- Lines 470-526
 function ElementNavLink:choose_followup_SO(unit, skip_element_ids)
 	if not self._values.followup_elements then
 		return
@@ -541,7 +550,7 @@ function ElementNavLink:choose_followup_SO(unit, skip_element_ids)
 	end
 end
 
--- Lines 520-527
+-- Lines 530-537
 function ElementNavLink:get_as_followup(unit, skip_element_ids)
 	if (not unit or managers.navigation:check_access(self._values.SO_access, unit:brain():SO_access(), 0) and self:clbk_verify_administration(unit)) and not skip_element_ids[self._id] then
 		return self, self:_get_default_value_if_nil("base_chance")
@@ -550,7 +559,7 @@ function ElementNavLink:get_as_followup(unit, skip_element_ids)
 	self:event("admin_fail", unit)
 end
 
--- Lines 531-533
+-- Lines 541-543
 function ElementNavLink:_get_default_value_if_nil(name_in)
 	return self._values[name_in] or self._DEFAULT_VALUES[name_in]
 end

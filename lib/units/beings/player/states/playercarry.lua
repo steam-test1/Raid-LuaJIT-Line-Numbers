@@ -175,14 +175,21 @@ function PlayerCarry:_update_check_actions(t, dt)
 	self:_check_stats_screen(t, dt, input)
 end
 
--- Lines 236-240
-function PlayerCarry:_check_action_run(...)
+-- Lines 236-247
+function PlayerCarry:_check_action_run(t, input)
 	if tweak_data.carry.types[self._tweak_data_name].can_run or managers.player:has_category_upgrade("carry", "movement_penalty_nullifier") or managers.buff_effect:is_effect_active(BuffEffectManager.EFFECT_BAGS_DONT_SLOW_PLAYERS_DOWN) then
-		PlayerCarry.super._check_action_run(self, ...)
+		PlayerCarry.super._check_action_run(self, t, input)
+	elseif input.btn_run_press then
+		managers.notification:add_notification({
+			duration = 2,
+			shelf_life = 5,
+			id = "hint_cant_run",
+			text = managers.localization:text("hint_cant_run")
+		})
 	end
 end
 
--- Lines 243-258
+-- Lines 250-265
 function PlayerCarry:_check_use_item(t, input)
 	local new_action = nil
 	local action_wanted = input.btn_use_item_press
@@ -203,27 +210,27 @@ function PlayerCarry:_check_use_item(t, input)
 	return new_action
 end
 
--- Lines 262-267
+-- Lines 269-274
 function PlayerCarry:_check_change_weapon(...)
 	return PlayerCarry.super._check_change_weapon(self, ...)
 end
 
--- Lines 269-274
+-- Lines 276-281
 function PlayerCarry:_check_action_equip(...)
 	return PlayerCarry.super._check_action_equip(self, ...)
 end
 
--- Lines 278-280
+-- Lines 285-287
 function PlayerCarry:_update_movement(t, dt)
 	PlayerCarry.super._update_movement(self, t, dt)
 end
 
--- Lines 284-287
+-- Lines 291-294
 function PlayerCarry:_start_action_jump(...)
 	PlayerCarry.super._start_action_jump(self, ...)
 end
 
--- Lines 289-295
+-- Lines 296-302
 function PlayerCarry:_perform_jump(jump_vec)
 	if not managers.player:has_category_upgrade("carry", "movement_penalty_nullifier") then
 		if not managers.buff_effect:is_effect_active(BuffEffectManager.EFFECT_BAGS_DONT_SLOW_PLAYERS_DOWN) then
@@ -234,7 +241,7 @@ function PlayerCarry:_perform_jump(jump_vec)
 	PlayerCarry.super._perform_jump(self, jump_vec)
 end
 
--- Lines 299-313
+-- Lines 306-320
 function PlayerCarry:_get_max_walk_speed(...)
 	local multiplier = tweak_data.carry.types[self._tweak_data_name].move_speed_modifier
 
@@ -251,15 +258,15 @@ function PlayerCarry:_get_max_walk_speed(...)
 	return PlayerCarry.super._get_max_walk_speed(self, ...) * multiplier
 end
 
--- Lines 315-317
+-- Lines 322-324
 function PlayerCarry:_get_walk_headbob(...)
 	return PlayerCarry.super._get_walk_headbob(self, ...) * tweak_data.carry.types[self._tweak_data_name].move_speed_modifier
 end
 
--- Lines 321-323
+-- Lines 328-330
 function PlayerCarry:pre_destroy(unit)
 end
 
--- Lines 327-329
+-- Lines 334-336
 function PlayerCarry:destroy()
 end

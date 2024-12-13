@@ -7,15 +7,9 @@ function MenuMainState:init(game_state_machine)
 	GameState.init(self, "menu_main", game_state_machine)
 end
 
--- Lines 9-104
+-- Lines 9-107
 function MenuMainState:at_enter(old_state)
-	if Global.reset_progress then
-		Application:debug("[MenuMainState:at_enter] Global.reset_progress")
-		managers.savefile:clear_progress_data()
-
-		Global.reset_progress = nil
-	end
-
+	managers.worldcollection:reset_global_ref_counter()
 	managers.platform:set_playing(false)
 	managers.platform:set_rich_presence("Idle")
 
@@ -98,7 +92,7 @@ function MenuMainState:at_enter(old_state)
 
 		managers.menu:open_node("trial_info")
 	elseif not has_invite and not managers.network:session() and false then
-		-- Lines 85-87
+		-- Lines 88-90
 		local function yes_func()
 			MenuCallbackHandler:play_safehouse({
 				skip_question = true
@@ -122,7 +116,7 @@ function MenuMainState:at_enter(old_state)
 	end
 end
 
--- Lines 106-115
+-- Lines 109-118
 function MenuMainState:at_exit(new_state)
 	if new_state:name() ~= "freeflight" then
 		managers.menu:close_menu("menu_main")
@@ -135,7 +129,7 @@ function MenuMainState:at_exit(new_state)
 	end
 end
 
--- Lines 117-123
+-- Lines 120-126
 function MenuMainState:server_left()
 	if managers.network:session() and (managers.network:session():has_recieved_ok_to_load_level() or managers.network:session():closing()) then
 		return
@@ -144,11 +138,11 @@ function MenuMainState:server_left()
 	managers.menu:show_host_left_dialog("dialog_server_left")
 end
 
--- Lines 125-126
+-- Lines 128-129
 function MenuMainState:on_disconnected()
 end
 
--- Lines 128-130
+-- Lines 131-133
 function MenuMainState:is_joinable()
 	return false
 end

@@ -7,11 +7,12 @@ GlobalStateManager.EVENT_PRE_START_RAID = "system_pre_start_raid"
 GlobalStateManager.EVENT_START_RAID = "system_start_raid"
 GlobalStateManager.EVENT_END_RAID = "system_end_raid"
 GlobalStateManager.EVENT_END_TUTORIAL = "system_end_tutorial"
+GlobalStateManager.EVENT_RESTART_CAMP = "system_restart_camp"
 GlobalStateManager.EVENT_CHARACTER_CREATED = "system_character_created"
 GlobalStateManager.TYPE_BOOL = "bool"
 GlobalStateManager.TYPE_VALUE = "value"
 
--- Lines 20-48
+-- Lines 21-50
 function GlobalStateManager:init()
 	self._triggers = {}
 	self._states = {}
@@ -41,20 +42,23 @@ function GlobalStateManager:init()
 	}, callback(managers.warcry, managers.warcry, "on_mission_end_callback"))
 	self:add_listener("TAI_END_MISSION", {
 		GlobalStateManager.EVENT_END_RAID
-	}, callback(managers.criminals, managers.criminals, "set_teamAI_to_true"))
+	}, callback(managers.criminals, managers.criminals, "on_mission_end_callback"))
+	self:add_listener("TAI_START_MISSION", {
+		GlobalStateManager.EVENT_START_RAID
+	}, callback(managers.criminals, managers.criminals, "on_mission_start_callback"))
 end
 
--- Lines 51-54
+-- Lines 53-56
 function GlobalStateManager:add_listener(key, events, clbk)
 	self._listener_holder:add(key, events, clbk)
 end
 
--- Lines 56-58
+-- Lines 58-60
 function GlobalStateManager:remove_listener(key)
 	self._listener_holder:remove(key)
 end
 
--- Lines 60-67
+-- Lines 62-69
 function GlobalStateManager:register_trigger(trigger, flag)
 	if not flag then
 		Application:error("[GlobalStateManager:register_trigger] Trying to register trigger without flag!", inspect(trigger))
@@ -67,7 +71,7 @@ function GlobalStateManager:register_trigger(trigger, flag)
 	table.insert(self._triggers[flag], trigger)
 end
 
--- Lines 69-83
+-- Lines 71-85
 function GlobalStateManager:unregister_trigger(trigger, flag)
 	if not flag then
 		Application:error("[GlobalStateManager:register_trigger] Trying to unregister trigger without flag!", inspect(trigger))
@@ -88,7 +92,7 @@ function GlobalStateManager:unregister_trigger(trigger, flag)
 	end
 end
 
--- Lines 85-91
+-- Lines 87-93
 function GlobalStateManager:flag_names()
 	local flag_names = {}
 
@@ -99,7 +103,7 @@ function GlobalStateManager:flag_names()
 	return flag_names
 end
 
--- Lines 93-100
+-- Lines 95-102
 function GlobalStateManager:flag(flag_name)
 	local flag = self._states[GlobalStateManager.GLOBAL_STATE_NAME][flag_name]
 
@@ -112,7 +116,7 @@ function GlobalStateManager:flag(flag_name)
 	return flag.value
 end
 
--- Lines 102-111
+-- Lines 104-113
 function GlobalStateManager:set_flag(flag_name)
 	local flag = self._states[GlobalStateManager.GLOBAL_STATE_NAME][flag_name]
 
@@ -128,7 +132,7 @@ function GlobalStateManager:set_flag(flag_name)
 	self:_fire_triggers(flag_name, old_state, true)
 end
 
--- Lines 113-122
+-- Lines 115-124
 function GlobalStateManager:set_value_flag(flag_name, value)
 	local flag = self._states[GlobalStateManager.GLOBAL_STATE_NAME][flag_name]
 
@@ -144,17 +148,17 @@ function GlobalStateManager:set_value_flag(flag_name, value)
 	self:_fire_triggers(flag_name, old_state, value)
 end
 
--- Lines 125-127
+-- Lines 127-129
 function GlobalStateManager:set_implicit_flag(flag_name)
 	self:_fire_triggers(flag_name, false, true)
 end
 
--- Lines 129-131
+-- Lines 131-133
 function GlobalStateManager:clear_implicit_flag(flag_name)
 	self:_fire_triggers(flag_name, true, false)
 end
 
--- Lines 133-144
+-- Lines 135-146
 function GlobalStateManager:clear_flag(flag_name)
 	local flag = self._states[GlobalStateManager.GLOBAL_STATE_NAME][flag_name]
 
@@ -170,31 +174,35 @@ function GlobalStateManager:clear_flag(flag_name)
 	self:_fire_triggers(flag_name, old_state, false)
 end
 
--- Lines 147-201
+-- Lines 149-206
 function GlobalStateManager:fire_event(flag_name)
 	if flag_name == GlobalStateManager.EVENT_START_RAID then
 		managers.raid_menu:set_pause_menu_enabled(false)
 	end
 
-	if (GlobalStateManager.EVENT_START_RAID == flag_name or GlobalStateManager.EVENT_END_RAID == flag_name) and not managers.network:session():chk_all_peers_spawned(true) then
-		Application:debug("[GlobalStateManager:fire_event] Reschedule level start!")
-		managers.queued_tasks:queue(nil, managers.global_state.fire_event, managers.global_state, flag_name, 1, nil)
+	if GlobalStateManager.EVENT_START_RAID == flag_name or GlobalStateManager.EVENT_END_RAID == flag_name then
+		if not managers.network:session():chk_all_peers_spawned(true) then
+			Application:debug("[GlobalStateManager:fire_event] Reschedule level start!")
+			managers.queued_tasks:queue(nil, managers.global_state.fire_event, managers.global_state, flag_name, 1, nil)
 
-		self._fire_event_delay = true
-		local t = Application:time()
+			self._fire_event_delay = true
+			local t = Application:time()
 
-		if not self._next_hint_t or self._next_hint_t < t then
-			self._next_hint_t = t + 6
+			if not self._next_hint_t or self._next_hint_t < t then
+				self._next_hint_t = t + 6
 
-			managers.notification:add_notification({
-				duration = 2,
-				shelf_life = 5,
-				id = "hud_waiting_for_player_dropin",
-				text = managers.localization:text("hud_waiting_for_player_dropin")
-			})
+				managers.notification:add_notification({
+					duration = 2,
+					shelf_life = 5,
+					id = "hud_waiting_for_player_dropin",
+					text = managers.localization:text("hud_waiting_for_player_dropin")
+				})
+			end
+
+			return
+		elseif managers.vote:is_restarting() then
+			return
 		end
-
-		return
 	end
 
 	if self._fire_event_delay then
@@ -226,12 +234,12 @@ function GlobalStateManager:fire_event(flag_name)
 	end
 end
 
--- Lines 204-206
+-- Lines 209-211
 function GlobalStateManager:set_to_default(flag_name)
 	self._states[GlobalStateManager.GLOBAL_STATE_NAME][flag_name].value = self._states[GlobalStateManager.GLOBAL_STATE_NAME][flag_name].default
 end
 
--- Lines 208-215
+-- Lines 213-220
 function GlobalStateManager:reset_flags_for_job(job_id)
 	for name, flag in pairs(self._states[GlobalStateManager.GLOBAL_STATE_NAME]) do
 		if flag.job_id == job_id then
@@ -240,14 +248,14 @@ function GlobalStateManager:reset_flags_for_job(job_id)
 	end
 end
 
--- Lines 217-221
+-- Lines 222-226
 function GlobalStateManager:reset_all_flags()
 	for name, flag in pairs(self._states[GlobalStateManager.GLOBAL_STATE_NAME]) do
 		flag.value = flag.default
 	end
 end
 
--- Lines 223-228
+-- Lines 228-233
 function GlobalStateManager:sync_save(data)
 	local state = {
 		data = self._states
@@ -255,7 +263,7 @@ function GlobalStateManager:sync_save(data)
 	data.GlobalStateManager = state
 end
 
--- Lines 230-235
+-- Lines 235-240
 function GlobalStateManager:sync_load(data)
 	local state = data.GlobalStateManager
 
@@ -264,7 +272,7 @@ function GlobalStateManager:sync_load(data)
 	end
 end
 
--- Lines 237-246
+-- Lines 242-251
 function GlobalStateManager:get_all_global_states()
 	local global_states = {}
 
@@ -285,14 +293,14 @@ function GlobalStateManager:get_all_global_states()
 	return global_states
 end
 
--- Lines 248-252
+-- Lines 253-257
 function GlobalStateManager:set_global_states(states)
 	for i = 1, #states do
 		self._states.global_init[states[i].id].value = states[i].value
 	end
 end
 
--- Lines 254-263
+-- Lines 259-268
 function GlobalStateManager:save_game(data)
 	local global_states = {}
 
@@ -313,7 +321,7 @@ function GlobalStateManager:save_game(data)
 	data.global_state = global_states
 end
 
--- Lines 265-271
+-- Lines 270-276
 function GlobalStateManager:load_game(data)
 	if data.global_state then
 		for i = 1, #data.global_state do
@@ -322,7 +330,7 @@ function GlobalStateManager:load_game(data)
 	end
 end
 
--- Lines 273-277
+-- Lines 278-282
 function GlobalStateManager:on_simulation_ended()
 	self._triggers = {}
 	self._states = {}
@@ -330,7 +338,7 @@ function GlobalStateManager:on_simulation_ended()
 	self:_parse_states()
 end
 
--- Lines 279-300
+-- Lines 284-305
 function GlobalStateManager:check_flag_value(check_type, value1, value2)
 	if check_type == "equal" then
 		return value1 == value2
@@ -353,7 +361,7 @@ function GlobalStateManager:check_flag_value(check_type, value1, value2)
 	end
 end
 
--- Lines 305-323
+-- Lines 310-328
 function GlobalStateManager:_parse_states()
 	local list = PackageManager:script_data(self.FILE_EXTENSION:id(), self.PATH:id())
 	local states = list.states
@@ -375,7 +383,7 @@ function GlobalStateManager:_parse_states()
 	end
 end
 
--- Lines 325-335
+-- Lines 330-340
 function GlobalStateManager:_parse_value(value, data_type)
 	if data_type == GlobalStateManager.TYPE_VALUE then
 		return value
@@ -386,7 +394,7 @@ function GlobalStateManager:_parse_value(value, data_type)
 	end
 end
 
--- Lines 337-354
+-- Lines 342-359
 function GlobalStateManager:_fire_triggers(flag, old_state, new_state)
 	if old_state == new_state then
 		return
@@ -401,7 +409,7 @@ function GlobalStateManager:_fire_triggers(flag, old_state, new_state)
 	end
 end
 
--- Lines 356-359
+-- Lines 361-364
 function GlobalStateManager:_call_listeners(event, params)
 	self._listener_holder:call(event, params)
 end

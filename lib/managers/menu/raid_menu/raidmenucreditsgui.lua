@@ -3,15 +3,11 @@ RaidMenuCreditsGui.PATH = "gamedata/"
 RaidMenuCreditsGui.FILE_EXTENSION = "credits"
 RaidMenuCreditsGui.INTRO_VIDEO = "movies/vanilla/credits/05_credits_v003"
 
--- Lines 8-37
+-- Lines 8-29
 function RaidMenuCreditsGui:init(ws, fullscreen_ws, node, component_name)
 	managers.music:stop()
 	RaidMenuOptionsControls.super.init(self, ws, fullscreen_ws, node, component_name)
-
-	if RaidMenuCreditsGui.INTRO_VIDEO then
-		self._node.components.raid_menu_header:set_screen_name("menu_credits")
-	end
-
+	self._node.components.raid_menu_header:set_screen_name("menu_credits")
 	self._node.components.raid_menu_footer:hide_name_and_gold_panel()
 
 	self._controller_list = {}
@@ -25,18 +21,12 @@ function RaidMenuCreditsGui:init(ws, fullscreen_ws, node, component_name)
 	end
 
 	self:_build_credits_panel(node._parameters.credits_file)
-
-	if RaidMenuCreditsGui.INTRO_VIDEO then
-		self:_show_intro_video()
-	else
-		self:_skip_video()
-	end
-
+	self:_show_intro_video()
 	self:bind_controller_inputs()
 	managers.controller:add_hotswap_callback("event_complete_state", callback(self, self, "on_controller_hotswap"))
 end
 
--- Lines 39-144
+-- Lines 31-136
 function RaidMenuCreditsGui:_build_credits_panel(file)
 	local lang_key = SystemInfo:language():key()
 	local files = {
@@ -50,7 +40,7 @@ function RaidMenuCreditsGui:_build_credits_panel(file)
 		files[Idstring("english"):key()] = "_uk"
 	end
 
-	if not RaidMenuCreditsGui.FILE and (file == "eula" or file == "trial") and files[lang_key] then
+	if (file == "eula" or file == "trial") and files[lang_key] then
 		file = file .. files[lang_key] or file
 	end
 
@@ -161,7 +151,7 @@ function RaidMenuCreditsGui:_build_credits_panel(file)
 	self._credits_panel:set_height(ypos + 50)
 end
 
--- Lines 146-191
+-- Lines 138-183
 function RaidMenuCreditsGui:_show_intro_video()
 	local video_panel_params = {
 		is_root_panel = true,
@@ -206,7 +196,7 @@ function RaidMenuCreditsGui:_show_intro_video()
 	press_any_key_prompt:animate(callback(self, self, "_animate_show_press_any_key_prompt"))
 end
 
--- Lines 193-208
+-- Lines 185-200
 function RaidMenuCreditsGui:_animate_show_press_any_key_prompt(prompt)
 	local duration = 0.7
 	local t = 0
@@ -224,7 +214,7 @@ function RaidMenuCreditsGui:_animate_show_press_any_key_prompt(prompt)
 	prompt:set_alpha(0.85)
 end
 
--- Lines 210-243
+-- Lines 202-235
 function RaidMenuCreditsGui:_animate_change_press_any_key_prompt(prompt)
 	local fade_out_duration = 0.25
 	local t = (1 - prompt:alpha()) * fade_out_duration
@@ -263,7 +253,7 @@ function RaidMenuCreditsGui:_animate_change_press_any_key_prompt(prompt)
 	prompt:set_alpha(0.85)
 end
 
--- Lines 245-252
+-- Lines 237-244
 function RaidMenuCreditsGui:on_controller_hotswap()
 	local press_any_key_prompt = self._safe_panel:child("press_any_key_prompt")
 
@@ -273,7 +263,7 @@ function RaidMenuCreditsGui:on_controller_hotswap()
 	end
 end
 
--- Lines 254-272
+-- Lines 246-264
 function RaidMenuCreditsGui:update(t, dt)
 	if self._playing_intro_video and (self:is_playing() and self:is_skipped() or not self:is_playing()) then
 		self._credits_intro_video:destroy()
@@ -298,7 +288,7 @@ function RaidMenuCreditsGui:update(t, dt)
 	end
 end
 
--- Lines 274-280
+-- Lines 266-272
 function RaidMenuCreditsGui:is_playing()
 	if alive(self._credits_intro_video) then
 		return self._credits_intro_video:loop_count() < 1
@@ -307,7 +297,7 @@ function RaidMenuCreditsGui:is_playing()
 	end
 end
 
--- Lines 282-290
+-- Lines 274-282
 function RaidMenuCreditsGui:is_skipped()
 	for _, controller in ipairs(self._controller_list) do
 		if controller:get_any_input_pressed() then
@@ -318,11 +308,11 @@ function RaidMenuCreditsGui:is_skipped()
 	return false
 end
 
--- Lines 292-321
+-- Lines 284-313
 function RaidMenuCreditsGui:_skip_video()
 	managers.music:post_event(MusicManager.CREDITS_MUSIC)
 
-	-- Lines 295-316
+	-- Lines 287-308
 	local function scroll_func(o)
 		local y = o:top()
 		local speed = 50
@@ -353,32 +343,32 @@ function RaidMenuCreditsGui:_skip_video()
 	end
 end
 
--- Lines 324-326
+-- Lines 316-318
 function RaidMenuCreditsGui:_setup_panels(node)
 	RaidMenuCreditsGui.super._setup_panels(self, node)
 end
 
--- Lines 328-330
+-- Lines 320-322
 function RaidMenuCreditsGui:_create_menu_item(row_item)
 	RaidMenuCreditsGui.super._create_menu_item(self, row_item)
 end
 
--- Lines 332-334
+-- Lines 324-326
 function RaidMenuCreditsGui:_setup_item_panel_parent(safe_rect)
 	RaidMenuCreditsGui.super._setup_item_panel_parent(self, safe_rect)
 end
 
--- Lines 336-338
+-- Lines 328-330
 function RaidMenuCreditsGui:_setup_item_panel(safe_rect, res)
 	RaidMenuCreditsGui.super._setup_item_panel(self, safe_rect, res)
 end
 
--- Lines 340-342
+-- Lines 332-334
 function RaidMenuCreditsGui:resolution_changed()
 	RaidMenuCreditsGui.super.resolution_changed(self)
 end
 
--- Lines 344-351
+-- Lines 336-343
 function RaidMenuCreditsGui:set_visible(visible)
 	RaidMenuCreditsGui.super.set_visible(self, visible)
 
@@ -389,7 +379,7 @@ function RaidMenuCreditsGui:set_visible(visible)
 	end
 end
 
--- Lines 353-362
+-- Lines 345-354
 function RaidMenuCreditsGui:close(...)
 	managers.controller:remove_hotswap_callback("event_complete_state")
 	self._credits_panel:stop(self._credits_panel_thread)
@@ -399,64 +389,64 @@ function RaidMenuCreditsGui:close(...)
 	managers.music:post_event(MusicManager.MENU_MUSIC)
 end
 
--- Lines 364-366
+-- Lines 356-358
 function RaidMenuCreditsGui:mouse_moved(o, x, y)
 	return false
 end
 
--- Lines 368-370
+-- Lines 360-362
 function RaidMenuCreditsGui:mouse_released(o, button, x, y)
 	return false
 end
 
--- Lines 372-374
+-- Lines 364-366
 function RaidMenuCreditsGui:mouse_pressed(button, x, y)
 	return false
 end
 
--- Lines 376-378
+-- Lines 368-370
 function RaidMenuCreditsGui:mouse_clicked(button, x, y)
 	return false
 end
 
--- Lines 380-382
+-- Lines 372-374
 function RaidMenuCreditsGui:mouse_double_click(o, button, x, y)
 	return true
 end
 
--- Lines 384-386
+-- Lines 376-378
 function RaidMenuCreditsGui:confirm_pressed()
 	return true
 end
 
--- Lines 388-391
+-- Lines 380-383
 function RaidMenuCreditsGui:back_pressed()
 	managers.raid_menu:on_escape()
 
 	return true
 end
 
--- Lines 393-395
+-- Lines 385-387
 function RaidMenuCreditsGui:move_up()
 	return true
 end
 
--- Lines 397-399
+-- Lines 389-391
 function RaidMenuCreditsGui:move_down()
 	return true
 end
 
--- Lines 401-403
+-- Lines 393-395
 function RaidMenuCreditsGui:move_left()
 	return true
 end
 
--- Lines 405-407
+-- Lines 397-399
 function RaidMenuCreditsGui:move_right()
 	return true
 end
 
--- Lines 411-421
+-- Lines 403-413
 function RaidMenuCreditsGui:bind_controller_inputs()
 	local legend = {
 		controller = {

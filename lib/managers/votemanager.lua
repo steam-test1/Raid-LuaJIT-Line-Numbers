@@ -472,7 +472,7 @@ function VoteManager:network_package(type, value, result, peer_id)
 	end
 end
 
--- Lines 442-531
+-- Lines 442-533
 function VoteManager:update(t, dt)
 	local current_time = TimerManager:wall():time()
 
@@ -563,10 +563,14 @@ function VoteManager:update(t, dt)
 
 			if self._restart_t <= Application:time() then
 				if Network:is_server() and self._callback_type == "restart" then
+					self._callback_type = nil
+
 					managers.game_play_central:restart_the_game()
 				end
 
 				if Network:is_server() and self._callback_type == "restart_mission" then
+					self._callback_type = nil
+
 					managers.game_play_central:restart_the_mission()
 				end
 
@@ -579,7 +583,7 @@ function VoteManager:update(t, dt)
 	end
 end
 
--- Lines 533-538
+-- Lines 535-540
 function VoteManager:stop()
 	self._callback_type = nil
 	self._callback_counter = nil
@@ -587,7 +591,7 @@ function VoteManager:stop()
 	self._stopped = true
 end
 
--- Lines 540-635
+-- Lines 542-637
 function VoteManager:message_vote()
 	if not self._type or self._voted or not managers.network:session() then
 		return
@@ -699,7 +703,7 @@ function VoteManager:message_vote()
 	managers.system_menu:show(dialog_data)
 end
 
--- Lines 637-659
+-- Lines 639-661
 function VoteManager:message_host_kick(peer)
 	local dialog_data = {
 		title = managers.localization:text("dialog_mp_kick_player_title"),
@@ -731,34 +735,34 @@ function VoteManager:message_host_kick(peer)
 	managers.system_menu:show(dialog_data)
 end
 
--- Lines 661-663
+-- Lines 663-665
 function VoteManager:sync_server_kick_option(peer)
 	peer:send("voting_data", self.VOTE_EVENT.server_kick_option, Global.game_settings.kick_option, 0)
 end
 
--- Lines 665-667
+-- Lines 667-669
 function VoteManager:option_vote_kick()
 	return game_state_machine:current_state_name() ~= "menu_main" and (Network:is_server() and Global.game_settings.kick_option or Global.game_settings.kick_option_synced) == 2
 end
 
--- Lines 669-671
+-- Lines 671-673
 function VoteManager:option_host_kick()
 	return game_state_machine:current_state_name() == "menu_main" or (Network:is_server() and Global.game_settings.kick_option or Global.game_settings.kick_option_synced) == 1
 end
 
--- Lines 673-675
+-- Lines 675-677
 function VoteManager:option_no_kick()
 	return (Network:is_server() and Global.game_settings.kick_option or Global.game_settings.kick_option_synced) == 0
 end
 
--- Lines 677-680
+-- Lines 679-682
 function VoteManager:option_vote_restart()
 	local setting = Network:is_server() and Global.game_settings.kick_option or Global.game_settings.kick_option_synced
 
 	return setting == 2 or setting == 0
 end
 
--- Lines 682-684
+-- Lines 684-686
 function VoteManager:option_host_restart()
 	return (Network:is_server() and Global.game_settings.kick_option or Global.game_settings.kick_option_synced) == 1
 end

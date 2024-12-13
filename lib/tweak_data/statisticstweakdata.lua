@@ -172,7 +172,7 @@ function StatisticsTweakData:statistics_specializations()
 	return 12
 end
 
--- Lines 167-233
+-- Lines 167-236
 function StatisticsTweakData:statistics_table()
 	local level_list = {
 		"camp",
@@ -204,6 +204,7 @@ function StatisticsTweakData:statistics_table()
 		"thompson",
 		"sten",
 		"garand",
+		"garand_golden",
 		"m1918",
 		"m1903",
 		"m1912",
@@ -222,13 +223,11 @@ function StatisticsTweakData:statistics_table()
 		"german_brass_knuckles",
 		"lockwood_brothers_push_dagger",
 		"bc41_knuckle_knife",
-		"km_dagger"
+		"km_dagger",
+		"marching_mace"
 	}
 	local grenade_list = {
-		"m24",
-		"mills",
-		"d343",
-		"concrete"
+		"m24"
 	}
 	local enemy_list = {
 		"german_black_waffen_sentry_gasmask",
@@ -260,7 +259,7 @@ function StatisticsTweakData:statistics_table()
 	return level_list, job_list, mask_list, weapon_list, melee_list, grenade_list, enemy_list, armor_list, character_list, deployable_list
 end
 
--- Lines 235-237
+-- Lines 238-240
 function StatisticsTweakData:resolution_statistics_table()
 	return {
 		"3840x2160",

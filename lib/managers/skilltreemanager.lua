@@ -1,5 +1,5 @@
 SkillTreeManager = SkillTreeManager or class()
-SkillTreeManager.VERSION = 22
+SkillTreeManager.VERSION = 21
 
 -- Lines 5-7
 function SkillTreeManager:init()
@@ -253,12 +253,13 @@ function SkillTreeManager:set_character_profile_base_class(character_profile_bas
 	end
 end
 
--- Lines 247-249
+-- Lines 247-250
 function SkillTreeManager:_equip_class_default_weapons()
-	managers.blackmarket:equip_class_default_weapons()
+	managers.blackmarket:equip_class_default_primary()
+	managers.blackmarket:equip_class_default_secondary()
 end
 
--- Lines 251-276
+-- Lines 252-277
 function SkillTreeManager:set_character_profile_subclass(character_profile_subclass)
 	local base_class = tweak_data.skilltree.classes[self._global.character_profile_base_class]
 	local subclass = base_class.subclasses[character_profile_subclass]
@@ -274,7 +275,7 @@ function SkillTreeManager:set_character_profile_subclass(character_profile_subcl
 	self:activate_skill_by_index(1, 1, true)
 end
 
--- Lines 278-284
+-- Lines 279-285
 function SkillTreeManager:reset_skills()
 	Global.skilltree_manager = {
 		VERSION = SkillTreeManager.VERSION,
@@ -283,7 +284,7 @@ function SkillTreeManager:reset_skills()
 	self._global = Global.skilltree_manager
 end
 
--- Lines 288-319
+-- Lines 289-320
 function SkillTreeManager:activate_skill_by_index(level, skill_index, apply_acquires)
 	local skill_tree = self:get_character_skilltree()
 	local level_skills = skill_tree[level]
@@ -293,7 +294,7 @@ function SkillTreeManager:activate_skill_by_index(level, skill_index, apply_acqu
 	self:_activate_skill(skill_entry, skill, apply_acquires)
 end
 
--- Lines 321-332
+-- Lines 322-333
 function SkillTreeManager:unlock_weapons_for_level(level)
 	local weapon_progression = self:get_character_automatic_unlock_progression()
 
@@ -308,7 +309,7 @@ function SkillTreeManager:unlock_weapons_for_level(level)
 	end
 end
 
--- Lines 335-347
+-- Lines 336-348
 function SkillTreeManager:create_breadcrumbs_for_level(level)
 	local character_skilltree = self:get_character_skilltree()
 
@@ -325,14 +326,14 @@ function SkillTreeManager:create_breadcrumbs_for_level(level)
 	end
 end
 
--- Lines 349-353
+-- Lines 350-354
 function SkillTreeManager:apply_automatic_unlocks_for_levels_up_to(level, category_to_apply)
 	for i = 1, level do
 		self:apply_automatic_unlocks_for_level(i, category_to_apply)
 	end
 end
 
--- Lines 355-361
+-- Lines 356-362
 function SkillTreeManager:apply_automatic_unlocks_for_all_levels(category_to_apply)
 	local level_cap = managers.experience:level_cap()
 
@@ -341,7 +342,7 @@ function SkillTreeManager:apply_automatic_unlocks_for_all_levels(category_to_app
 	end
 end
 
--- Lines 363-390
+-- Lines 364-391
 function SkillTreeManager:apply_automatic_unlocks_for_level(level, category_to_apply)
 	local character_unlock_progression = self:get_character_automatic_unlock_progression()
 	local character_skilltree = self:get_character_skilltree()
@@ -372,7 +373,7 @@ function SkillTreeManager:apply_automatic_unlocks_for_level(level, category_to_a
 	end
 end
 
--- Lines 392-397
+-- Lines 393-398
 function SkillTreeManager:_activate_skill(skill_entry, skill, apply_acquires)
 	if skill_entry then
 		skill_entry.active = true
@@ -381,7 +382,7 @@ function SkillTreeManager:_activate_skill(skill_entry, skill, apply_acquires)
 	self:_apply_skill(skill, apply_acquires)
 end
 
--- Lines 399-409
+-- Lines 400-410
 function SkillTreeManager:_apply_skill(skill, apply_acquires)
 	for _, upgrade in ipairs(skill.upgrades) do
 		managers.upgrades:aquire(upgrade, nil, UpgradesManager.AQUIRE_STRINGS[2])
@@ -394,7 +395,7 @@ function SkillTreeManager:_apply_skill(skill, apply_acquires)
 	end
 end
 
--- Lines 411-419
+-- Lines 412-420
 function SkillTreeManager:_acquire(acquire)
 	if acquire.subclass then
 		self:set_character_profile_subclass(acquire.subclass)
@@ -405,7 +406,7 @@ function SkillTreeManager:_acquire(acquire)
 	end
 end
 
--- Lines 421-426
+-- Lines 422-427
 function SkillTreeManager:on_respec_tree()
 	MenuCallbackHandler:_update_outfit_information()
 
@@ -414,7 +415,7 @@ function SkillTreeManager:on_respec_tree()
 	end
 end
 
--- Lines 429-437
+-- Lines 430-438
 function SkillTreeManager:check_reset_message()
 	local show_reset_message = self._global.reset_message and true or false
 
@@ -427,26 +428,26 @@ function SkillTreeManager:check_reset_message()
 	end
 end
 
--- Lines 441-446
+-- Lines 442-447
 function SkillTreeManager:pack_to_string()
 	local packed_string = managers.skilltree:get_character_profile_class()
 
 	return packed_string
 end
 
--- Lines 448-453
+-- Lines 449-454
 function SkillTreeManager:pack_to_string_from_list(list)
 	local packed_string = managers.skilltree:get_character_profile_class()
 
 	return packed_string
 end
 
--- Lines 457-465
+-- Lines 458-466
 function SkillTreeManager:unpack_from_string(packed_string)
 	return packed_string
 end
 
--- Lines 469-480
+-- Lines 470-481
 function SkillTreeManager:save(data)
 	local state = {
 		version = SkillTreeManager.VERSION,
@@ -460,7 +461,7 @@ function SkillTreeManager:save(data)
 	data.SkillTreeManager = state
 end
 
--- Lines 482-515
+-- Lines 483-519
 function SkillTreeManager:load(data, version)
 	self:reset_skills()
 
@@ -495,9 +496,11 @@ function SkillTreeManager:load(data, version)
 	end
 
 	self:apply_automatic_unlocks_for_levels_up_to(managers.experience:current_level())
+	managers.blackmarket:_verfify_equipped_category(WeaponInventoryManager.BM_CATEGORY_PRIMARY_NAME)
+	managers.blackmarket:_verfify_equipped_category(WeaponInventoryManager.BM_CATEGORY_SECONDARY_NAME)
 end
 
--- Lines 518-533
+-- Lines 522-537
 function SkillTreeManager:_activate_skill_tree(skill_tree)
 	for level, skills in ipairs(skill_tree) do
 		for index, skill_entry in ipairs(skills) do
@@ -510,11 +513,11 @@ function SkillTreeManager:_activate_skill_tree(skill_tree)
 	end
 end
 
--- Lines 536-537
+-- Lines 540-541
 function SkillTreeManager:_verify_loaded_data(points_aquired_during_load)
 end
 
--- Lines 539-559
+-- Lines 543-563
 function SkillTreeManager:digest_value(value, digest, default)
 	if type(value) == "boolean" then
 		return default or 0
@@ -535,11 +538,11 @@ function SkillTreeManager:digest_value(value, digest, default)
 	return Application:digest_value(value, digest)
 end
 
--- Lines 564-565
+-- Lines 568-569
 function SkillTreeManager:debug()
 end
 
--- Lines 570-577
+-- Lines 574-581
 function SkillTreeManager:reset()
 	Global.skilltree_manager = nil
 

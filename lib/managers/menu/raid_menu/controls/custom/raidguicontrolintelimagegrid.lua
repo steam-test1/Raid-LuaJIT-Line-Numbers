@@ -33,7 +33,7 @@ function RaidGUIControlIntelImageGrid:_create_panels()
 	self._inner_panel = self._object:panel(panel_params)
 end
 
--- Lines 37-70
+-- Lines 37-71
 function RaidGUIControlIntelImageGrid:_create_photos(only_first_n_events)
 	self._inner_panel:clear()
 	self._inner_panel:set_y(0)
@@ -48,6 +48,7 @@ function RaidGUIControlIntelImageGrid:_create_photos(only_first_n_events)
 	for i = 1, #self._mission_photos do
 		local photo_params = {
 			x = 0,
+			layer = 1,
 			y = y,
 			photo = self._mission_photos[i].photo,
 			on_click_callback = callback(self, self, "_on_photo_clicked", i)
@@ -69,7 +70,7 @@ function RaidGUIControlIntelImageGrid:_create_photos(only_first_n_events)
 	self:_check_scrollability()
 end
 
--- Lines 73-102
+-- Lines 74-103
 function RaidGUIControlIntelImageGrid:_on_photo_clicked(photo_index)
 	if self._selected_index == photo_index then
 		return
@@ -102,7 +103,7 @@ function RaidGUIControlIntelImageGrid:_on_photo_clicked(photo_index)
 	end
 end
 
--- Lines 104-121
+-- Lines 105-122
 function RaidGUIControlIntelImageGrid:set_data(data)
 	self._mission = data.mission
 
@@ -124,19 +125,19 @@ function RaidGUIControlIntelImageGrid:set_data(data)
 	self:select(1)
 end
 
--- Lines 123-127
+-- Lines 124-128
 function RaidGUIControlIntelImageGrid:select(index)
 	if self._mission_photos[index] then
 		self:_on_photo_clicked(index)
 	end
 end
 
--- Lines 129-131
+-- Lines 130-132
 function RaidGUIControlIntelImageGrid:clear_selection()
 	self._selected_index = nil
 end
 
--- Lines 133-149
+-- Lines 134-150
 function RaidGUIControlIntelImageGrid:set_selected(value, dont_trigger_selected_callback)
 	self._selected = value
 
@@ -157,7 +158,7 @@ function RaidGUIControlIntelImageGrid:set_selected(value, dont_trigger_selected_
 	end
 end
 
--- Lines 151-164
+-- Lines 152-165
 function RaidGUIControlIntelImageGrid:move_up()
 	if self._selected and self._selected_index and self._photos[self._selected_index - 2] then
 		self._photos[self._selected_index]:set_selected(false)
@@ -177,7 +178,7 @@ function RaidGUIControlIntelImageGrid:move_up()
 	return false
 end
 
--- Lines 166-179
+-- Lines 167-180
 function RaidGUIControlIntelImageGrid:move_down()
 	if self._selected and self._selected_index and self._photos[self._selected_index + 2] then
 		self._photos[self._selected_index]:set_selected(false)
@@ -197,7 +198,7 @@ function RaidGUIControlIntelImageGrid:move_down()
 	return false
 end
 
--- Lines 181-194
+-- Lines 182-195
 function RaidGUIControlIntelImageGrid:move_right()
 	if self._selected and self._selected_index and self._selected_index % 2 ~= 0 and self._photos[self._selected_index + 1] then
 		self._photos[self._selected_index]:set_selected(false)
@@ -217,7 +218,7 @@ function RaidGUIControlIntelImageGrid:move_right()
 	return false
 end
 
--- Lines 196-209
+-- Lines 197-210
 function RaidGUIControlIntelImageGrid:move_left()
 	if self._selected and self._selected_index and self._selected_index % 2 == 0 and self._photos[self._selected_index - 1] then
 		self._photos[self._selected_index]:set_selected(false)
@@ -237,7 +238,7 @@ function RaidGUIControlIntelImageGrid:move_left()
 	return false
 end
 
--- Lines 211-252
+-- Lines 212-253
 function RaidGUIControlIntelImageGrid:_get_mission_photos(only_first_n_events)
 	local mission_tweak_data = tweak_data.operations.missions[self._mission]
 	local photos = {}
@@ -281,7 +282,7 @@ function RaidGUIControlIntelImageGrid:_get_mission_photos(only_first_n_events)
 	return photos
 end
 
--- Lines 254-260
+-- Lines 255-261
 function RaidGUIControlIntelImageGrid:_check_scrollability()
 	if self._inner_panel:h() <= self._object:h() then
 		return
@@ -290,7 +291,7 @@ function RaidGUIControlIntelImageGrid:_check_scrollability()
 	self._scrollable = true
 end
 
--- Lines 262-274
+-- Lines 263-275
 function RaidGUIControlIntelImageGrid:on_mouse_scroll_up()
 	if not self._scrollable then
 		return false
@@ -305,7 +306,7 @@ function RaidGUIControlIntelImageGrid:on_mouse_scroll_up()
 	return true
 end
 
--- Lines 276-288
+-- Lines 277-289
 function RaidGUIControlIntelImageGrid:on_mouse_scroll_down()
 	if not self._scrollable then
 		return false
@@ -320,6 +321,6 @@ function RaidGUIControlIntelImageGrid:on_mouse_scroll_down()
 	return true
 end
 
--- Lines 290-291
+-- Lines 291-292
 function RaidGUIControlIntelImageGrid:close()
 end
