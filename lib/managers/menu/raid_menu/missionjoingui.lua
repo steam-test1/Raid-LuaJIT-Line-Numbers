@@ -723,17 +723,12 @@ function MissionJoinGui:_remove_active_controls()
 	end
 end
 
--- Lines 524-533
+-- Lines 524-538
 function MissionJoinGui:data_source_distance_filter_stepper()
 	local result = {}
 
 	table.insert(result, {
-		value = -1,
-		info = "Any",
-		text = utf8.to_upper(managers.localization:text("menu_any"))
-	})
-	table.insert(result, {
-		value = 1,
+		value = 0,
 		info = "Close",
 		text = utf8.to_upper(managers.localization:text("menu_dist_filter_close"))
 	})
@@ -751,7 +746,7 @@ function MissionJoinGui:data_source_distance_filter_stepper()
 	return result
 end
 
--- Lines 535-546
+-- Lines 540-551
 function MissionJoinGui:data_source_difficulty_filter_stepper()
 	local result = {}
 
@@ -774,7 +769,7 @@ function MissionJoinGui:data_source_difficulty_filter_stepper()
 	return result
 end
 
--- Lines 548-568
+-- Lines 553-573
 function MissionJoinGui:data_source_mission_filter_stepper()
 	local result = {}
 
@@ -807,12 +802,12 @@ function MissionJoinGui:data_source_mission_filter_stepper()
 	return result
 end
 
--- Lines 571-573
+-- Lines 576-578
 function MissionJoinGui:on_click_apply_filters_button()
 	self:_refresh_server_list()
 end
 
--- Lines 575-581
+-- Lines 580-586
 function MissionJoinGui:on_click_show_filters_button()
 	self._filters_panel:set_visible(not self._filters_panel:visible())
 
@@ -821,13 +816,13 @@ function MissionJoinGui:on_click_show_filters_button()
 	end
 end
 
--- Lines 583-587
+-- Lines 588-592
 function MissionJoinGui:on_click_join_button()
 	Application:trace("[MissionJoinGui:on_click_join_button]")
 	self:_join_game()
 end
 
--- Lines 591-617
+-- Lines 596-622
 function MissionJoinGui:_refresh_server_list()
 	self._apply_filters_button:hide()
 
@@ -848,13 +843,13 @@ function MissionJoinGui:_refresh_server_list()
 	self:_find_online_games(managers.network.matchmake:search_friends_only())
 end
 
--- Lines 619-622
+-- Lines 624-627
 function MissionJoinGui:_select_server_list_item(data_value)
 	self:_select_game_from_list()
 	self:_set_game_description_data(data_value)
 end
 
--- Lines 624-632
+-- Lines 629-637
 function MissionJoinGui:_render_filters()
 	self._friends_only_button:set_value_and_render(managers.network.matchmake:search_friends_only())
 	self._in_camp_servers_only:set_value_and_render(managers.network.matchmake:get_lobby_filter("state") == 1)
@@ -863,7 +858,7 @@ function MissionJoinGui:_render_filters()
 	self._mission_filter_stepper:select_item_by_value(managers.network.matchmake:get_lobby_filter("job_id"))
 end
 
--- Lines 634-646
+-- Lines 639-651
 function MissionJoinGui:_join_game()
 	local selected_row = self._table_servers:get_selected_row()
 
@@ -877,7 +872,7 @@ function MissionJoinGui:_join_game()
 	managers.network.matchmake:join_server_with_check(steam_player_id)
 end
 
--- Lines 648-656
+-- Lines 653-661
 function MissionJoinGui:_select_game_from_list()
 	local selected_row = self._table_servers:get_selected_row()
 
@@ -888,7 +883,7 @@ function MissionJoinGui:_select_game_from_list()
 	self._selected_row_data = selected_row:get_data()
 end
 
--- Lines 658-876
+-- Lines 663-881
 function MissionJoinGui:_set_game_description_data(data)
 	local in_camp = data.level_id == "camp"
 
@@ -1093,7 +1088,7 @@ local is_x360 = SystemInfo:platform() == Idstring("X360")
 local is_xb1 = SystemInfo:platform() == Idstring("XB1")
 local is_ps4 = SystemInfo:platform() == Idstring("PS4")
 
--- Lines 885-899
+-- Lines 890-904
 function MissionJoinGui:_find_online_games(friends_only)
 	if is_win32 then
 		self:_find_online_games_win32(friends_only)
@@ -1110,9 +1105,9 @@ function MissionJoinGui:_find_online_games(friends_only)
 	end
 end
 
--- Lines 902-1098
+-- Lines 907-1103
 function MissionJoinGui:_find_online_games_win32(friends_only)
-	-- Lines 904-1083
+	-- Lines 909-1088
 	local function f(info)
 		managers.network.matchmake:search_lobby_done()
 
@@ -1308,7 +1303,7 @@ function MissionJoinGui:_find_online_games_win32(friends_only)
 	managers.network.matchmake:register_callback("search_lobby", f)
 	managers.network.matchmake:search_lobby(friends_only)
 
-	-- Lines 1088-1094
+	-- Lines 1093-1099
 	local function usrs_f(success, amount)
 		print("usrs_f", success, amount)
 
@@ -1321,29 +1316,29 @@ function MissionJoinGui:_find_online_games_win32(friends_only)
 	Steam:sa_handler():get_concurrent_users()
 end
 
--- Lines 1100-1103
+-- Lines 1105-1108
 function MissionJoinGui:add_gui_job(data)
 	self._gui_jobs[data.id] = data
 end
 
--- Lines 1105-1107
+-- Lines 1110-1112
 function MissionJoinGui:update_gui_job(data)
 	self._gui_jobs[data.id] = data
 end
 
--- Lines 1109-1111
+-- Lines 1114-1116
 function MissionJoinGui:remove_gui_job(id)
 	self._gui_jobs[id] = nil
 end
 
--- Lines 1113-1117
+-- Lines 1118-1122
 function MissionJoinGui:set_players_online(amount)
 	if self._online_users_count and self._online_users_count:is_alive() then
 		self._online_users_count:set_text(self:translate("menu_mission_join_users_online_count", true) .. " " .. amount)
 	end
 end
 
--- Lines 1121-1136
+-- Lines 1126-1141
 function MissionJoinGui:_filters_set_selected_server_table()
 	self._filters_active = false
 
@@ -1360,7 +1355,7 @@ function MissionJoinGui:_filters_set_selected_server_table()
 	self._table_servers:set_selected(true)
 end
 
--- Lines 1138-1152
+-- Lines 1143-1157
 function MissionJoinGui:_filters_set_selected_filters()
 	self._filters_active = true
 
@@ -1377,7 +1372,7 @@ function MissionJoinGui:_filters_set_selected_filters()
 	self._table_servers:set_selected(false)
 end
 
--- Lines 1156-1174
+-- Lines 1161-1179
 function MissionJoinGui:bind_controller_inputs()
 	local bindings = {
 		{
@@ -1410,7 +1405,7 @@ function MissionJoinGui:bind_controller_inputs()
 	self:set_legend(legend)
 end
 
--- Lines 1176-1193
+-- Lines 1181-1198
 function MissionJoinGui:bind_controller_inputs_no_join()
 	local bindings = {
 		{
@@ -1442,7 +1437,7 @@ function MissionJoinGui:bind_controller_inputs_no_join()
 	self:set_legend(legend)
 end
 
--- Lines 1195-1217
+-- Lines 1200-1222
 function MissionJoinGui:bind_controller_inputs_player_description()
 	local bindings = {
 		{
@@ -1477,7 +1472,7 @@ function MissionJoinGui:bind_controller_inputs_player_description()
 	self:set_legend(legend)
 end
 
--- Lines 1219-1228
+-- Lines 1224-1233
 function MissionJoinGui:_on_refresh()
 	self:on_click_apply_filters_button()
 	self:bind_controller_inputs()
@@ -1485,7 +1480,7 @@ function MissionJoinGui:_on_refresh()
 	return true, nil
 end
 
--- Lines 1230-1255
+-- Lines 1235-1260
 function MissionJoinGui:_on_filter()
 	local server_table_selected = self._table_servers:is_selected()
 	local have_any_servers = false
@@ -1509,7 +1504,7 @@ function MissionJoinGui:_on_filter()
 	return true, nil
 end
 
--- Lines 1258-1270
+-- Lines 1263-1275
 function MissionJoinGui:confirm_pressed()
 	Application:trace("[MissionJoinGui:confirm_pressed]")
 
@@ -1522,7 +1517,7 @@ function MissionJoinGui:confirm_pressed()
 	end
 end
 
--- Lines 1273-1276
+-- Lines 1278-1281
 function MissionJoinGui:back_pressed()
 	Application:trace("[MissionJoinGui:back_pressed]")
 	managers.raid_menu:on_escape()
