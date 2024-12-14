@@ -1,6 +1,6 @@
 IntelTweakData = IntelTweakData or class()
 
--- Lines 3-369
+-- Lines 3-378
 function IntelTweakData:init(tweak_data)
 	self.categories = {
 		bulletins = {}
@@ -76,6 +76,14 @@ function IntelTweakData:init(tweak_data)
 		update_person = "CONTROL",
 		title = "operational_status_4_title_id",
 		text = "operational_status_4_text_id"
+	}
+	self.categories.operational_status.items[5] = {
+		id = "operational_status_5",
+		list_item_name_id = "operational_status_5_list_item_name_id",
+		update_date = "OCT 11 2017",
+		update_person = "CONTROL",
+		title = "operational_status_5_title_id",
+		text = "operational_status_5_text_id"
 	}
 	self.categories.raid_personnel.items = {
 		{}
@@ -247,7 +255,7 @@ function IntelTweakData:init(tweak_data)
 	}
 end
 
--- Lines 371-381
+-- Lines 380-390
 function IntelTweakData:get_control_video_by_path(path)
 	if not self.categories.control_archive then
 		return
@@ -260,7 +268,7 @@ function IntelTweakData:get_control_video_by_path(path)
 	end
 end
 
--- Lines 383-392
+-- Lines 392-401
 function IntelTweakData:get_item_data(category_name, item_id)
 	for _, item_data in ipairs(self.categories[category_name].items) do
 		if tostring(item_data.id) == tostring(item_id) then

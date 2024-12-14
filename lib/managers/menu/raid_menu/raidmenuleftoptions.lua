@@ -11,19 +11,24 @@ function RaidMenuLeftOptions:_set_initial_data()
 	self._node.components.raid_menu_header:set_screen_name("menu_header_options_main_screen_name", "menu_header_options_main_screen_subtitle")
 end
 
--- Lines 14-19
+-- Lines 14-24
 function RaidMenuLeftOptions:_layout()
 	RaidMenuLeftOptions.super._layout(self)
 	self:_layout_list_menu()
-	self:bind_controller_inputs()
+
+	if RaidMenuCallbackHandler:is_in_main_menu() then
+		self:bind_controller_inputs_reset_progress()
+	else
+		self:bind_controller_inputs()
+	end
 end
 
--- Lines 21-23
+-- Lines 26-28
 function RaidMenuLeftOptions:close()
 	RaidMenuLeftOptions.super.close(self)
 end
 
--- Lines 25-59
+-- Lines 30-64
 function RaidMenuLeftOptions:_layout_list_menu()
 	local list_menu_options_params = {
 		selection_enabled = true,
@@ -66,7 +71,7 @@ function RaidMenuLeftOptions:_layout_list_menu()
 	self._reset_progress_button:set_visible(RaidMenuCallbackHandler:is_in_main_menu())
 end
 
--- Lines 61-72
+-- Lines 66-77
 function RaidMenuLeftOptions:_list_menu_options_data_source()
 	local _list_items = {}
 
@@ -90,7 +95,7 @@ function RaidMenuLeftOptions:_list_menu_options_data_source()
 	return _list_items
 end
 
--- Lines 74-86
+-- Lines 79-91
 function RaidMenuLeftOptions:_on_list_menu_options_item_selected(data)
 	if not data.callback then
 		return
@@ -104,8 +109,37 @@ function RaidMenuLeftOptions:_on_list_menu_options_item_selected(data)
 	end
 end
 
--- Lines 90-108
+-- Lines 95-111
 function RaidMenuLeftOptions:bind_controller_inputs()
+	local bindings = {
+		{
+			key = Idstring("menu_controller_face_top"),
+			callback = callback(self, self, "_on_list_menu_options_item_selected", {
+				callback = "menu_options_on_click_default"
+			})
+		}
+	}
+
+	self:set_controller_bindings(bindings, true)
+
+	local legend = {
+		controller = {
+			"menu_legend_back",
+			"menu_legend_default_options"
+		},
+		keyboard = {
+			{
+				key = "footer_back",
+				callback = callback(self, self, "_on_legend_pc_back", nil)
+			}
+		}
+	}
+
+	self:set_legend(legend)
+end
+
+-- Lines 113-131
+function RaidMenuLeftOptions:bind_controller_inputs_reset_progress()
 	local bindings = {
 		{
 			key = Idstring("menu_controller_face_left"),

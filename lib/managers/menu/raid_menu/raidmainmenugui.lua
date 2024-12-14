@@ -153,7 +153,7 @@ function RaidMainMenuGui:_layout_list_menu()
 	self._list_menu:set_selected(true)
 end
 
--- Lines 146-188
+-- Lines 146-186
 function RaidMainMenuGui:_layout_steam_group_button()
 	local steam_group_panel_params = {
 		layer = 50,
@@ -164,10 +164,6 @@ function RaidMainMenuGui:_layout_steam_group_button()
 		valign = "bottom"
 	}
 	self._steam_group_panel = self._root_panel:panel(steam_group_panel_params)
-
-	self._steam_group_panel:set_right(self._root_panel:w() - 96)
-	self._steam_group_panel:set_bottom(self._root_panel:h() - 77)
-
 	self._steam_button_t = 0
 	self._steam_button_pressed_scale = 0.95
 	local group_button_frame_params = {
@@ -197,36 +193,36 @@ function RaidMainMenuGui:_layout_steam_group_button()
 	self._steam_group_button_image:set_center_x(self._steam_group_panel:w() / 2)
 	self._steam_group_panel:set_w(RaidMainMenuGui.STEAM_GROUP_BUTTON_W)
 	self._steam_group_panel:set_h(RaidMainMenuGui.STEAM_GROUP_BUTTON_H)
-	self._steam_group_panel:set_right(self._root_panel:w() - 96)
+	self._steam_group_panel:set_right(self._root_panel:w())
 	self._steam_group_panel:set_bottom(self._root_panel:h() - 77)
 end
 
--- Lines 190-192
+-- Lines 188-190
 function RaidMainMenuGui:mouse_over_steam_group_button()
 	self._steam_group_button_frame:set_color(Color("ff8880"))
 end
 
--- Lines 194-198
+-- Lines 192-196
 function RaidMainMenuGui:mouse_exit_steam_group_button()
 	self._steam_group_button_frame:set_color(Color.white)
 	self._steam_group_button_frame:stop()
 	self._steam_group_button_frame:animate(callback(self, self, "_animate_steam_group_button_release"))
 end
 
--- Lines 200-203
+-- Lines 198-201
 function RaidMainMenuGui:mouse_pressed_steam_group_button()
 	self._steam_group_button_frame:stop()
 	self._steam_group_button_frame:animate(callback(self, self, "_animate_steam_group_button_press"))
 end
 
--- Lines 205-210
+-- Lines 203-208
 function RaidMainMenuGui:mouse_released_steam_group_button()
 	self._steam_group_button_frame:stop()
 	self._steam_group_button_frame:animate(callback(self, self, "_animate_steam_group_button_release"))
 	Steam:overlay_activate("url", "http://steamcommunity.com/games/414740")
 end
 
--- Lines 212-238
+-- Lines 210-236
 function RaidMainMenuGui:_animate_steam_group_button_press(o)
 	local duration = 0.15
 	local t = self._steam_button_t * duration
@@ -254,7 +250,7 @@ function RaidMainMenuGui:_animate_steam_group_button_press(o)
 	self._steam_button_t = 1
 end
 
--- Lines 240-266
+-- Lines 238-264
 function RaidMainMenuGui:_animate_steam_group_button_release(o)
 	local duration = 0.15
 	local t = (1 - self._steam_button_t) * duration
@@ -276,13 +272,13 @@ function RaidMainMenuGui:_animate_steam_group_button_release(o)
 
 	self._steam_group_panel:set_w(RaidMainMenuGui.STEAM_GROUP_BUTTON_W)
 	self._steam_group_panel:set_h(RaidMainMenuGui.STEAM_GROUP_BUTTON_H)
-	self._steam_group_panel:set_right(self._root_panel:w() - 96)
+	self._steam_group_panel:set_right(self._root_panel:w())
 	self._steam_group_panel:set_bottom(self._root_panel:h() - 77)
 
 	self._steam_button_t = 0
 end
 
--- Lines 269-430
+-- Lines 267-428
 function RaidMainMenuGui:_layout_kick_mute_widget()
 	if self._widget_panel then
 		self._widget_panel:clear()
@@ -443,7 +439,7 @@ function RaidMainMenuGui:_layout_kick_mute_widget()
 	self._list_menu:set_menu_move_controls(menu_move)
 end
 
--- Lines 432-447
+-- Lines 430-445
 function RaidMainMenuGui:on_widget_button_selected(button)
 	local widget_action = nil
 
@@ -462,12 +458,12 @@ function RaidMainMenuGui:on_widget_button_selected(button)
 	self._widget_action_title:set_text(self:translate(widget_action, true))
 end
 
--- Lines 449-451
+-- Lines 447-449
 function RaidMainMenuGui:on_widget_button_unselected(button)
 	self._widget_action_title:set_text("")
 end
 
--- Lines 453-538
+-- Lines 451-536
 function RaidMainMenuGui:_list_menu_data_source()
 	local _list_items = {}
 
@@ -690,7 +686,7 @@ function RaidMainMenuGui:_list_menu_data_source()
 	return _list_items
 end
 
--- Lines 540-552
+-- Lines 538-550
 function RaidMainMenuGui:_on_list_menu_item_selected(data)
 	if not data.callback then
 		return

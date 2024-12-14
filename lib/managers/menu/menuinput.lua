@@ -437,8 +437,12 @@ function MenuInput:mouse_pressed(o, button, x, y)
 	end
 end
 
--- Lines 434-581
+-- Lines 434-585
 function MenuInput:mouse_released(o, button, x, y)
+	if not managers.menu:active_menu() then
+		return
+	end
+
 	x, y = self:_modified_mouse_pos(x, y)
 
 	if self._slider_marker then
@@ -566,7 +570,7 @@ function MenuInput:mouse_released(o, button, x, y)
 	end
 end
 
--- Lines 583-600
+-- Lines 587-604
 function MenuInput:mouse_clicked(o, button, x, y)
 	x, y = self:_modified_mouse_pos(x, y)
 
@@ -581,7 +585,7 @@ function MenuInput:mouse_clicked(o, button, x, y)
 	return managers.menu:active_menu().renderer:mouse_clicked(o, button, x, y)
 end
 
--- Lines 602-622
+-- Lines 606-626
 function MenuInput:mouse_double_click(o, button, x, y)
 	x, y = self:_modified_mouse_pos(x, y)
 
@@ -596,7 +600,7 @@ function MenuInput:mouse_double_click(o, button, x, y)
 	return managers.menu:active_menu().renderer:mouse_double_click(o, button, x, y)
 end
 
--- Lines 625-845
+-- Lines 629-849
 function MenuInput:update(t, dt)
 	if self._menu_plane then
 		self._menu_plane:set_rotation(Rotation(math.sin(t * 60) * 40, math.sin(t * 50) * 30, 0))
@@ -777,7 +781,7 @@ function MenuInput:update(t, dt)
 	self._mouse_moved = nil
 end
 
--- Lines 847-857
+-- Lines 851-861
 function MenuInput:menu_axis_move()
 	local axis_moved = {
 		x = 0,
@@ -795,7 +799,7 @@ function MenuInput:menu_axis_move()
 	return axis_moved
 end
 
--- Lines 859-869
+-- Lines 863-873
 function MenuInput:menu_axis_scroll()
 	local axis_scrolled = {
 		x = 0,
@@ -813,12 +817,12 @@ function MenuInput:menu_axis_scroll()
 	return axis_scrolled
 end
 
--- Lines 871-873
+-- Lines 875-877
 function MenuInput:post_event(event)
 	self._sound_source:post_event(event)
 end
 
--- Lines 876-880
+-- Lines 880-884
 function MenuInput:menu_up_input_bool()
 	local result_1 = MenuInput.super.menu_up_input_bool(self)
 	local result_2 = self._move_axis_limit < self:menu_axis_move().y
@@ -826,32 +830,32 @@ function MenuInput:menu_up_input_bool()
 	return result_1 or result_2
 end
 
--- Lines 881-884
+-- Lines 885-888
 function MenuInput:menu_up_pressed()
 	return MenuInput.super.menu_up_pressed(self) or self._axis_status.y == self.AXIS_STATUS_PRESSED and self:menu_axis_move().y > 0
 end
 
--- Lines 885-887
+-- Lines 889-891
 function MenuInput:menu_up_released()
 	return MenuInput.super.menu_up_released(self) or self._axis_status.y == self.AXIS_STATUS_RELEASED
 end
 
--- Lines 891-893
+-- Lines 895-897
 function MenuInput:menu_down_input_bool()
 	return MenuInput.super.menu_down_input_bool(self) or self:menu_axis_move().y < -self._move_axis_limit
 end
 
--- Lines 894-897
+-- Lines 898-901
 function MenuInput:menu_down_pressed()
 	return MenuInput.super.menu_down_pressed(self) or self._axis_status.y == self.AXIS_STATUS_PRESSED and self:menu_axis_move().y < 0
 end
 
--- Lines 898-900
+-- Lines 902-904
 function MenuInput:menu_down_released()
 	return MenuInput.super.menu_down_released(self) or self._axis_status.y == self.AXIS_STATUS_RELEASED
 end
 
--- Lines 904-908
+-- Lines 908-912
 function MenuInput:menu_left_input_bool()
 	local result_1 = MenuInput.super.menu_left_input_bool(self)
 	local result_2 = self:menu_axis_move().x < -self._move_axis_limit
@@ -859,92 +863,92 @@ function MenuInput:menu_left_input_bool()
 	return result_1 or result_2
 end
 
--- Lines 909-912
+-- Lines 913-916
 function MenuInput:menu_left_pressed()
 	return MenuInput.super.menu_left_pressed(self) or self._axis_status.x == self.AXIS_STATUS_PRESSED and self:menu_axis_move().x < 0
 end
 
--- Lines 913-915
+-- Lines 917-919
 function MenuInput:menu_left_released()
 	return MenuInput.super.menu_left_released(self) or self._axis_status.x == self.AXIS_STATUS_RELEASED
 end
 
--- Lines 919-922
+-- Lines 923-926
 function MenuInput:menu_right_input_bool()
 	return MenuInput.super.menu_right_input_bool(self) or self._move_axis_limit < self:menu_axis_move().x
 end
 
--- Lines 923-926
+-- Lines 927-930
 function MenuInput:menu_right_pressed()
 	return MenuInput.super.menu_right_pressed(self) or self._axis_status.x == self.AXIS_STATUS_PRESSED and self:menu_axis_move().x > 0
 end
 
--- Lines 927-929
+-- Lines 931-933
 function MenuInput:menu_right_released()
 	return MenuInput.super.menu_right_released(self) or self._axis_status.x == self.AXIS_STATUS_RELEASED
 end
 
--- Lines 934-936
+-- Lines 938-940
 function MenuInput:menu_scroll_up_input_bool()
 	return self._move_axis_limit < self:menu_axis_scroll().y
 end
 
--- Lines 937-939
+-- Lines 941-943
 function MenuInput:menu_scroll_up_pressed()
 	return self._axis_status.y == self.AXIS_STATUS_PRESSED and self:menu_axis_scroll().y > 0
 end
 
--- Lines 940-942
+-- Lines 944-946
 function MenuInput:menu_scroll_up_released()
 	return self._axis_status.y == self.AXIS_STATUS_RELEASED
 end
 
--- Lines 946-948
+-- Lines 950-952
 function MenuInput:menu_scroll_down_input_bool()
 	return self:menu_axis_scroll().y < -self._move_axis_limit
 end
 
--- Lines 949-951
+-- Lines 953-955
 function MenuInput:menu_scroll_down_pressed()
 	return self._axis_status.y == self.AXIS_STATUS_PRESSED and self:menu_axis_scroll().y < 0
 end
 
--- Lines 952-954
+-- Lines 956-958
 function MenuInput:menu_scroll_down_released()
 	return self._axis_status.y == self.AXIS_STATUS_RELEASED
 end
 
--- Lines 958-960
+-- Lines 962-964
 function MenuInput:menu_scroll_left_input_bool()
 	return self:menu_axis_scroll().x < -self._move_axis_limit
 end
 
--- Lines 961-963
+-- Lines 965-967
 function MenuInput:menu_scroll_left_pressed()
 	return self._axis_status.x == self.AXIS_STATUS_PRESSED and self:menu_axis_scroll().x < 0
 end
 
--- Lines 964-966
+-- Lines 968-970
 function MenuInput:menu_scroll_left_released()
 	return self._axis_status.x == self.AXIS_STATUS_RELEASED
 end
 
--- Lines 970-972
+-- Lines 974-976
 function MenuInput:menu_scroll_right_input_bool()
 	return self._move_axis_limit < self:menu_axis_scroll().x
 end
 
--- Lines 973-975
+-- Lines 977-979
 function MenuInput:menu_scroll_right_pressed()
 	return self._axis_status.x == self.AXIS_STATUS_PRESSED and self:menu_axis_scroll().x > 0
 end
 
--- Lines 976-978
+-- Lines 980-982
 function MenuInput:menu_scroll_right_released()
 	return self._axis_status.x == self.AXIS_STATUS_RELEASED
 end
 
--- Lines 993-998
+-- Lines 997-1002
 function MenuInput:menu_next_page_input_bool()
 	if self._controller then
 		return self._controller:get_input_bool("next_page")
@@ -953,7 +957,7 @@ function MenuInput:menu_next_page_input_bool()
 	return false
 end
 
--- Lines 1000-1005
+-- Lines 1004-1009
 function MenuInput:menu_next_page_pressed()
 	if self._controller then
 		return self._controller:get_input_pressed("next_page")
@@ -962,7 +966,7 @@ function MenuInput:menu_next_page_pressed()
 	return false
 end
 
--- Lines 1006-1011
+-- Lines 1010-1015
 function MenuInput:menu_next_page_released()
 	if self._controller then
 		return self._controller:get_input_released("next_page")
@@ -971,7 +975,7 @@ function MenuInput:menu_next_page_released()
 	return false
 end
 
--- Lines 1015-1020
+-- Lines 1019-1024
 function MenuInput:menu_previous_page_input_bool()
 	if self._controller then
 		return self._controller:get_input_bool("previous_page")
@@ -980,7 +984,7 @@ function MenuInput:menu_previous_page_input_bool()
 	return false
 end
 
--- Lines 1022-1027
+-- Lines 1026-1031
 function MenuInput:menu_previous_page_pressed()
 	if self._controller then
 		return self._controller:get_input_pressed("previous_page")
@@ -989,7 +993,7 @@ function MenuInput:menu_previous_page_pressed()
 	return false
 end
 
--- Lines 1028-1033
+-- Lines 1032-1037
 function MenuInput:menu_previous_page_released()
 	if self._controller then
 		return self._controller:get_input_released("previous_page")
@@ -998,7 +1002,7 @@ function MenuInput:menu_previous_page_released()
 	return false
 end
 
--- Lines 1040-1064
+-- Lines 1044-1068
 function MenuInput:_update_axis_status()
 	local axis_moved = self:menu_axis_move()
 
@@ -1023,7 +1027,7 @@ function MenuInput:_update_axis_status()
 	end
 end
 
--- Lines 1067-1089
+-- Lines 1071-1093
 function MenuInput:_update_axis_scroll_status()
 	local axis_scrolled = self:menu_axis_scroll()
 

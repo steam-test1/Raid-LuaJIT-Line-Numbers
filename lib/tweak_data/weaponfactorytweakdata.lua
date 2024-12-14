@@ -101,7 +101,7 @@ local is_win_32 = SystemInfo:platform() == Idstring("WIN32")
 local is_not_win_32 = not is_win_32
 WeaponFactoryTweakData = WeaponFactoryTweakData or class()
 
--- Lines 125-165
+-- Lines 125-174
 function WeaponFactoryTweakData:init()
 	self.parts = {}
 
@@ -112,6 +112,7 @@ function WeaponFactoryTweakData:init()
 	self:_init_vertical_grips()
 	self:_init_sights()
 	self:_init_m1911()
+	self:_init_webley()
 	self:_init_thompson()
 	self:_init_sten()
 	self:_init_garand()
@@ -125,52 +126,52 @@ function WeaponFactoryTweakData:init()
 	self:_init_welrod()
 	self:_init_mg42()
 	self:_init_c96()
-	self:_init_webley()
 	self:_init_mosin()
 	self:_init_sterling()
+	self:_init_geco()
 	self:create_ammunition()
 	self:_init_content_unfinished()
 	self:_cleanup_unfinished_content()
 	self:_cleanup_unfinished_parts()
 end
 
--- Lines 169-170
+-- Lines 178-179
 function WeaponFactoryTweakData:_init_silencers()
 end
 
--- Lines 172-173
+-- Lines 181-182
 function WeaponFactoryTweakData:_init_nozzles()
 end
 
--- Lines 175-176
+-- Lines 184-185
 function WeaponFactoryTweakData:_init_gadgets()
 end
 
--- Lines 178-179
+-- Lines 187-188
 function WeaponFactoryTweakData:_init_vertical_grips()
 end
 
--- Lines 181-182
+-- Lines 190-191
 function WeaponFactoryTweakData:_init_sights()
 end
 
--- Lines 184-185
+-- Lines 193-194
 function WeaponFactoryTweakData:_init_content_unfinished()
 end
 
--- Lines 187-188
+-- Lines 196-197
 function WeaponFactoryTweakData:_cleanup_unfinished_content()
 end
 
--- Lines 190-191
+-- Lines 199-200
 function WeaponFactoryTweakData:_cleanup_unfinished_parts()
 end
 
--- Lines 195-196
+-- Lines 204-205
 function WeaponFactoryTweakData:_init_base_parts_for_cloning()
 end
 
--- Lines 199-353
+-- Lines 208-362
 function WeaponFactoryTweakData:_init_thompson()
 	self.parts.wpn_fps_smg_thompson_b_standard = {
 		a_obj = "a_b",
@@ -454,7 +455,7 @@ function WeaponFactoryTweakData:_init_thompson()
 	self.wpn_fps_smg_thompson_npc.unit = "units/vanilla/weapons/wpn_fps_smg_thompson/wpn_fps_smg_thompson_npc"
 end
 
--- Lines 355-495
+-- Lines 364-504
 function WeaponFactoryTweakData:_init_sten()
 	self.parts.wpn_fps_smg_sten_b_standard = {
 		a_obj = "a_b",
@@ -681,7 +682,7 @@ function WeaponFactoryTweakData:_init_sten()
 	self.wpn_fps_smg_sten_npc.unit = "units/vanilla/weapons/wpn_fps_smg_sten/wpn_fps_smg_sten_npc"
 end
 
--- Lines 497-633
+-- Lines 506-642
 function WeaponFactoryTweakData:_init_garand()
 	self.parts.wpn_fps_ass_garand_b_standard = {
 		a_obj = "a_b",
@@ -891,7 +892,7 @@ function WeaponFactoryTweakData:_init_garand()
 	self.wpn_fps_ass_garand_npc.unit = "units/vanilla/weapons/wpn_fps_ass_garand/wpn_fps_ass_garand_npc"
 end
 
--- Lines 635-771
+-- Lines 644-780
 function WeaponFactoryTweakData:_init_garand_golden()
 	self.parts.wpn_fps_ass_garand_golden_b_standard = {
 		a_obj = "a_b",
@@ -1101,7 +1102,7 @@ function WeaponFactoryTweakData:_init_garand_golden()
 	self.wpn_fps_ass_garand_golden_npc.unit = "units/vanilla/weapons/wpn_fps_ass_garand/wpn_fps_ass_garand_golden_npc"
 end
 
--- Lines 773-866
+-- Lines 782-875
 function WeaponFactoryTweakData:_init_m1918()
 	self.parts.wpn_fps_lmg_m1918_b_standard = {
 		a_obj = "a_b",
@@ -1244,7 +1245,7 @@ function WeaponFactoryTweakData:_init_m1918()
 	self.wpn_fps_lmg_m1918_npc.unit = "units/vanilla/weapons/wpn_fps_lmg_m1918/wpn_fps_lmg_m1918_npc"
 end
 
--- Lines 868-980
+-- Lines 877-989
 function WeaponFactoryTweakData:_init_m1903()
 	self.parts.wpn_fps_snp_m1903_b_standard = {
 		a_obj = "a_b",
@@ -1430,7 +1431,7 @@ function WeaponFactoryTweakData:_init_m1903()
 	self.wpn_fps_snp_m1903_npc.unit = "units/vanilla/weapons/wpn_fps_snp_m1903/wpn_fps_snp_m1903_npc"
 end
 
--- Lines 982-1076
+-- Lines 991-1085
 function WeaponFactoryTweakData:_init_m1911()
 	self.parts.wpn_fps_pis_m1911_body_standard = {
 		third_unit = "units/vanilla/weapons/wpn_third_pis_m1911_pts/wpn_third_pis_m1911_body_standard",
@@ -1581,7 +1582,148 @@ function WeaponFactoryTweakData:_init_m1911()
 	self.wpn_fps_pis_m1911_npc.unit = "units/vanilla/weapons/wpn_fps_pis_m1911/wpn_fps_pis_m1911_npc"
 end
 
--- Lines 1078-1201
+-- Lines 1088-1182
+function WeaponFactoryTweakData:_init_geco()
+	self.parts.wpn_fps_sho_geco_b_standard = {
+		third_unit = "units/upd_001/weapons/wpn_third_sho_geco_pts/wpn_third_sho_geco_b_standard",
+		a_obj = "a_b",
+		type = "barrel",
+		name_id = "bm_wp_sho_geco_b_standard",
+		unit = "units/upd_001/weapons/wpn_fps_sho_geco_pts/wpn_fps_sho_geco_b_standard",
+		stats = {
+			value = 1
+		}
+	}
+	self.parts.wpn_fps_sho_geco_b_short = {
+		third_unit = "units/upd_001/weapons/wpn_third_sho_geco_pts/wpn_third_sho_geco_b_short",
+		a_obj = "a_b",
+		type = "barrel",
+		name_id = "bm_wp_sho_geco_b_short",
+		unit = "units/upd_001/weapons/wpn_fps_sho_geco_pts/wpn_fps_sho_geco_b_short",
+		stats = {
+			value = 1
+		}
+	}
+	self.parts.wpn_fps_sho_geco_s_standard = {
+		third_unit = "units/upd_001/weapons/wpn_third_sho_geco_pts/wpn_third_sho_geco_s_standard",
+		a_obj = "a_s",
+		type = "stock",
+		name_id = "bm_wp_sho_geco_s_standard",
+		unit = "units/upd_001/weapons/wpn_fps_sho_geco_pts/wpn_fps_sho_geco_s_standard",
+		stats = {
+			value = 1
+		}
+	}
+	self.parts.wpn_fps_sho_geco_s_cheek_rest = {
+		third_unit = "units/upd_001/weapons/wpn_third_sho_geco_pts/wpn_third_sho_geco_s_cheek_rest",
+		a_obj = "a_s",
+		type = "stock",
+		name_id = "bm_wp_sho_geco_s_cheek_rest",
+		unit = "units/upd_001/weapons/wpn_fps_sho_geco_pts/wpn_fps_sho_geco_s_cheek_rest",
+		stats = {
+			value = 1
+		}
+	}
+	self.parts.wpn_fps_sho_geco_lock = {
+		third_unit = "units/upd_001/weapons/wpn_third_sho_geco_pts/wpn_third_sho_geco_lock",
+		a_obj = "a_lock",
+		type = "lock",
+		name_id = "bm_wp_sho_geco_lock",
+		unit = "units/upd_001/weapons/wpn_fps_sho_geco_pts/wpn_fps_sho_geco_lock",
+		stats = {
+			value = 1
+		}
+	}
+	self.parts.wpn_fps_sho_geco_body_standard = {
+		third_unit = "units/upd_001/weapons/wpn_third_sho_geco_pts/wpn_third_sho_geco_body_standard",
+		a_obj = "a_body",
+		type = "lower_receiver",
+		name_id = "bm_wp_sho_geco_body_standard",
+		unit = "units/upd_001/weapons/wpn_fps_sho_geco_pts/wpn_fps_sho_geco_body_standard",
+		stats = {
+			value = 1
+		}
+	}
+	self.parts.wpn_fps_sho_geco_shell_1 = {
+		third_unit = "units/upd_001/weapons/wpn_third_sho_geco_pts/wpn_third_sho_geco_shell_1",
+		a_obj = "a_shell_1",
+		type = "shell_1",
+		name_id = "bm_wp_sho_geco_shell_1",
+		unit = "units/upd_001/weapons/wpn_fps_sho_geco_pts/wpn_fps_sho_geco_shell_1",
+		stats = {
+			value = 1
+		}
+	}
+	self.parts.wpn_fps_sho_geco_shell_2 = {
+		third_unit = "units/upd_001/weapons/wpn_third_sho_geco_pts/wpn_third_sho_geco_shell_2",
+		a_obj = "a_shell_2",
+		type = "shell_2",
+		name_id = "bm_wp_sho_geco_shell_2",
+		unit = "units/upd_001/weapons/wpn_fps_sho_geco_pts/wpn_fps_sho_geco_shell_2",
+		stats = {
+			value = 1
+		}
+	}
+	self.parts.wpn_fps_sho_geco_trigger_1 = {
+		third_unit = "units/upd_001/weapons/wpn_third_sho_geco_pts/wpn_third_sho_geco_trigger_1",
+		a_obj = "a_trigger_1",
+		type = "trigger_1",
+		name_id = "bm_wp_sho_geco_trigger_1",
+		unit = "units/upd_001/weapons/wpn_fps_sho_geco_pts/wpn_fps_sho_geco_trigger_1",
+		stats = {
+			value = 1
+		}
+	}
+	self.parts.wpn_fps_sho_geco_trigger_2 = {
+		third_unit = "units/upd_001/weapons/wpn_third_sho_geco_pts/wpn_third_sho_geco_trigger_2",
+		a_obj = "a_trigger_2",
+		type = "trigger_2",
+		name_id = "bm_wp_sho_geco_trigger_2",
+		unit = "units/upd_001/weapons/wpn_fps_sho_geco_pts/wpn_fps_sho_geco_trigger_2",
+		stats = {
+			value = 1
+		}
+	}
+	self.wpn_fps_sho_geco = {
+		unit = "units/upd_001/weapons/wpn_fps_sho_geco/wpn_fps_sho_geco",
+		optional_types = {
+			"barrel_ext",
+			"gadget"
+		},
+		animations = {
+			reload = "reload",
+			fire = "recoil",
+			fire_steelsight = "recoil",
+			reload_not_empty = "reload_not_empty"
+		},
+		default_blueprint = {
+			"wpn_fps_sho_geco_b_standard",
+			"wpn_fps_sho_geco_s_standard",
+			"wpn_fps_sho_geco_lock",
+			"wpn_fps_sho_geco_body_standard",
+			"wpn_fps_sho_geco_shell_1",
+			"wpn_fps_sho_geco_shell_2",
+			"wpn_fps_sho_geco_trigger_1",
+			"wpn_fps_sho_geco_trigger_2"
+		},
+		uses_parts = {
+			"wpn_fps_sho_geco_b_standard",
+			"wpn_fps_sho_geco_s_standard",
+			"wpn_fps_sho_geco_lock",
+			"wpn_fps_sho_geco_body_standard",
+			"wpn_fps_sho_geco_shell_1",
+			"wpn_fps_sho_geco_shell_2",
+			"wpn_fps_sho_geco_trigger_1",
+			"wpn_fps_sho_geco_trigger_2",
+			"wpn_fps_sho_geco_b_short",
+			"wpn_fps_sho_geco_s_cheek_rest"
+		}
+	}
+	self.wpn_fps_sho_geco_npc = deep_clone(self.wpn_fps_sho_geco)
+	self.wpn_fps_sho_geco_npc.unit = "units/upd_001/weapons/wpn_fps_sho_geco/wpn_fps_sho_geco_npc"
+end
+
+-- Lines 1418-1541
 function WeaponFactoryTweakData:_init_m1912()
 	self.parts.wpn_fps_sho_m1912_b_standard = {
 		a_obj = "a_b",
@@ -1770,7 +1912,7 @@ function WeaponFactoryTweakData:_init_m1912()
 	self.wpn_fps_sho_m1912_npc.unit = "units/vanilla/weapons/wpn_fps_sho_m1912/wpn_fps_sho_m1912_npc"
 end
 
--- Lines 1203-1298
+-- Lines 1543-1638
 function WeaponFactoryTweakData:_init_mp38()
 	self.parts.wpn_fps_smg_mp38_b_standard = {
 		a_obj = "a_b",
@@ -1918,7 +2060,7 @@ function WeaponFactoryTweakData:_init_mp38()
 	self.wpn_fps_smg_mp38_npc.unit = "units/vanilla/weapons/wpn_fps_smg_mp38/wpn_fps_smg_mp38_npc"
 end
 
--- Lines 1300-1399
+-- Lines 1640-1739
 function WeaponFactoryTweakData:_init_mp44()
 	self.parts.wpn_fps_ass_mp44_b_standard = {
 		a_obj = "a_b",
@@ -2083,7 +2225,7 @@ function WeaponFactoryTweakData:_init_mp44()
 	self.wpn_fps_ass_mp44_npc.unit = "units/vanilla/weapons/wpn_fps_ass_mp44/wpn_fps_ass_mp44_npc"
 end
 
--- Lines 1401-1492
+-- Lines 1741-1832
 function WeaponFactoryTweakData:_init_carbine()
 	self.parts.wpn_fps_ass_carbine_b_standard = {
 		a_obj = "a_b",
@@ -2226,7 +2368,7 @@ function WeaponFactoryTweakData:_init_carbine()
 	self.wpn_fps_ass_carbine_npc.unit = "units/vanilla/weapons/wpn_fps_ass_carbine/wpn_fps_ass_carbine_npc"
 end
 
--- Lines 1494-1642
+-- Lines 1834-1982
 function WeaponFactoryTweakData:_init_mg42()
 	self.parts.wpn_fps_lmg_mg42_b_mg42 = {
 		a_obj = "a_b",
@@ -2451,7 +2593,7 @@ function WeaponFactoryTweakData:_init_mg42()
 	self.wpn_fps_lmg_mg42_npc.unit = "units/vanilla/weapons/wpn_fps_lmg_mg42/wpn_fps_lmg_mg42_npc"
 end
 
--- Lines 1645-1762
+-- Lines 1985-2102
 function WeaponFactoryTweakData:_init_c96()
 	self.parts.wpn_fps_pis_c96_b_long = {
 		a_obj = "a_b",
@@ -2626,7 +2768,7 @@ function WeaponFactoryTweakData:_init_c96()
 	self.wpn_fps_pis_c96_npc.unit = "units/vanilla/weapons/wpn_fps_pis_c96/wpn_fps_pis_c96_npc"
 end
 
--- Lines 1764-1892
+-- Lines 2104-2232
 function WeaponFactoryTweakData:_init_webley()
 	self.parts.wpn_fps_pis_webley_body_standard = {
 		third_unit = "units/vanilla/weapons/wpn_third_pis_webley_pts/wpn_third_pis_webley_body_standard",
@@ -2822,7 +2964,7 @@ function WeaponFactoryTweakData:_init_webley()
 	self.wpn_fps_pis_webley_npc.unit = "units/vanilla/weapons/wpn_fps_pis_webley/wpn_fps_pis_webley_npc"
 end
 
--- Lines 1894-1997
+-- Lines 2234-2337
 function WeaponFactoryTweakData:_init_mosin()
 	self.parts.wpn_fps_snp_mosin_b_standard = {
 		a_obj = "a_b",
@@ -2928,7 +3070,7 @@ function WeaponFactoryTweakData:_init_mosin()
 		stance_mod = {
 			wpn_fps_snp_mosin = {
 				lens_distortion_power = 1.04,
-				translation = Vector3(0, -23, -2.323)
+				translation = Vector3(0, -21, -2.323)
 			}
 		}
 	}
@@ -2983,7 +3125,7 @@ function WeaponFactoryTweakData:_init_mosin()
 	self.wpn_fps_snp_mosin_npc.unit = "units/vanilla/weapons/wpn_fps_snp_mosin/wpn_fps_snp_mosin_npc"
 end
 
--- Lines 2000-2080
+-- Lines 2340-2420
 function WeaponFactoryTweakData:_init_sterling()
 	self.parts.wpn_fps_smg_sterling_b_long = {
 		a_obj = "a_b",
@@ -3112,7 +3254,7 @@ function WeaponFactoryTweakData:_init_sterling()
 	self.wpn_fps_smg_sterling_npc.unit = "units/vanilla/weapons/wpn_fps_smg_sterling/wpn_fps_smg_sterling_npc"
 end
 
--- Lines 2082-2107
+-- Lines 2422-2447
 function WeaponFactoryTweakData:_init_welrod()
 	self.wpn_fps_pis_welrod = {
 		unit = "units/vanilla/weapons/wpn_fps_pis_welrod/wpn_fps_pis_welrod",
@@ -3145,11 +3287,11 @@ function WeaponFactoryTweakData:_init_welrod()
 	self.wpn_fps_pis_welrod_npc.unit = "units/vanilla/weapons/wpn_fps_pis_welrod/wpn_fps_pis_welrod_npc"
 end
 
--- Lines 2111-2113
+-- Lines 2451-2453
 function WeaponFactoryTweakData:is_part_internal(part_id)
 	return self.parts[part_id] and self.parts[part_id].internal_part or false
 end
 
--- Lines 2115-2117
+-- Lines 2455-2457
 function WeaponFactoryTweakData:create_ammunition()
 end

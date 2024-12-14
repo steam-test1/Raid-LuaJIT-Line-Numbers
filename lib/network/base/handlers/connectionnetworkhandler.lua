@@ -820,7 +820,7 @@ function ConnectionNetworkHandler:sync_award_achievement(achievement_id, sender)
 	managers.achievment:award(achievement_id)
 end
 
--- Lines 818-825
+-- Lines 818-826
 function ConnectionNetworkHandler:propagate_alert(type, position, range, filter, aggressor, head_position, sender)
 	local peer = self._verify_sender(sender)
 
@@ -838,7 +838,7 @@ function ConnectionNetworkHandler:propagate_alert(type, position, range, filter,
 	})
 end
 
--- Lines 829-834
+-- Lines 830-835
 function ConnectionNetworkHandler:set_auto_assault_ai_trade(character_name, time)
 	if not self._verify_gamestate(self._gamestate_filter.any_ingame) then
 		return
@@ -847,7 +847,7 @@ function ConnectionNetworkHandler:set_auto_assault_ai_trade(character_name, time
 	managers.trade:sync_set_auto_assault_ai_trade(character_name, time)
 end
 
--- Lines 838-843
+-- Lines 839-844
 function ConnectionNetworkHandler:sync_prepare_world(world_id, peer, stage, sender)
 	if not self._verify_sender(sender) then
 		return
@@ -856,7 +856,7 @@ function ConnectionNetworkHandler:sync_prepare_world(world_id, peer, stage, send
 	managers.worldcollection:sync_world_prepared(world_id, peer, stage)
 end
 
--- Lines 846-853
+-- Lines 847-854
 function ConnectionNetworkHandler:send_loaded_packages(package, count, sender)
 	if not self._verify_in_client_session() then
 		Application:error("[ConnectionNetworkHandler:send_loaded_packages] Not session, recieving failed!")
@@ -872,7 +872,7 @@ function ConnectionNetworkHandler:send_loaded_packages(package, count, sender)
 	})
 end
 
--- Lines 878-884
+-- Lines 879-885
 function ConnectionNetworkHandler:spawn_loot(tweak_table, position, yaw, pitch, roll, sender)
 	if not self._verify_sender(sender) then
 		return
@@ -881,45 +881,40 @@ function ConnectionNetworkHandler:spawn_loot(tweak_table, position, yaw, pitch, 
 	managers.drop_loot:drop_item(tweak_table, position, Rotation(yaw, pitch, roll))
 end
 
--- Lines 886-888
+-- Lines 887-889
 function ConnectionNetworkHandler:connection_keep_alive(sender)
 end
 
--- Lines 892-894
+-- Lines 893-895
 function ConnectionNetworkHandler:request_change_criminal_character(peer_id, new_character_name, peer_unit)
 	managers.character_customization:request_change_criminal_character(peer_id, new_character_name, peer_unit)
 end
 
--- Lines 896-898
+-- Lines 897-899
 function ConnectionNetworkHandler:change_criminal_character(peer_id, new_character_name, peer_unit)
 	managers.character_customization:change_criminal_character(peer_id, new_character_name, peer_unit)
 end
 
--- Lines 902-906
+-- Lines 903-907
 function ConnectionNetworkHandler:sync_host_selects_suggested_card(card_key_name, peer_id, steam_instance_id)
 	if managers.menu_component._raid_challenge_cards_gui then
 		managers.menu_component._raid_challenge_cards_gui:sync_host_selects_suggested_card(card_key_name, peer_id, steam_instance_id)
 	end
 end
 
--- Lines 908-912
+-- Lines 909-913
 function ConnectionNetworkHandler:sync_phase_two_execute_action(action, peer_id)
 	if managers.menu_component._raid_challenge_cards_gui then
 		managers.menu_component._raid_challenge_cards_gui:sync_phase_two_execute_action(action, peer_id)
 	end
 end
 
--- Lines 914-916
+-- Lines 915-917
 function ConnectionNetworkHandler:select_challenge_card(peer_id)
 	managers.challenge_cards:select_challenge_card(peer_id)
 end
 
--- Lines 918-920
-function ConnectionNetworkHandler:sync_system_start_raid()
-	managers.raid_menu:_system_start_raid()
-end
-
--- Lines 922-927
+-- Lines 919-924
 function ConnectionNetworkHandler:remove_challenge_card_from_inventory(challenge_card_key, peer_id)
 	local local_peer = managers.network:session():local_peer()
 
@@ -928,68 +923,68 @@ function ConnectionNetworkHandler:remove_challenge_card_from_inventory(challenge
 	end
 end
 
--- Lines 934-936
+-- Lines 931-933
 function ConnectionNetworkHandler:mark_active_card_as_spent()
 	managers.challenge_cards:mark_active_card_as_spent()
 end
 
--- Lines 938-940
+-- Lines 935-937
 function ConnectionNetworkHandler:set_successfull_raid_end()
 	managers.challenge_cards:set_successfull_raid_end()
 end
 
--- Lines 942-944
+-- Lines 939-941
 function ConnectionNetworkHandler:deactivate_active_challenge_card()
 	managers.challenge_cards:deactivate_active_challenge_card()
 end
 
--- Lines 946-948
+-- Lines 943-945
 function ConnectionNetworkHandler:remove_active_challenge_card()
 	managers.challenge_cards:remove_active_challenge_card()
 end
 
--- Lines 950-952
+-- Lines 947-949
 function ConnectionNetworkHandler:send_suggested_card_to_peers(challenge_card_key, peer_id, steam_instance_id)
 	managers.challenge_cards:sync_suggested_card_from_peer(challenge_card_key, peer_id, steam_instance_id)
 end
 
--- Lines 954-956
+-- Lines 951-953
 function ConnectionNetworkHandler:send_remove_suggested_card_to_peers(peer_id)
 	managers.challenge_cards:sync_remove_suggested_card_from_peer(peer_id)
 end
 
--- Lines 958-960
+-- Lines 955-957
 function ConnectionNetworkHandler:clear_suggested_cards()
 	managers.challenge_cards:clear_suggested_cards()
 end
 
--- Lines 962-964
+-- Lines 959-961
 function ConnectionNetworkHandler:send_toggle_lock_suggested_card_to_peers(peer_id)
 	managers.challenge_cards:sync_toggle_lock_suggested_challenge_card(peer_id)
 end
 
--- Lines 967-969
+-- Lines 964-966
 function ConnectionNetworkHandler:card_failed_warning(challenge_card_key, effect_id, peer_id)
 	managers.challenge_cards:card_failed_warning(challenge_card_key, effect_id, peer_id)
 end
 
--- Lines 972-974
+-- Lines 969-971
 function ConnectionNetworkHandler:fail_effect(failed_effect_name, peer_id)
 	managers.buff_effect:fail_effect(failed_effect_name, peer_id)
 end
 
--- Lines 979-981
+-- Lines 976-978
 function ConnectionNetworkHandler:sync_loot_to_peers(loot_type, name, xp, peer_id)
 	managers.lootdrop:on_loot_dropped_for_peer(loot_type, name, xp, peer_id)
 end
 
--- Lines 984-987
+-- Lines 981-984
 function ConnectionNetworkHandler:sync_set_selected_job(job_id, difficulty)
 	tweak_data:set_difficulty(difficulty)
 	managers.raid_job:_set_selected_job(job_id)
 end
 
--- Lines 990-995
+-- Lines 987-992
 function ConnectionNetworkHandler:sync_current_job(job_id, sender)
 	if not self._verify_sender(sender) then
 		return
@@ -998,7 +993,7 @@ function ConnectionNetworkHandler:sync_current_job(job_id, sender)
 	managers.raid_job:sync_current_job(job_id)
 end
 
--- Lines 997-1012
+-- Lines 994-1009
 function ConnectionNetworkHandler:sync_picked_up_loot_values(picked_up_current_leg, picked_up_total, sender)
 	if not self._verify_sender(sender) then
 		return
@@ -1016,7 +1011,7 @@ function ConnectionNetworkHandler:sync_picked_up_loot_values(picked_up_current_l
 	})
 end
 
--- Lines 1014-1020
+-- Lines 1011-1017
 function ConnectionNetworkHandler:sync_spawned_loot_values(spawned_current_leg, spawned_total, sender)
 	if not self._verify_sender(sender) then
 		return
@@ -1026,7 +1021,7 @@ function ConnectionNetworkHandler:sync_spawned_loot_values(spawned_current_leg, 
 	managers.lootdrop:set_loot_spawned_current_leg(spawned_current_leg)
 end
 
--- Lines 1023-1029
+-- Lines 1020-1026
 function ConnectionNetworkHandler:start_statistics_session(from_beginning, drop_in, sender)
 	if not self._verify_sender(sender) then
 		return
@@ -1038,7 +1033,7 @@ function ConnectionNetworkHandler:start_statistics_session(from_beginning, drop_
 	})
 end
 
--- Lines 1031-1037
+-- Lines 1028-1034
 function ConnectionNetworkHandler:stop_statistics_session(success, quit, end_type, sender)
 	if not self._verify_sender(sender) then
 		return
@@ -1051,7 +1046,7 @@ function ConnectionNetworkHandler:stop_statistics_session(success, quit, end_typ
 	})
 end
 
--- Lines 1039-1045
+-- Lines 1036-1042
 function ConnectionNetworkHandler:sync_current_event_index(current_event_index, sender)
 	if not self._verify_sender(sender) then
 		return
@@ -1060,7 +1055,7 @@ function ConnectionNetworkHandler:sync_current_event_index(current_event_index, 
 	managers.raid_job:sync_current_event_index(current_event_index)
 end
 
--- Lines 1047-1053
+-- Lines 1044-1050
 function ConnectionNetworkHandler:sync_complete_job(sender)
 	if not self._verify_sender(sender) then
 		return
@@ -1069,7 +1064,7 @@ function ConnectionNetworkHandler:sync_complete_job(sender)
 	managers.raid_job:complete_job()
 end
 
--- Lines 1055-1061
+-- Lines 1052-1058
 function ConnectionNetworkHandler:sync_event_loot_data(loot_acquired, loot_spawned, sender)
 	if not self._verify_sender(sender) then
 		return
@@ -1078,7 +1073,7 @@ function ConnectionNetworkHandler:sync_event_loot_data(loot_acquired, loot_spawn
 	managers.raid_job:sync_event_loot_data(loot_acquired, loot_spawned)
 end
 
--- Lines 1065-1071
+-- Lines 1062-1068
 function ConnectionNetworkHandler:sync_airplane_barrage(airplane_unit, sequence_name, sender)
 	if not self._verify_sender(sender) then
 		return
@@ -1087,7 +1082,7 @@ function ConnectionNetworkHandler:sync_airplane_barrage(airplane_unit, sequence_
 	managers.barrage:sync_airplane_barrage(airplane_unit, sequence_name)
 end
 
--- Lines 1073-1079
+-- Lines 1070-1076
 function ConnectionNetworkHandler:sync_barrage_launch_sound(event_name, sender)
 	if not self._verify_sender(sender) then
 		return
@@ -1096,7 +1091,7 @@ function ConnectionNetworkHandler:sync_barrage_launch_sound(event_name, sender)
 	managers.barrage:play_barrage_launch_sound(event_name)
 end
 
--- Lines 1083-1101
+-- Lines 1080-1099
 function ConnectionNetworkHandler:sync_external_start_mission(mission_id, event_id, reload_mission_flag, sender)
 	if not self._verify_sender(sender) then
 		return
@@ -1116,12 +1111,13 @@ function ConnectionNetworkHandler:sync_external_start_mission(mission_id, event_
 		managers.raid_job._selected_job = managers.raid_job._current_job
 
 		managers.raid_job:on_mission_restart()
+		managers.raid_job:stop_sounds()
 	end
 
 	managers.raid_job:do_external_start_mission(mission, event_id)
 end
 
--- Lines 1103-1111
+-- Lines 1101-1109
 function ConnectionNetworkHandler:sync_external_end_mission(restart_camp, failed, sender)
 	if not self._verify_sender(sender) then
 		return
@@ -1131,7 +1127,7 @@ function ConnectionNetworkHandler:sync_external_end_mission(restart_camp, failed
 	managers.raid_job:do_external_end_mission(restart_camp)
 end
 
--- Lines 1113-1119
+-- Lines 1111-1117
 function ConnectionNetworkHandler:restart(sender)
 	if not self._verify_sender(sender) then
 		return
@@ -1140,79 +1136,7 @@ function ConnectionNetworkHandler:restart(sender)
 	managers.raid_job:do_external_end_mission()
 end
 
--- Lines 1121-1137
-function ConnectionNetworkHandler:set_player_level(level, sender)
-	local sender_peer = self._verify_sender(sender)
-
-	if not sender_peer then
-		return
-	end
-
-	sender_peer:set_level(level)
-
-	local character_data = managers.criminals:character_data_by_peer_id(sender_peer:id())
-	local panel_id = character_data.panel_id
-
-	if panel_id then
-		managers.hud:set_teammate_level(panel_id, level)
-	else
-		debug_pause("[ConnectionNetworkHandler:set_player_level] Trying to set player level for a player without a HUD panel!")
-	end
-end
-
--- Lines 1139-1146
-function ConnectionNetworkHandler:set_player_nationality(nationality, sender)
-	local sender_peer = self._verify_sender(sender)
-
-	if not sender_peer then
-		return
-	end
-
-	sender_peer:set_nationality(nationality)
-end
-
--- Lines 1149-1156
-function ConnectionNetworkHandler:set_player_class(class, sender)
-	local sender_peer = self._verify_sender(sender)
-
-	if not sender_peer then
-		return
-	end
-
-	sender_peer:set_class(class)
-end
-
--- Lines 1158-1181
-function ConnectionNetworkHandler:set_active_warcry(warcry_name, fill_percentage, sender)
-	local sender_peer = self._verify_sender(sender)
-
-	if not sender_peer then
-		return
-	end
-
-	sender_peer:set_active_warcry(warcry_name)
-
-	local character_data = managers.criminals:character_data_by_peer_id(sender_peer:id())
-	local panel_id = character_data.panel_id
-	local name_label_id = sender_peer:unit() and sender_peer:unit():unit_data() and sender_peer:unit():unit_data().name_label_id
-
-	if panel_id then
-		if warcry_name then
-			managers.hud:set_teammate_active_warcry(character_data.panel_id, name_label_id, warcry_name)
-		end
-
-		if fill_percentage then
-			managers.hud:set_teammate_warcry_meter_fill(character_data.panel_id, {
-				total = 100,
-				current = fill_percentage
-			})
-		end
-	else
-		debug_pause("[ConnectionNetworkHandler:set_player_level] Trying to set active warcry for a player without a HUD panel!")
-	end
-end
-
--- Lines 1183-1191
+-- Lines 1119-1127
 function ConnectionNetworkHandler:sync_warcry_meter_fill_percentage(fill_percentage, sender)
 	local sender_peer = self._verify_sender(sender)
 
@@ -1228,7 +1152,7 @@ function ConnectionNetworkHandler:sync_warcry_meter_fill_percentage(fill_percent
 	})
 end
 
--- Lines 1193-1201
+-- Lines 1129-1137
 function ConnectionNetworkHandler:sync_warcry_meter_glow(value, sender)
 	local sender_peer = self._verify_sender(sender)
 
@@ -1241,7 +1165,7 @@ function ConnectionNetworkHandler:sync_warcry_meter_glow(value, sender)
 	managers.hud:set_warcry_meter_glow(character_data.panel_id, value)
 end
 
--- Lines 1203-1214
+-- Lines 1139-1150
 function ConnectionNetworkHandler:sync_activate_warcry(warcry_type, warcry_level, duration, sender)
 	local sender_peer = self._verify_sender(sender)
 
@@ -1256,7 +1180,7 @@ function ConnectionNetworkHandler:sync_activate_warcry(warcry_type, warcry_level
 	managers.warcry:activate_peer_warcry(sender_peer:id(), warcry_type, warcry_level)
 end
 
--- Lines 1216-1227
+-- Lines 1152-1163
 function ConnectionNetworkHandler:sync_deactivate_warcry(sender)
 	local sender_peer = self._verify_sender(sender)
 
@@ -1271,7 +1195,7 @@ function ConnectionNetworkHandler:sync_deactivate_warcry(sender)
 	managers.warcry:deactivate_peer_warcry(sender_peer:id())
 end
 
--- Lines 1229-1236
+-- Lines 1165-1172
 function ConnectionNetworkHandler:refill_grenades(amount, sender)
 	local sender_peer = self._verify_sender(sender)
 
@@ -1282,7 +1206,7 @@ function ConnectionNetworkHandler:refill_grenades(amount, sender)
 	managers.player:refill_grenades(amount)
 end
 
--- Lines 1238-1249
+-- Lines 1174-1185
 function ConnectionNetworkHandler:sync_queue_dialog(id, instigator, sender)
 	local sender_peer = self._verify_sender(sender)
 
@@ -1300,7 +1224,7 @@ function ConnectionNetworkHandler:sync_queue_dialog(id, instigator, sender)
 	end
 end
 
--- Lines 1251-1258
+-- Lines 1187-1194
 function ConnectionNetworkHandler:sync_camp_presence(value, sender)
 	local sender_peer = self._verify_sender(sender)
 
@@ -1311,7 +1235,7 @@ function ConnectionNetworkHandler:sync_camp_presence(value, sender)
 	managers.player:set_local_player_in_camp(value)
 end
 
--- Lines 1260-1267
+-- Lines 1196-1203
 function ConnectionNetworkHandler:sync_objectives_manager_mission_start(sender)
 	local sender_peer = self._verify_sender(sender)
 
@@ -1322,7 +1246,7 @@ function ConnectionNetworkHandler:sync_objectives_manager_mission_start(sender)
 	managers.objectives:on_mission_start_callback()
 end
 
--- Lines 1269-1276
+-- Lines 1205-1212
 function ConnectionNetworkHandler:sync_active_challenge_card(card_key, locked, status, sender)
 	local sender_peer = self._verify_sender(sender)
 
@@ -1333,7 +1257,7 @@ function ConnectionNetworkHandler:sync_active_challenge_card(card_key, locked, s
 	managers.challenge_cards:sync_active_challenge_card(card_key, locked, status)
 end
 
--- Lines 1278-1285
+-- Lines 1214-1221
 function ConnectionNetworkHandler:sync_active_challenge_card(card_key, locked, status, sender)
 	local sender_peer = self._verify_sender(sender)
 
@@ -1344,7 +1268,7 @@ function ConnectionNetworkHandler:sync_active_challenge_card(card_key, locked, s
 	managers.challenge_cards:sync_active_challenge_card(card_key, locked, status)
 end
 
--- Lines 1287-1294
+-- Lines 1223-1230
 function ConnectionNetworkHandler:sync_spotter_spawn_flare(flare, pos, rot, forward, v, sender)
 	local sender_peer = self._verify_sender(sender)
 
@@ -1355,7 +1279,7 @@ function ConnectionNetworkHandler:sync_spotter_spawn_flare(flare, pos, rot, forw
 	managers.barrage:sync_spotter_spawn_flare(flare, pos, rot, forward, v)
 end
 
--- Lines 1296-1302
+-- Lines 1232-1238
 function ConnectionNetworkHandler:sync_spotter_flare_disabled(unit, sender)
 	local sender_peer = self._verify_sender(sender)
 
@@ -1366,7 +1290,7 @@ function ConnectionNetworkHandler:sync_spotter_flare_disabled(unit, sender)
 	unit:damage():run_sequence_simple("state_interaction_disabled")
 end
 
--- Lines 1304-1310
+-- Lines 1240-1246
 function ConnectionNetworkHandler:sync_randomize_operation(operation_id, string_delimited, sender)
 	local sender_peer = self._verify_sender(sender)
 
@@ -1377,7 +1301,7 @@ function ConnectionNetworkHandler:sync_randomize_operation(operation_id, string_
 	tweak_data.operations:set_operation_indexes_delimited(operation_id, string_delimited)
 end
 
--- Lines 1312-1319
+-- Lines 1248-1255
 function ConnectionNetworkHandler:set_hud_suspicion_state(indicator_id, state, sender)
 	local sender_peer = self._verify_sender(sender)
 
@@ -1388,7 +1312,7 @@ function ConnectionNetworkHandler:set_hud_suspicion_state(indicator_id, state, s
 	managers.hud:set_suspicion_indicator_state(indicator_id, state)
 end
 
--- Lines 1321-1330
+-- Lines 1257-1266
 function ConnectionNetworkHandler:restore_health_by_percentage(health_percentage, sender)
 	local sender_peer = self._verify_sender(sender)
 
@@ -1401,7 +1325,7 @@ function ConnectionNetworkHandler:restore_health_by_percentage(health_percentage
 	end
 end
 
--- Lines 1332-1342
+-- Lines 1268-1278
 function ConnectionNetworkHandler:enter_lockpicking_state(sender)
 	local sender_peer = self._verify_sender(sender)
 
@@ -1415,7 +1339,7 @@ function ConnectionNetworkHandler:enter_lockpicking_state(sender)
 	managers.hud:on_teammate_start_lockpicking(teammate_panel_id, name_label_id)
 end
 
--- Lines 1344-1354
+-- Lines 1280-1290
 function ConnectionNetworkHandler:exit_lockpicking_state(sender)
 	local sender_peer = self._verify_sender(sender)
 
@@ -1429,7 +1353,7 @@ function ConnectionNetworkHandler:exit_lockpicking_state(sender)
 	managers.hud:on_teammate_stop_lockpicking(teammate_panel_id, name_label_id)
 end
 
--- Lines 1356-1363
+-- Lines 1292-1299
 function ConnectionNetworkHandler:sync_document_spawn_chance(document_spawn_chance, sender)
 	local sender_peer = self._verify_sender(sender)
 
@@ -1440,7 +1364,7 @@ function ConnectionNetworkHandler:sync_document_spawn_chance(document_spawn_chan
 	managers.consumable_missions:on_document_spawn_chance_received(document_spawn_chance, sender_peer:id())
 end
 
--- Lines 1365-1372
+-- Lines 1301-1308
 function ConnectionNetworkHandler:reset_document_spawn_chance_modifier(sender)
 	local sender_peer = self._verify_sender(sender)
 
@@ -1451,7 +1375,7 @@ function ConnectionNetworkHandler:reset_document_spawn_chance_modifier(sender)
 	managers.consumable_missions:reset_document_spawn_modifier()
 end
 
--- Lines 1376-1391
+-- Lines 1312-1327
 function ConnectionNetworkHandler:sync_warcry_team_buff(upgrade_id, identifier, acquired, sender)
 	if not self._verify_sender(sender) or not self._verify_gamestate(self._gamestate_filter.any_ingame_playing) then
 		return

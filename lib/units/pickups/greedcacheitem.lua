@@ -4,7 +4,7 @@ GreedCacheItem = GreedCacheItem or class()
 function GreedCacheItem:init(unit)
 	self._unit = unit
 	self._reserve = 0
-	self._current_amount = 0
+	self._unlocked = false
 end
 
 -- Lines 9-12
@@ -68,20 +68,48 @@ function GreedCacheItem:get_lockpick_parameters()
 	return parameters
 end
 
--- Lines 62-64
+-- Lines 62-65
 function GreedCacheItem:unlock()
+	self._unlocked = true
+
 	self:_check_current_sequence()
 end
 
--- Lines 66-68
+-- Lines 67-69
+function GreedCacheItem:locked()
+	return not self._unlocked
+end
+
+-- Lines 71-73
 function GreedCacheItem:interaction_timer_value()
 	return tweak_data.greed.cache_items[self._tweak_table].interaction_timer
 end
 
--- Lines 70-75
+-- Lines 75-82
 function GreedCacheItem:on_load_complete()
 	local world_id = managers.worldcollection:get_worlddefinition_by_unit_id(self._unit:unit_data().unit_id):world_id()
 
 	managers.greed:register_greed_cache_item(self._unit, world_id)
-	self:set_reserve(tweak_data.greed.cache_items[self._tweak_table].value)
+
+	if not self._reserve or not self._current_amount then
+		self:set_reserve(tweak_data.greed.cache_items[self._tweak_table].value)
+	end
+end
+
+-- Lines 84-88
+function GreedCacheItem:save(data)
+	data.reserve = self._reserve
+	data.current_amount = self._current_amount
+	data.unlocked = self._unlocked
+end
+
+-- Lines 90-98
+function GreedCacheItem:load(data)
+	self._reserve = data.reserve
+	self._current_amount = data.current_amount
+	self._unlocked = data.unlocked
+
+	if self._unlocked then
+		self:_check_current_sequence()
+	end
 end

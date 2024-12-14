@@ -806,8 +806,8 @@ function AttentionTweakData:_init_prop()
 		max_range = 3000,
 		reaction = "REACT_AIM",
 		notice_requires_FOV = true,
-		uncover_range = 200,
-		verification_interval = 0.4,
+		uncover_range = 300,
+		verification_interval = 0.1,
 		release_delay = 1,
 		filter = "civilians_enemies"
 	}

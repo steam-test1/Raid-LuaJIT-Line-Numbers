@@ -193,7 +193,7 @@ require("lib/units/characters/CharacterManageSpawnedUnits")
 
 GameSetup = GameSetup or class(Setup)
 
--- Lines 262-327
+-- Lines 263-328
 function GameSetup:load_packages()
 	Application:debug("[GameSetup:load_packages()]")
 	Setup.load_packages(self)
@@ -267,7 +267,7 @@ function GameSetup:load_packages()
 	end
 end
 
--- Lines 329-361
+-- Lines 330-362
 function GameSetup:gather_packages_to_unload()
 	Setup.unload_packages(self)
 
@@ -303,12 +303,12 @@ function GameSetup:gather_packages_to_unload()
 	end
 end
 
--- Lines 363-365
+-- Lines 364-366
 function GameSetup:unload_packages()
 	Setup.unload_packages(self)
 end
 
--- Lines 367-407
+-- Lines 368-408
 function GameSetup:init_managers(managers)
 	Setup.init_managers(self, managers)
 
@@ -343,7 +343,7 @@ function GameSetup:init_managers(managers)
 	end
 end
 
--- Lines 409-452
+-- Lines 410-453
 function GameSetup:init_game()
 	local gsm = Setup.init_game(self)
 
@@ -381,7 +381,7 @@ function GameSetup:init_game()
 	return gsm
 end
 
--- Lines 454-488
+-- Lines 455-489
 function GameSetup:init_finalize()
 	if script_data.level_script and script_data.level_script.post_init then
 		script_data.level_script:post_init()
@@ -420,7 +420,7 @@ function GameSetup:init_finalize()
 	managers.network.account:set_playing(true)
 end
 
--- Lines 490-530
+-- Lines 491-531
 function GameSetup:update(t, dt)
 	Setup.update(self, t, dt)
 
@@ -458,7 +458,7 @@ function GameSetup:update(t, dt)
 	managers.buff_effect:update(t, dt)
 end
 
--- Lines 532-545
+-- Lines 533-546
 function GameSetup:paused_update(t, dt)
 	Setup.paused_update(self, t, dt)
 	managers.groupai:paused_update(t, dt)
@@ -474,7 +474,7 @@ function GameSetup:paused_update(t, dt)
 	self:_update_debug_input()
 end
 
--- Lines 547-562
+-- Lines 548-563
 function GameSetup:destroy()
 	Setup.destroy(self)
 
@@ -487,13 +487,13 @@ function GameSetup:destroy()
 	managers.network.account:set_playing(false)
 end
 
--- Lines 564-569
+-- Lines 565-570
 function GameSetup:end_update(t, dt)
 	Setup.end_update(self, t, dt)
 	managers.game_play_central:end_update(t, dt)
 end
 
--- Lines 572-598
+-- Lines 573-599
 function GameSetup:save(data)
 	Setup.save(self, data)
 	managers.game_play_central:save(data)
@@ -521,7 +521,7 @@ function GameSetup:save(data)
 	managers.statistics:sync_save(data)
 end
 
--- Lines 601-627
+-- Lines 602-628
 function GameSetup:load(data)
 	Setup.load(self, data)
 	managers.hud:load(data)
@@ -549,7 +549,7 @@ function GameSetup:load(data)
 	managers.statistics:sync_load(data)
 end
 
--- Lines 630-655
+-- Lines 631-656
 function GameSetup:_update_debug_input()
 end
 

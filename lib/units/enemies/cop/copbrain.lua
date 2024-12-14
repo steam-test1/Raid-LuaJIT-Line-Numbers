@@ -1443,14 +1443,16 @@ function CopBrain:stealth_action_allowed()
 	return not self._flagged_looking and not self._SO_id
 end
 
--- Lines 1500-1504
+-- Lines 1500-1505
 function CopBrain:_switch_to_cbt()
+	self._switch_to_cbt_called = false
+
 	if alive(self._unit) then
 		self._unit:movement():set_stance("cbt", false, false)
 	end
 end
 
--- Lines 1508-1542
+-- Lines 1509-1543
 function CopBrain:pre_destroy(unit)
 	self:set_active(false)
 	self:cancel_all_pathing_searches()

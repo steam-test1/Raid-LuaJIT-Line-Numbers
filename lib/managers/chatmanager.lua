@@ -16,19 +16,30 @@ function ChatManager:_setup()
 	self._message_buffer = {}
 end
 
--- Lines 21-32
+-- Lines 21-42
 function ChatManager:register_receiver(channel_id, receiver)
 	self._receivers[channel_id] = self._receivers[channel_id] or {}
 	self._message_buffer[channel_id] = self._message_buffer[channel_id] or {}
 
 	table.insert(self._receivers[channel_id], receiver)
 
-	for _, message_data in ipairs(self._message_buffer[channel_id]) do
-		receiver:receive_message(message_data.name, message_data.peer_id, message_data.message, message_data.color, message_data.icon, message_data.system_message)
+	local ct_cached_messages = #self._message_buffer[channel_id]
+	local ct_chat_cached_messages = receiver:ct_cached_messages()
+
+	if ct_chat_cached_messages < ct_cached_messages then
+		for i = ct_chat_cached_messages + 1, ct_cached_messages do
+			local message_data = self._message_buffer[channel_id][i]
+
+			receiver:receive_message(message_data.name, message_data.peer_id, message_data.message, message_data.color, message_data.icon, message_data.system_message)
+		end
+	elseif ct_cached_messages == ct_chat_cached_messages and ct_cached_messages == ChatManager.MESSAGE_BUFFER_SIZE then
+		for _, message_data in ipairs(self._message_buffer[channel_id]) do
+			receiver:receive_message(message_data.name, message_data.peer_id, message_data.message, message_data.color, message_data.icon, message_data.system_message)
+		end
 	end
 end
 
--- Lines 34-45
+-- Lines 44-55
 function ChatManager:unregister_receiver(channel_id, receiver)
 	if not self._receivers[channel_id] then
 		return
@@ -43,7 +54,7 @@ function ChatManager:unregister_receiver(channel_id, receiver)
 	end
 end
 
--- Lines 47-58
+-- Lines 57-68
 function ChatManager:send_message(channel_id, sender, message)
 	if managers.network:session() then
 		sender = managers.network:session():local_peer()
@@ -55,14 +66,14 @@ function ChatManager:send_message(channel_id, sender, message)
 	end
 end
 
--- Lines 60-64
+-- Lines 70-74
 function ChatManager:feed_system_message(channel_id, message)
 	if not Global.game_settings.single_player then
 		self:_receive_message(channel_id, nil, nil, message, Color.white, nil, true)
 	end
 end
 
--- Lines 66-77
+-- Lines 76-87
 function ChatManager:receive_message_by_peer(channel_id, peer, message)
 	local color_id = peer:id()
 	local color = tweak_data.chat_colors[color_id]
@@ -70,17 +81,17 @@ function ChatManager:receive_message_by_peer(channel_id, peer, message)
 	self:_receive_message(channel_id, peer:name(), peer:id(), message, tweak_data.chat_colors[color_id], false)
 end
 
--- Lines 79-81
+-- Lines 89-91
 function ChatManager:receive_message_by_name(channel_id, name, message)
 	self:_receive_message(channel_id, name, nil, message, tweak_data.chat_colors[1])
 end
 
--- Lines 83-85
+-- Lines 93-95
 function ChatManager:clear_message_buffer(channel_id)
 	self._message_buffer[channel_id] = {}
 end
 
--- Lines 87-95
+-- Lines 97-105
 function ChatManager:_cache_message(channel_id, name, peer_id, message, color, icon, system_message)
 	table.insert(self._message_buffer[channel_id], {
 		name = name,
@@ -96,7 +107,7 @@ function ChatManager:_cache_message(channel_id, name, peer_id, message, color, i
 	end
 end
 
--- Lines 97-111
+-- Lines 107-121
 function ChatManager:_receive_message(channel_id, name, peer_id, message, color, icon, system_message)
 	if not self._receivers[channel_id] then
 		return
@@ -109,10 +120,10 @@ function ChatManager:_receive_message(channel_id, name, peer_id, message, color,
 	end
 end
 
--- Lines 114-117
+-- Lines 124-127
 function ChatManager:save(data)
 end
 
--- Lines 120-123
+-- Lines 130-133
 function ChatManager:load(data)
 end

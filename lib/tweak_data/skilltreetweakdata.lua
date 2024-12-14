@@ -216,7 +216,7 @@ function SkillTreeTweakData:_init_classes(tweak_data)
 	}
 end
 
--- Lines 154-2397
+-- Lines 154-2406
 function SkillTreeTweakData:_init_skill_list()
 	self.skills = {
 		skill_empty_placeholder = {
@@ -2866,6 +2866,18 @@ function SkillTreeTweakData:_init_skill_list()
 				"mg42"
 			}
 		},
+		weapon_unlock_geco = {
+			name_id = "skill_weapon_unlock_geco_name",
+			desc_id = "skill_weapon_unlock_geco_desc",
+			icon_xy = {
+				1,
+				1
+			},
+			acquires = {},
+			upgrades = {
+				"geco"
+			}
+		},
 		pistol_damage_multiplier_1 = {
 			stat_desc_id = "skill_pistol_damage_multiplier_stat_line",
 			icon_large = "skills_dealing_damage_pistol_multiplier_large",
@@ -3472,7 +3484,7 @@ function SkillTreeTweakData:_init_skill_list()
 	}
 end
 
--- Lines 2400-2451
+-- Lines 2409-2460
 function SkillTreeTweakData:_init_recon_skill_tree()
 	self.skill_trees.recon = {
 		{
@@ -3888,7 +3900,7 @@ function SkillTreeTweakData:_init_recon_skill_tree()
 	}
 end
 
--- Lines 2454-2505
+-- Lines 2463-2514
 function SkillTreeTweakData:_init_assault_skill_tree()
 	self.skill_trees.assault = {
 		{
@@ -4304,7 +4316,7 @@ function SkillTreeTweakData:_init_assault_skill_tree()
 	}
 end
 
--- Lines 2508-2559
+-- Lines 2517-2568
 function SkillTreeTweakData:_init_infiltrator_skill_tree()
 	self.skill_trees.infiltrator = {
 		{
@@ -4720,7 +4732,7 @@ function SkillTreeTweakData:_init_infiltrator_skill_tree()
 	}
 end
 
--- Lines 2562-2614
+-- Lines 2571-2623
 function SkillTreeTweakData:_init_demolitions_skill_tree()
 	self.skill_trees.demolitions = {
 		{
@@ -5136,7 +5148,7 @@ function SkillTreeTweakData:_init_demolitions_skill_tree()
 	}
 end
 
--- Lines 2623-2642
+-- Lines 2632-2651
 function SkillTreeTweakData:get_weapon_unlock_levels()
 	local ret = {}
 
@@ -5159,7 +5171,7 @@ function SkillTreeTweakData:get_weapon_unlock_levels()
 	return ret
 end
 
--- Lines 2645-2659
+-- Lines 2654-2668
 function SkillTreeTweakData:get_weapon_unlock_level(weapon_id, class_name)
 	for level, unlock_data in pairs(self.automatic_unlock_progressions[class_name]) do
 		if unlock_data.weapons then
@@ -5176,7 +5188,7 @@ function SkillTreeTweakData:get_weapon_unlock_level(weapon_id, class_name)
 	return nil
 end
 
--- Lines 2661-2688
+-- Lines 2670-2697
 function SkillTreeTweakData:_init_recon_unlock_progression()
 	self.automatic_unlock_progressions.recon = {
 		{
@@ -5250,7 +5262,7 @@ function SkillTreeTweakData:_init_recon_unlock_progression()
 	}
 end
 
--- Lines 2690-2716
+-- Lines 2699-2725
 function SkillTreeTweakData:_init_assault_unlock_progression()
 	self.automatic_unlock_progressions.assault = {
 		{
@@ -5328,7 +5340,7 @@ function SkillTreeTweakData:_init_assault_unlock_progression()
 	}
 end
 
--- Lines 2718-2744
+-- Lines 2727-2755
 function SkillTreeTweakData:_init_infiltrator_unlock_progression()
 	self.automatic_unlock_progressions.infiltrator = {
 		{
@@ -5346,6 +5358,11 @@ function SkillTreeTweakData:_init_infiltrator_unlock_progression()
 		[10] = {
 			weapons = {
 				"weapon_unlock_thompson"
+			}
+		},
+		[13] = {
+			weapons = {
+				"weapon_unlock_geco"
 			}
 		},
 		[15] = {
@@ -5399,7 +5416,7 @@ function SkillTreeTweakData:_init_infiltrator_unlock_progression()
 	}
 end
 
--- Lines 2746-2771
+-- Lines 2757-2785
 function SkillTreeTweakData:_init_demolitions_unlock_progression()
 	self.automatic_unlock_progressions.demolitions = {
 		{
@@ -5412,6 +5429,11 @@ function SkillTreeTweakData:_init_demolitions_unlock_progression()
 		[3] = {
 			weapons = {
 				"weapon_unlock_carbine"
+			}
+		},
+		[10] = {
+			weapons = {
+				"weapon_unlock_geco"
 			}
 		},
 		[15] = {

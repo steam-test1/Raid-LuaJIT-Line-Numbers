@@ -76,12 +76,17 @@ function ElementPlayerSpawner:on_executed(instigator)
 	self:_end_transition()
 end
 
--- Lines 85-98
+-- Lines 85-102
 function ElementPlayerSpawner:_end_transition(client)
 	local cnt = managers.worldcollection.world_counter or 0
+	local player_spawned = true
 
-	if not managers.worldcollection:check_all_peers_synced_last_world(CoreWorldCollection.STAGE_LOAD_FINISHED) or cnt > 0 or client and not managers.player:player_unit() then
-		Application:debug("[ElementPlayerSpawner:_end_transition()] Waiting...")
+	if client and not managers.player:player_unit() then
+		player_spawned = false
+	end
+
+	if not managers.worldcollection:check_all_peers_synced_last_world(CoreWorldCollection.STAGE_LOAD_FINISHED) or cnt > 0 or not player_spawned then
+		Application:debug("[ElementPlayerSpawner:_end_transition()] Waiting...", client, player_spawned)
 		managers.queued_tasks:queue(nil, self._end_transition, self, client, 0.5)
 
 		return
@@ -95,7 +100,7 @@ function ElementPlayerSpawner:_end_transition(client)
 	end
 end
 
--- Lines 100-112
+-- Lines 104-116
 function ElementPlayerSpawner:_do_hide_loading_screen()
 	if not managers.raid_job:is_camp_loaded() and managers.player:local_player() and managers.raid_job:current_job() and managers.raid_job:current_job().start_in_stealth then
 		managers.player:get_current_state():_start_action_unequip_weapon(managers.player:player_timer():time(), {
@@ -111,7 +116,7 @@ function ElementPlayerSpawner:_do_hide_loading_screen()
 	managers.queued_tasks:queue(nil, self._first_login_check, self, nil, 0.2)
 end
 
--- Lines 114-119
+-- Lines 118-123
 function ElementPlayerSpawner:_first_login_check()
 	if managers.worldcollection.first_login_check then
 		managers.worldcollection.first_login_check = false
@@ -120,7 +125,7 @@ function ElementPlayerSpawner:_first_login_check()
 	end
 end
 
--- Lines 121-124
+-- Lines 125-128
 function ElementPlayerSpawner:destroy()
 	ElementPlayerSpawner.super.destroy(self)
 	managers.queued_tasks:unqueue_all(nil, self)

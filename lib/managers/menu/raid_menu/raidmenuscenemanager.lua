@@ -521,17 +521,9 @@ function RaidMenuSceneManager:first_login_check()
 	managers.statistics:publish_custom_stat_to_steam("game_played")
 end
 
--- Lines 554-559
+-- Lines 554-567
 function RaidMenuSceneManager:system_start_raid()
-	if Network:is_server() then
-		self:_system_start_raid()
-		managers.network:session():send_to_peers_synched("sync_system_start_raid")
-	end
-end
-
--- Lines 561-574
-function RaidMenuSceneManager:_system_start_raid()
-	Application:trace("[RaidMenuSceneManager:_system_start_raid]")
+	Application:trace("[RaidMenuSceneManager:system_start_raid]")
 
 	managers.challenge_cards._suggested_cards = nil
 	managers.challenge_cards._temp_steam_loot = nil
@@ -541,17 +533,17 @@ function RaidMenuSceneManager:_system_start_raid()
 	managers.player:replenish_player_weapons()
 end
 
--- Lines 576-578
+-- Lines 569-571
 function RaidMenuSceneManager:set_current_legend_control(control)
 	self._current_legend_control = control
 end
 
--- Lines 580-582
+-- Lines 573-575
 function RaidMenuSceneManager:current_legend_control()
 	return self._current_legend_control
 end
 
--- Lines 584-591
+-- Lines 577-584
 function RaidMenuSceneManager:set_legend_labels(legend)
 	if not self._current_legend_control then
 		Application:error("[RaidMenuSceneManager:set_legend_labels] Trying to set controller legend while no legend control is present")
@@ -562,14 +554,14 @@ function RaidMenuSceneManager:set_legend_labels(legend)
 	self._current_legend_control:set_labels(legend)
 end
 
--- Lines 593-596
+-- Lines 586-589
 function RaidMenuSceneManager:toggle_fullscreen_raid()
 	local is_fullscreen = managers.viewport:is_fullscreen()
 
 	managers.viewport:set_fullscreen(not is_fullscreen)
 end
 
--- Lines 598-604
+-- Lines 591-597
 function RaidMenuSceneManager:is_pc_controller()
 	if not managers.controller:is_xbox_controller_present() or managers.menu:is_pc_controller() then
 		return true
@@ -578,7 +570,7 @@ function RaidMenuSceneManager:is_pc_controller()
 	end
 end
 
--- Lines 606-612
+-- Lines 599-605
 function RaidMenuSceneManager:refresh_footer_gold_amount()
 	if not managers.menu_component._active_components.raid_menu_footer.component_object then
 		return
@@ -587,7 +579,7 @@ function RaidMenuSceneManager:refresh_footer_gold_amount()
 	managers.menu_component._active_components.raid_menu_footer.component_object:refresh_gold_amount()
 end
 
--- Lines 614-628
+-- Lines 607-621
 function RaidMenuSceneManager:show_dialog_join_others_forbidden()
 	local dialog_data = {
 		title = managers.localization:text("dialog_warning_title"),
@@ -605,7 +597,7 @@ function RaidMenuSceneManager:show_dialog_join_others_forbidden()
 	managers.system_menu:show(dialog_data)
 end
 
--- Lines 630-644
+-- Lines 623-637
 function RaidMenuSceneManager:show_dialog_disconnected_from_steam()
 	local dialog_data = {
 		title = managers.localization:text("dialog_warning_title"),
@@ -623,7 +615,7 @@ function RaidMenuSceneManager:show_dialog_disconnected_from_steam()
 	managers.system_menu:show(dialog_data)
 end
 
--- Lines 646-660
+-- Lines 639-653
 function RaidMenuSceneManager:show_dialog_already_in_game()
 	local dialog_data = {
 		title = managers.localization:text("dialog_warning_title"),
@@ -641,7 +633,7 @@ function RaidMenuSceneManager:show_dialog_already_in_game()
 	managers.system_menu:show(dialog_data)
 end
 
--- Lines 663-675
+-- Lines 656-668
 function RaidMenuSceneManager:show_release_dialog_helper(message)
 	local dialog_data = {
 		title = "release dialog helper",

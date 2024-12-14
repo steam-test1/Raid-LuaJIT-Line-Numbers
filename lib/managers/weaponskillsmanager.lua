@@ -177,7 +177,7 @@ function WeaponSkillsManager:remind_weapon_challenge(weapon_id, tier_index, skil
 	managers.notification:add_notification(notification_data)
 end
 
--- Lines 174-194
+-- Lines 174-196
 function WeaponSkillsManager:on_weapon_challenge_completed(weapon_id, tier_index, skill_index)
 	local weapon_skill_tree = Global.weapon_skills_manager.weapon_skills_skill_tree[weapon_id]
 	local notification_data = {
@@ -200,9 +200,10 @@ function WeaponSkillsManager:on_weapon_challenge_completed(weapon_id, tier_index
 		tier_index,
 		skill_index
 	})
+	managers.savefile:save_game(SavefileManager.SETTING_SLOT)
 end
 
--- Lines 201-225
+-- Lines 203-227
 function WeaponSkillsManager:has_new_weapon_upgrades(params)
 	if not params or not params.weapon_category or params.weapon_category == WeaponInventoryManager.CATEGORY_NAME_PRIMARY then
 		local owned_primary_weapons = managers.weapon_inventory:get_owned_weapons(WeaponInventoryManager.BM_CATEGORY_PRIMARY_ID)
@@ -233,7 +234,7 @@ function WeaponSkillsManager:has_new_weapon_upgrades(params)
 	return false
 end
 
--- Lines 267-279
+-- Lines 269-281
 function WeaponSkillsManager:is_weapon_skills_tree_empty()
 	local result = true
 
@@ -248,24 +249,24 @@ function WeaponSkillsManager:is_weapon_skills_tree_empty()
 	return result
 end
 
--- Lines 281-284
+-- Lines 283-286
 function WeaponSkillsManager:get_weapon_skills(weapon_id)
 	local skill_tree = self._global.weapon_skills_skill_tree[weapon_id]
 
 	return skill_tree
 end
 
--- Lines 288-290
+-- Lines 290-292
 function WeaponSkillsManager:get_available_weapon_skill_points()
 	return Global.weapon_skills_manager.available_weapon_skill_points
 end
 
--- Lines 292-294
+-- Lines 294-296
 function WeaponSkillsManager:set_available_weapon_skill_points(value)
 	Global.weapon_skills_manager.available_weapon_skill_points = value
 end
 
--- Lines 296-301
+-- Lines 298-303
 function WeaponSkillsManager:add_available_weapon_skill_points(value)
 	if not Global.weapon_skills_manager.available_weapon_skill_points then
 		Global.weapon_skills_manager.available_weapon_skill_points = 0
@@ -274,7 +275,7 @@ function WeaponSkillsManager:add_available_weapon_skill_points(value)
 	Global.weapon_skills_manager.available_weapon_skill_points = Global.weapon_skills_manager.available_weapon_skill_points + value
 end
 
--- Lines 303-311
+-- Lines 305-313
 function WeaponSkillsManager:add_weapon_skill_points_as_drops(value)
 	if not Global.weapon_skills_manager.gained_weapon_skill_points then
 		Global.weapon_skills_manager.gained_weapon_skill_points = 0
@@ -285,7 +286,7 @@ function WeaponSkillsManager:add_weapon_skill_points_as_drops(value)
 	self:add_available_weapon_skill_points(value)
 end
 
--- Lines 313-323
+-- Lines 315-325
 function WeaponSkillsManager:remove_weapon_skill_points_as_drops(value)
 	Global.weapon_skills_manager.gained_weapon_skill_points = Global.weapon_skills_manager.gained_weapon_skill_points - value
 
@@ -300,7 +301,7 @@ function WeaponSkillsManager:remove_weapon_skill_points_as_drops(value)
 	end
 end
 
--- Lines 325-332
+-- Lines 327-334
 function WeaponSkillsManager:apply_skill(weapon_id, tier_number, tier_skill_number)
 	local weapon_skills = self._global.weapon_skills_skill_tree[weapon_id][tier_number][tier_skill_number]
 	weapon_skills[1].active = true
@@ -310,7 +311,7 @@ function WeaponSkillsManager:apply_skill(weapon_id, tier_number, tier_skill_numb
 	end
 end
 
--- Lines 334-355
+-- Lines 336-357
 function WeaponSkillsManager:activate_skill(weapon_skill, bm_weapon_category_id)
 	weapon_skill.active = true
 	local weapon_id = weapon_skill.weapon_id
@@ -334,17 +335,24 @@ function WeaponSkillsManager:activate_skill(weapon_skill, bm_weapon_category_id)
 	end
 end
 
--- Lines 357-359
+-- Lines 359-361
 function WeaponSkillsManager:deactivate_skill(weapon_skill)
 	weapon_skill.active = nil
 end
 
--- Lines 361-363
+-- Lines 363-366
+function WeaponSkillsManager:is_skill_active(weapon_id, tier_number, tier_skill_number)
+	local weapon_skill = self._global.weapon_skills_skill_tree[weapon_id][tier_number][tier_skill_number]
+
+	return weapon_skill and weapon_skill.active
+end
+
+-- Lines 368-370
 function WeaponSkillsManager:get_weapon_skills_skill_tree()
 	return Global.weapon_skills_manager.weapon_skills_skill_tree
 end
 
--- Lines 365-389
+-- Lines 372-396
 function WeaponSkillsManager:is_weapon_fully_upgraded(weapon_id)
 	local weapon_skill_tree = managers.weapon_skills._global.weapon_skills_skill_tree[weapon_id]
 	local result = true
@@ -369,7 +377,7 @@ function WeaponSkillsManager:is_weapon_fully_upgraded(weapon_id)
 	return result, weapon_tier_count
 end
 
--- Lines 393-440
+-- Lines 400-447
 function WeaponSkillsManager:update_weapon_skills(weapon_category_id, weapon_id, action)
 	local weapon_skills = Global.weapon_skills_manager.weapon_skills_skill_tree[weapon_id]
 
@@ -408,7 +416,7 @@ function WeaponSkillsManager:update_weapon_skills(weapon_category_id, weapon_id,
 	self._temp_weapon_skills = nil
 end
 
--- Lines 442-464
+-- Lines 449-471
 function WeaponSkillsManager:update_weapon_skill(raid_stat_name, data, weapon_category_id, action)
 	local upgrade_name = self:get_upgrade_name_from_raid_stat_name(raid_stat_name)
 	local weapon_category_string = weapon_category_id == WeaponInventoryManager.BM_CATEGORY_PRIMARY_ID and "primary_weapon" or "secondary_weapon"
@@ -429,7 +437,7 @@ function WeaponSkillsManager:update_weapon_skill(raid_stat_name, data, weapon_ca
 	end
 end
 
--- Lines 466-484
+-- Lines 473-491
 function WeaponSkillsManager:update_weapon_skill_by_upgrade_name(upgrade_category, upgrade_name, upgrade_level, action)
 	local upgrade_full_name = upgrade_category .. "_" .. upgrade_name .. "_" .. upgrade_level
 
@@ -446,7 +454,7 @@ function WeaponSkillsManager:update_weapon_skill_by_upgrade_name(upgrade_categor
 	end
 end
 
--- Lines 487-505
+-- Lines 494-512
 function WeaponSkillsManager:get_upgrade_name_from_raid_stat_name(raid_stat_name)
 	local upgrade_name = ""
 
@@ -467,7 +475,7 @@ function WeaponSkillsManager:get_upgrade_name_from_raid_stat_name(raid_stat_name
 	return upgrade_name
 end
 
--- Lines 507-549
+-- Lines 514-556
 function WeaponSkillsManager:get_character_level_needed_for_tier(weapon_id, tier)
 	local skill_tree = self:get_weapon_skills_skill_tree()
 	local upgrade_name = skill_tree[weapon_id] and skill_tree[weapon_id].tier_unlock and skill_tree[weapon_id].tier_unlock[tier] or ""
@@ -515,7 +523,7 @@ function WeaponSkillsManager:get_character_level_needed_for_tier(weapon_id, tier
 	return max_level
 end
 
--- Lines 551-587
+-- Lines 558-594
 function WeaponSkillsManager:is_weapon_tier_unlocked(weapon_id, tier)
 	local result = false
 	local skill_tree = self:get_weapon_skills_skill_tree()
@@ -537,7 +545,7 @@ function WeaponSkillsManager:is_weapon_tier_unlocked(weapon_id, tier)
 	return result
 end
 
--- Lines 589-594
+-- Lines 596-601
 function WeaponSkillsManager:get_weapon_skills_current_upgrade_level(raid_stat_name, weapon_category_id)
 	local weapon_category_string = weapon_category_id == WeaponInventoryManager.BM_CATEGORY_PRIMARY_ID and "primary_weapon" or "secondary_weapon"
 	local upgrade_name = self:get_upgrade_name_from_raid_stat_name(raid_stat_name)
@@ -546,7 +554,7 @@ function WeaponSkillsManager:get_weapon_skills_current_upgrade_level(raid_stat_n
 	return upgrade_level
 end
 
--- Lines 596-620
+-- Lines 603-627
 function WeaponSkillsManager:deactivate_all_upgrades_for_bm_weapon_category_id(weapon_category_id)
 	local upgrades_table = nil
 	local weapon_category_name = ""
@@ -575,17 +583,17 @@ function WeaponSkillsManager:deactivate_all_upgrades_for_bm_weapon_category_id(w
 	end
 end
 
--- Lines 624-626
+-- Lines 631-633
 function WeaponSkillsManager:get_player_using_scope(weapon_id)
 	return Global.weapon_skills_manager.weapon_skills_skill_tree[weapon_id] and Global.weapon_skills_manager.weapon_skills_skill_tree[weapon_id].use_scope or false
 end
 
--- Lines 628-630
+-- Lines 635-637
 function WeaponSkillsManager:set_player_using_scope(weapon_id, flag)
 	Global.weapon_skills_manager.weapon_skills_skill_tree[weapon_id].use_scope = flag
 end
 
--- Lines 632-647
+-- Lines 639-654
 function WeaponSkillsManager:get_scope_weapon_part_name(weapon_id)
 	local result = nil
 	local factory_id = managers.weapon_factory:get_factory_id_by_weapon_id(weapon_id)
@@ -603,7 +611,7 @@ function WeaponSkillsManager:get_scope_weapon_part_name(weapon_id)
 	return result
 end
 
--- Lines 651-660
+-- Lines 658-667
 function WeaponSkillsManager:save(data)
 	local state = {
 		version = Global.weapon_skills_manager.version,
@@ -614,7 +622,7 @@ function WeaponSkillsManager:save(data)
 	data.WeaponSkillsManager = state
 end
 
--- Lines 662-695
+-- Lines 669-721
 function WeaponSkillsManager:load(data, version)
 	self:_setup(true)
 
@@ -625,6 +633,8 @@ function WeaponSkillsManager:load(data, version)
 	end
 
 	if not state.version or state.version and state.version ~= WeaponSkillsManager.VERSION then
+		Application:trace("[WeaponSkillsManager:load] The save data and manager version are mismatched! Migrating...")
+
 		Global.weapon_skills_manager.version = WeaponSkillsManager.VERSION
 		Global.weapon_skills_manager.available_weapon_skill_points = state.gained_weapon_skill_points or 0
 		Global.weapon_skills_manager.gained_weapon_skill_points = state.gained_weapon_skill_points or 0
@@ -636,13 +646,55 @@ function WeaponSkillsManager:load(data, version)
 		Global.weapon_skills_manager.available_weapon_skill_points = state.available_weapon_skill_points or 0
 		Global.weapon_skills_manager.gained_weapon_skill_points = state.gained_weapon_skill_points or 0
 		Global.weapon_skills_manager.weapon_skills_skill_tree = state.weapon_skills_skill_tree or deep_clone(tweak_data.weapon_skills.skill_trees)
+		local new_weapon_added = false
+
+		for weapon_id, weapon_skill_tree_data in pairs(tweak_data.weapon_skills.skill_trees) do
+			if not Global.weapon_skills_manager.weapon_skills_skill_tree[weapon_id] then
+				Global.weapon_skills_manager.weapon_skills_skill_tree[weapon_id] = deep_clone(weapon_skill_tree_data)
+				new_weapon_added = true
+			end
+		end
+
+		if new_weapon_added then
+			self:_initialize_weapon_skill_challenges()
+			managers.savefile:set_resave_required()
+		end
 	end
 
+	self:_force_complete_stuck_weapon_challenges()
 	self:update_weapon_skills(WeaponInventoryManager.BM_CATEGORY_PRIMARY_ID, managers.weapon_inventory:get_equipped_primary_weapon_id(), "activate")
 	self:update_weapon_skills(WeaponInventoryManager.BM_CATEGORY_SECONDARY_ID, managers.weapon_inventory:get_equipped_secondary_weapon_id(), "activate")
 end
 
--- Lines 699-714
+-- Lines 727-752
+function WeaponSkillsManager:_force_complete_stuck_weapon_challenges()
+	local need_resave = false
+
+	for weapon_id, weapon_skill_tree in pairs(Global.weapon_skills_manager.weapon_skills_skill_tree) do
+		for tier_index, tier_skill_data in ipairs(weapon_skill_tree) do
+			for skill_index, skill_data in pairs(tier_skill_data) do
+				for mod_index, mod_data in pairs(skill_data) do
+					if mod_data.active == true then
+						local challenge = managers.challenge:get_challenge(ChallengeManager.CATEGORY_WEAPON_UPGRADE, mod_data.challenge_id)
+
+						if not challenge:completed() then
+							debug_pause("[WeaponSkillsManager][_force_complete_stuck_weapon_challenges] Stuck weapon challenge found: ", weapon_id, tier_index, skill_index)
+							challenge:force_complete()
+
+							need_resave = true
+						end
+					end
+				end
+			end
+		end
+	end
+
+	if need_resave then
+		managers.savefile:save_game(SavefileManager.SETTING_SLOT)
+	end
+end
+
+-- Lines 756-771
 function WeaponSkillsManager:recreate_all_weapons_blueprints(weapon_category_id)
 	local datasource = managers.weapon_inventory:get_owned_weapons(weapon_category_id)
 
@@ -651,7 +703,7 @@ function WeaponSkillsManager:recreate_all_weapons_blueprints(weapon_category_id)
 	end
 end
 
--- Lines 716-787
+-- Lines 773-844
 function WeaponSkillsManager:recreate_weapon_blueprint(weapon_id, weapon_category_id, temp_skills, apply_blueprint)
 	local new_blueprint = nil
 
@@ -702,7 +754,7 @@ function WeaponSkillsManager:recreate_weapon_blueprint(weapon_id, weapon_categor
 	return new_blueprint
 end
 
--- Lines 789-801
+-- Lines 846-858
 function WeaponSkillsManager:apply_weapon_blueprint(weapon_id, weapon_category_id, new_blueprint)
 	local weapon_category_name = weapon_category_id == WeaponInventoryManager.BM_CATEGORY_PRIMARY_ID and WeaponInventoryManager.BM_CATEGORY_PRIMARY_NAME or WeaponInventoryManager.BM_CATEGORY_SECONDARY_NAME
 

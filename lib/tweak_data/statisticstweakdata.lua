@@ -172,7 +172,7 @@ function StatisticsTweakData:statistics_specializations()
 	return 12
 end
 
--- Lines 167-236
+-- Lines 167-263
 function StatisticsTweakData:statistics_table()
 	local level_list = {
 		"camp",
@@ -200,6 +200,7 @@ function StatisticsTweakData:statistics_table()
 	}
 	local weapon_list = {
 		"m1911",
+		"webley",
 		"c96",
 		"thompson",
 		"sten",
@@ -213,7 +214,8 @@ function StatisticsTweakData:statistics_table()
 		"mp44",
 		"mg42",
 		"mosin",
-		"sterling"
+		"sterling",
+		"geco"
 	}
 	local melee_list = {
 		"weapon",
@@ -259,7 +261,7 @@ function StatisticsTweakData:statistics_table()
 	return level_list, job_list, mask_list, weapon_list, melee_list, grenade_list, enemy_list, armor_list, character_list, deployable_list
 end
 
--- Lines 238-240
+-- Lines 265-267
 function StatisticsTweakData:resolution_statistics_table()
 	return {
 		"3840x2160",

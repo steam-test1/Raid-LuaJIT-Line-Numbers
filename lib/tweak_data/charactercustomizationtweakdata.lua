@@ -1144,8 +1144,8 @@ function CharacterCustomizationTweakData:initialization()
 			CharacterCustomizationTweakData.NATIONALITY_AMERICAN
 		},
 		path = "units/vanilla/characters/players/usa/upper/special_edition/player_usa_special_edition_upper",
-		path_icon = "units/vanilla/characters/players/usa/fp/special_edition/player_usa_special_edition_hud",
-		path_icon_large = "units/vanilla/characters/players/usa/fp/special_edition/player_usa_special_edition_large_hud",
+		path_icon = "units/vanilla/characters/players/usa/upper/special_edition/player_usa_special_edition_upper_hud",
+		path_icon_large = "units/vanilla/characters/players/usa/upper/special_edition/player_usa_special_edition_upper_large_hud",
 		path_fps_hands = "units/vanilla/characters/players/usa/fp/special_edition/player_usa_special_edition_fp",
 		redeem_xp = 0,
 		rarity = LootDropTweakData.RARITY_RARE,
@@ -1161,8 +1161,8 @@ function CharacterCustomizationTweakData:initialization()
 			CharacterCustomizationTweakData.NATIONALITY_BRITISH
 		},
 		path = "units/vanilla/characters/players/british/upper/special_edition/player_british_special_edition_upper",
-		path_icon = "units/vanilla/characters/players/british/fp/special_edition/player_british_special_edition_hud",
-		path_icon_large = "units/vanilla/characters/players/british/fp/special_edition/player_british_special_edition_large_hud",
+		path_icon = "units/vanilla/characters/players/british/upper/special_edition/player_british_special_edition_upper_hud",
+		path_icon_large = "units/vanilla/characters/players/british/upper/special_edition/player_british_special_edition_upper_large_hud",
 		path_fps_hands = "units/vanilla/characters/players/british/fp/special_edition/player_british_special_edition_fp",
 		redeem_xp = 0,
 		rarity = LootDropTweakData.RARITY_RARE,
@@ -1178,8 +1178,8 @@ function CharacterCustomizationTweakData:initialization()
 			CharacterCustomizationTweakData.NATIONALITY_GERMAN
 		},
 		path = "units/vanilla/characters/players/german/upper/special_edition/player_german_special_edition_upper",
-		path_icon = "units/vanilla/characters/players/german/fp/special_edition/player_german_special_edition_hud",
-		path_icon_large = "units/vanilla/characters/players/german/fp/special_edition/player_german_special_edition_large_hud",
+		path_icon = "units/vanilla/characters/players/german/upper/special_edition/player_german_special_edition_upper_hud",
+		path_icon_large = "units/vanilla/characters/players/german/upper/special_edition/player_german_special_edition_upper_large_hud",
 		path_fps_hands = "units/vanilla/characters/players/german/fp/special_edition/player_german_special_edition_fp",
 		redeem_xp = 0,
 		rarity = LootDropTweakData.RARITY_RARE,
@@ -1195,8 +1195,8 @@ function CharacterCustomizationTweakData:initialization()
 			CharacterCustomizationTweakData.NATIONALITY_RUSSIAN
 		},
 		path = "units/vanilla/characters/players/soviet/upper/special_edition/player_soviet_special_edition_upper",
-		path_icon = "units/vanilla/characters/players/soviet/fp/special_edition/player_soviet_special_edition_hud",
-		path_icon_large = "units/vanilla/characters/players/soviet/fp/special_edition/player_soviet_special_edition_large_hud",
+		path_icon = "units/vanilla/characters/players/soviet/upper/special_edition/player_soviet_special_edition_upper_hud",
+		path_icon_large = "units/vanilla/characters/players/soviet/upper/special_edition/player_soviet_special_edition_upper_large_hud",
 		path_fps_hands = "units/vanilla/characters/players/soviet/fp/special_edition/player_soviet_special_edition_fp",
 		redeem_xp = 0,
 		rarity = LootDropTweakData.RARITY_RARE,

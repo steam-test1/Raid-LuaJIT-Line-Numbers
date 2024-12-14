@@ -73,19 +73,21 @@ function VehicleCamera:update_camera()
 	self._camera_controller:set_default_up(target)
 end
 
--- Lines 75-82
+-- Lines 75-85
 function VehicleCamera:activate(player_unit)
 	self._active = true
 
-	self._viewport:set_camera(self._camera)
-	self._director:set_camera(self._camera_controller)
+	if self._viewport and self._viewport:name() == "playernil" then
+		self._viewport:set_camera(self._camera)
+		self._director:set_camera(self._camera_controller)
+	end
 
 	if alive(player_unit) then
 		player_unit:camera():set_listener_object(self._camera)
 	end
 end
 
--- Lines 84-95
+-- Lines 87-98
 function VehicleCamera:deactivate(player_unit)
 	self._active = false
 	self._rear_cam_active = false
@@ -100,7 +102,7 @@ function VehicleCamera:deactivate(player_unit)
 	end
 end
 
--- Lines 98-113
+-- Lines 101-116
 function VehicleCamera:show_next(player_unit)
 	if #self._camera_list == 0 then
 		return
@@ -119,7 +121,7 @@ function VehicleCamera:show_next(player_unit)
 	end
 end
 
--- Lines 115-137
+-- Lines 118-140
 function VehicleCamera:set_rear_cam_active(active, player_unit)
 	if not self._back_camera_object then
 		return
@@ -147,12 +149,12 @@ function VehicleCamera:set_rear_cam_active(active, player_unit)
 	end
 end
 
--- Lines 139-141
+-- Lines 142-144
 function VehicleCamera:rear_cam_active()
 	return self._rear_cam_active
 end
 
--- Lines 143-155
+-- Lines 146-158
 function VehicleCamera:destroy()
 	if alive(self._camera) then
 		World:delete_camera(self._camera)

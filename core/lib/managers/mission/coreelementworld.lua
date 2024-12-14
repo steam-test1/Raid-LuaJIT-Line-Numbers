@@ -159,7 +159,7 @@ end
 
 ElementWorldPoint.DELAY_DESTROY_SINGLE = 1.1
 ElementWorldPoint.DELAY_CREATE_SINGLE = 2
-ElementWorldPoint.DELAY_DESTROY_MULTI = 1.1
+ElementWorldPoint.DELAY_DESTROY_MULTI = 3
 ElementWorldPoint.DELAY_CREATE_MULTI = 5
 
 -- Lines 168-201

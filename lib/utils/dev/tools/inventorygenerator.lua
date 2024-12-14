@@ -508,7 +508,7 @@ function InventoryGenerator._find_item_in_content(entry, category, content)
 	return false
 end
 
--- Lines 516-580
+-- Lines 516-579
 function InventoryGenerator._create_steam_itemdef(json_path, items, defid_data)
 	local json = SystemFS:open(json_path, "w")
 
@@ -549,10 +549,11 @@ function InventoryGenerator._create_steam_itemdef(json_path, items, defid_data)
 		json:puts("\t\"icon_url_large\": \"https://s3-us-west-2.amazonaws.com/media.raidww2.com/steam_icons_challenge_cards/" .. item.key_name .. "_large.png\",")
 		json:puts("\t\"name_color\": \"" .. "2360D8" .. "\",")
 
-		local market = "true"
+		local tradable = "true"
+		local marketable = "false"
 
-		json:puts("\t\"tradable\": " .. market .. ",")
-		json:puts("\t\"marketable\": " .. market)
+		json:puts("\t\"tradable\": " .. tradable .. ",")
+		json:puts("\t\"marketable\": " .. marketable)
 
 		if count == #items then
 			json:puts("\t}")
@@ -566,7 +567,7 @@ function InventoryGenerator._create_steam_itemdef(json_path, items, defid_data)
 	SystemFS:close(json)
 end
 
--- Lines 582-609
+-- Lines 581-608
 function InventoryGenerator._create_steam_itemdef_clear(json_path, items, defid_data)
 	local json = SystemFS:open(json_path, "w")
 
@@ -595,7 +596,7 @@ function InventoryGenerator._create_steam_itemdef_clear(json_path, items, defid_
 	SystemFS:close(json)
 end
 
--- Lines 613-629
+-- Lines 612-628
 function InventoryGenerator._defids(json_path)
 	local defid_list = {}
 	local json_data = InventoryGenerator.json_load(json_path)
@@ -615,7 +616,7 @@ function InventoryGenerator._defids(json_path)
 	return defid_list
 end
 
--- Lines 631-643
+-- Lines 630-642
 function InventoryGenerator._create_id(category, entry, quality, bonus)
 	if not category or not entry then
 		return
@@ -630,7 +631,7 @@ function InventoryGenerator._create_id(category, entry, quality, bonus)
 	return id
 end
 
--- Lines 645-673
+-- Lines 644-672
 function InventoryGenerator._fill_defids(list, json_path)
 	local defid_list = {}
 	local defid_data = {}
@@ -666,7 +667,7 @@ function InventoryGenerator._fill_defids(list, json_path)
 	return defid_list, defid_data
 end
 
--- Lines 675-698
+-- Lines 674-697
 function InventoryGenerator._fill_defids_OLD(list, json_path)
 	local defid_list = {}
 	local defid_data = {}
@@ -700,7 +701,7 @@ function InventoryGenerator._fill_defids_OLD(list, json_path)
 	return defid_list, defid_data
 end
 
--- Lines 702-715
+-- Lines 701-714
 function InventoryGenerator.json_load(path)
 	if not SystemFS:exists(path) then
 		return
@@ -717,7 +718,7 @@ function InventoryGenerator.json_load(path)
 	return InventoryGenerator._json_entry(not start and json_data or json_data:sub(start + 1, stop and stop - 1))
 end
 
--- Lines 717-765
+-- Lines 716-764
 function InventoryGenerator._json_entry(data_string)
 	local key, temp = nil
 	local i1 = 1
@@ -767,7 +768,7 @@ function InventoryGenerator._json_entry(data_string)
 	return data
 end
 
--- Lines 767-796
+-- Lines 766-795
 function InventoryGenerator._json_value(data_string)
 	if not data_string or data_string == "" then
 		return
@@ -805,7 +806,7 @@ function InventoryGenerator._json_value(data_string)
 	end
 end
 
--- Lines 798-814
+-- Lines 797-813
 function InventoryGenerator._json_value_list(data_string)
 	local data = {}
 	local start = 1
@@ -824,7 +825,7 @@ function InventoryGenerator._json_value_list(data_string)
 	return data
 end
 
--- Lines 816-851
+-- Lines 815-850
 function InventoryGenerator._json_find_section(data_string, start_char, stop_char, pos)
 	local stop = pos or 1
 	local start = data_string:find(start_char, stop)
@@ -862,13 +863,13 @@ function InventoryGenerator._json_find_section(data_string, start_char, stop_cha
 	return start, stop or #data_string
 end
 
--- Lines 855-862
+-- Lines 854-861
 function InventoryGenerator._root_path()
 	local path = Application:base_path() .. (CoreApp.arg_value("-assetslocation") or "..\\..\\")
 	path = Application:nice_path(path, true)
 	local f = nil
 
-	-- Lines 860-860
+	-- Lines 859-859
 	function f(s)
 		local str, i = string.gsub(s, "\\[%w_%.%s]+\\%.%.", "")
 

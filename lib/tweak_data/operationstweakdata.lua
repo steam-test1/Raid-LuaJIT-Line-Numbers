@@ -103,7 +103,7 @@ function OperationsTweakData:_init_consumable_missions_data()
 	}
 end
 
--- Lines 98-200
+-- Lines 98-222
 function OperationsTweakData:_init_loading_screens()
 	self._loading_screens = {
 		generic = {}
@@ -201,13 +201,17 @@ function OperationsTweakData:_init_loading_screens()
 		image = "loading_screens_07",
 		text = "loading_bridge"
 	}
+	self._loading_screens.spies_crash_test = {
+		image = "loading_screens_07",
+		text = "loading_bridge"
+	}
 	self._loading_screens.sto = {
 		image = "loading_screens_07",
 		text = "loading_bridge"
 	}
 end
 
--- Lines 202-1638
+-- Lines 224-1855
 function OperationsTweakData:_init_raids()
 	self._raids_index = {
 		"flakturm",
@@ -1100,7 +1104,7 @@ function OperationsTweakData:_init_raids()
 	}
 end
 
--- Lines 1642-2067
+-- Lines 1859-2284
 function OperationsTweakData:_init_operations()
 	self._operations_index = {
 		"clear_skies",
@@ -1663,12 +1667,12 @@ function OperationsTweakData:_init_operations()
 	}
 end
 
--- Lines 2069-2071
+-- Lines 2286-2288
 function OperationsTweakData:get_all_loading_screens()
 	return self._loading_screens
 end
 
--- Lines 2073-2085
+-- Lines 2290-2302
 function OperationsTweakData:get_loading_screen(level)
 	local level = self._loading_screens[level]
 
@@ -1683,7 +1687,7 @@ function OperationsTweakData:get_loading_screen(level)
 	end
 end
 
--- Lines 2087-2094
+-- Lines 2304-2311
 function OperationsTweakData:mission_data(mission_id)
 	if not mission_id or not self.missions[mission_id] then
 		return
@@ -1695,17 +1699,17 @@ function OperationsTweakData:mission_data(mission_id)
 	return res
 end
 
--- Lines 2096-2098
+-- Lines 2313-2315
 function OperationsTweakData:get_raids_index()
 	return self._raids_index
 end
 
--- Lines 2100-2102
+-- Lines 2317-2319
 function OperationsTweakData:get_operations_index()
 	return self._operations_index
 end
 
--- Lines 2104-2111
+-- Lines 2321-2328
 function OperationsTweakData:get_index_from_raid_id(raid_id)
 	for index, entry_name in ipairs(self._raids_index) do
 		if entry_name == raid_id then
@@ -1716,7 +1720,7 @@ function OperationsTweakData:get_index_from_raid_id(raid_id)
 	return 0
 end
 
--- Lines 2113-2120
+-- Lines 2330-2337
 function OperationsTweakData:get_index_from_operation_id(raid_id)
 	for index, entry_name in ipairs(self._operations_index) do
 		if entry_name == raid_id then
@@ -1727,7 +1731,7 @@ function OperationsTweakData:get_index_from_operation_id(raid_id)
 	return 0
 end
 
--- Lines 2122-2129
+-- Lines 2339-2346
 function OperationsTweakData:get_region_index_from_name(region_name)
 	for index, reg_name in ipairs(self.regions) do
 		if region_name == reg_name then
@@ -1738,17 +1742,17 @@ function OperationsTweakData:get_region_index_from_name(region_name)
 	return 0
 end
 
--- Lines 2131-2133
+-- Lines 2348-2350
 function OperationsTweakData:get_raid_name_from_index(index)
 	return self._raids_index[index]
 end
 
--- Lines 2135-2137
+-- Lines 2352-2354
 function OperationsTweakData:get_operation_name_from_index(index)
 	return self._operations_index[index]
 end
 
--- Lines 2139-2151
+-- Lines 2356-2368
 function OperationsTweakData:randomize_operation(operation_id)
 	local operation = self.missions[operation_id]
 	local template = operation.events_index_template
@@ -1765,12 +1769,12 @@ function OperationsTweakData:randomize_operation(operation_id)
 	Application:debug("[OperationsTweakData:randomize_operation]", operation_id, inspect(calculated_index))
 end
 
--- Lines 2153-2155
+-- Lines 2370-2372
 function OperationsTweakData:get_operation_indexes_delimited(operation_id)
 	return table.concat(self.missions[operation_id].events_index, "|")
 end
 
--- Lines 2157-2159
+-- Lines 2374-2376
 function OperationsTweakData:set_operation_indexes_delimited(operation_id, delimited_string)
 	self.missions[operation_id].events_index = string.split(delimited_string, "|")
 end

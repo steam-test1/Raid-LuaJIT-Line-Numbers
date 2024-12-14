@@ -14,7 +14,7 @@ WeaponTweakData.DAMAGE_TYPE_EXPLOSION = "explosion"
 WeaponTweakData.HIT_INDICATOR_PERCENT = 0.05
 WeaponTweakData.HIT_INDICATOR_ABSOLUTE = 2.5
 
--- Lines 21-88
+-- Lines 21-99
 function WeaponTweakData:init(tweak_data)
 	local difficulty = Global.game_settings and Global.game_settings.difficulty or Global.DEFAULT_DIFFICULTY
 	local difficulty_index = tweak_data:difficulty_to_index(difficulty)
@@ -36,6 +36,7 @@ function WeaponTweakData:init(tweak_data)
 	self:_init_data_mp38_npc()
 	self:_init_data_mp44_npc()
 	self:_init_data_welrod_npc()
+	self:_init_data_geco_npc()
 	self:_init_data_tiger_main_gun_module_npc(difficulty_index)
 	self:_init_data_tiger_machinegun_module_npc(difficulty_index)
 	self:_init_data_junker_machinegun_module_npc(difficulty_index)
@@ -61,7 +62,7 @@ function WeaponTweakData:init(tweak_data)
 	self:_init_data_panzerfaust_60_npc()
 end
 
--- Lines 90-99
+-- Lines 101-110
 function WeaponTweakData:_set_difficulty_1()
 	self.tiger_main_gun_module.HEALTH_INIT = 7000
 	self.tiger_main_gun_module.SHIELD_HEALTH_INIT = 100
@@ -71,7 +72,7 @@ function WeaponTweakData:_set_difficulty_1()
 	self.tiger_machinegun_module.DAMAGE = 2
 end
 
--- Lines 101-110
+-- Lines 112-121
 function WeaponTweakData:_set_difficulty_2()
 	self.tiger_main_gun_module.HEALTH_INIT = 7000
 	self.tiger_main_gun_module.SHIELD_HEALTH_INIT = 100
@@ -81,7 +82,7 @@ function WeaponTweakData:_set_difficulty_2()
 	self.tiger_machinegun_module.DAMAGE = 4
 end
 
--- Lines 112-121
+-- Lines 123-132
 function WeaponTweakData:_set_difficulty_3()
 	self.tiger_main_gun_module.HEALTH_INIT = 27500
 	self.tiger_main_gun_module.SHIELD_HEALTH_INIT = 400
@@ -91,7 +92,7 @@ function WeaponTweakData:_set_difficulty_3()
 	self.tiger_machinegun_module.DAMAGE = 1.5
 end
 
--- Lines 123-132
+-- Lines 134-143
 function WeaponTweakData:_set_difficulty_4()
 	self.tiger_main_gun_module.HEALTH_INIT = 50000
 	self.tiger_main_gun_module.SHIELD_HEALTH_INIT = 750
@@ -101,7 +102,7 @@ function WeaponTweakData:_set_difficulty_4()
 	self.tiger_machinegun_module.DAMAGE = 2.5
 end
 
--- Lines 135-145
+-- Lines 146-156
 function WeaponTweakData:_init_data_npc_melee()
 	self.npc_melee = {
 		fists = {}
@@ -112,14 +113,14 @@ function WeaponTweakData:_init_data_npc_melee()
 	self.npc_melee.fists.player_blood_effect = true
 end
 
--- Lines 147-151
+-- Lines 158-162
 function WeaponTweakData:_set_npc_weapon_damage_multiplier(mul)
 	for name, data in pairs(self.npc_melee) do
 		data.damage = data.damage * mul
 	end
 end
 
--- Lines 157-184
+-- Lines 168-195
 function WeaponTweakData:_init_data_m1911_npc()
 	self.m1911_npc = {
 		sounds = {},
@@ -144,7 +145,34 @@ function WeaponTweakData:_init_data_m1911_npc()
 	self.m1911_npc.suppression = 1
 end
 
--- Lines 186-218
+-- Lines 198-226
+function WeaponTweakData:_init_data_geco_npc()
+	self.geco_npc = {
+		sounds = {},
+		use_data = {},
+		usage = "geco",
+		usage_anim = "geco"
+	}
+	self.geco_npc.sounds.prefix = ""
+	self.geco_npc.sounds.single = "double_barrel_fire_npc_single"
+	self.geco_npc.sounds.autofire_start = nil
+	self.geco_npc.sounds.autofire_stop = nil
+	self.geco_npc.use_data.selection_index = 2
+	self.geco_npc.DAMAGE = 6
+	self.geco_npc.muzzleflash = "effects/vanilla/weapons/shotgun/sho_muzzleflash"
+	self.geco_npc.shell_ejection = "effects/vanilla/weapons/shells/shell_empty"
+	self.geco_npc.CLIP_AMMO_MAX = 2
+	self.geco_npc.NR_CLIPS_MAX = 32
+	self.geco_npc.AMMO_MAX = self.geco_npc.CLIP_AMMO_MAX * self.geco_npc.NR_CLIPS_MAX
+	self.geco_npc.auto = {
+		fire_rate = 0.8
+	}
+	self.geco_npc.hold = "geco"
+	self.geco_npc.alert_size = 5000
+	self.geco_npc.suppression = 1
+end
+
+-- Lines 293-325
 function WeaponTweakData:_init_data_sten_npc()
 	self.sten_npc = {
 		sounds = {},
@@ -172,7 +200,7 @@ function WeaponTweakData:_init_data_sten_npc()
 	self.sten_npc.suppression = 1
 end
 
--- Lines 220-249
+-- Lines 327-356
 function WeaponTweakData:_init_data_garand_npc()
 	self.garand_npc = {
 		sounds = {},
@@ -199,7 +227,7 @@ function WeaponTweakData:_init_data_garand_npc()
 	self.garand_npc.suppression = 1
 end
 
--- Lines 251-280
+-- Lines 358-387
 function WeaponTweakData:_init_data_garand_golden_npc()
 	self.garand_golden_npc = {
 		sounds = {},
@@ -226,7 +254,7 @@ function WeaponTweakData:_init_data_garand_golden_npc()
 	self.garand_golden_npc.suppression = 1
 end
 
--- Lines 282-311
+-- Lines 389-418
 function WeaponTweakData:_init_data_m1918_npc()
 	self.m1918_npc = {
 		sounds = {},
@@ -253,7 +281,7 @@ function WeaponTweakData:_init_data_m1918_npc()
 	self.m1918_npc.suppression = 1
 end
 
--- Lines 313-361
+-- Lines 420-468
 function WeaponTweakData:_init_data_m24()
 	self.m24 = {
 		sounds = {},
@@ -301,7 +329,7 @@ function WeaponTweakData:_init_data_m24()
 	}
 end
 
--- Lines 543-580
+-- Lines 650-687
 function WeaponTweakData:_init_data_molotov()
 	self.molotov = {
 		sounds = {},
@@ -342,7 +370,7 @@ function WeaponTweakData:_init_data_molotov()
 	}
 end
 
--- Lines 582-611
+-- Lines 689-718
 function WeaponTweakData:_init_data_m1903_npc()
 	self.m1903_npc = {
 		sounds = {},
@@ -369,7 +397,7 @@ function WeaponTweakData:_init_data_m1903_npc()
 	self.m1903_npc.suppression = 1
 end
 
--- Lines 613-642
+-- Lines 720-749
 function WeaponTweakData:_init_data_m1912_npc()
 	self.m1912_npc = {
 		sounds = {},
@@ -396,7 +424,7 @@ function WeaponTweakData:_init_data_m1912_npc()
 	self.m1912_npc.suppression = 1
 end
 
--- Lines 644-676
+-- Lines 751-783
 function WeaponTweakData:_init_data_mp38_npc()
 	self.mp38_npc = {
 		sounds = {},
@@ -425,7 +453,7 @@ function WeaponTweakData:_init_data_mp38_npc()
 	self.mp38_npc.suppression = 1
 end
 
--- Lines 678-710
+-- Lines 785-817
 function WeaponTweakData:_init_data_mp44_npc()
 	self.mp44_npc = {
 		sounds = {},
@@ -454,7 +482,7 @@ function WeaponTweakData:_init_data_mp44_npc()
 	self.mp44_npc.suppression = 1
 end
 
--- Lines 712-745
+-- Lines 819-852
 function WeaponTweakData:_init_data_mg42_npc()
 	self.mg42_npc = {
 		sounds = {},
@@ -484,7 +512,7 @@ function WeaponTweakData:_init_data_mg42_npc()
 	self.mg42_secondary_npc.armor_piercing = true
 end
 
--- Lines 749-776
+-- Lines 856-883
 function WeaponTweakData:_init_data_c96_npc()
 	self.c96_npc = {}
 	self.c96_npc = {
@@ -510,7 +538,7 @@ function WeaponTweakData:_init_data_c96_npc()
 	self.c96_npc.suppression = 1
 end
 
--- Lines 778-804
+-- Lines 885-911
 function WeaponTweakData:_init_data_webley_npc()
 	self.webley_npc = {}
 	self.webley_npc = {
@@ -535,7 +563,7 @@ function WeaponTweakData:_init_data_webley_npc()
 	self.webley_npc.suppression = 1
 end
 
--- Lines 806-834
+-- Lines 913-941
 function WeaponTweakData:_init_data_mosin_npc()
 	self.mosin_npc = {
 		sounds = {},
@@ -562,7 +590,7 @@ function WeaponTweakData:_init_data_mosin_npc()
 	self.mosin_npc.suppression = 1
 end
 
--- Lines 836-866
+-- Lines 943-973
 function WeaponTweakData:_init_data_sterling_npc()
 	self.sterling_npc = {
 		sounds = {},
@@ -590,7 +618,7 @@ function WeaponTweakData:_init_data_sterling_npc()
 	self.sterling_npc.suppression = 1
 end
 
--- Lines 868-894
+-- Lines 975-1001
 function WeaponTweakData:_init_data_welrod_npc()
 	self.welrod_npc = {
 		sounds = {},
@@ -615,7 +643,7 @@ function WeaponTweakData:_init_data_welrod_npc()
 	self.welrod_npc.suppression = 1
 end
 
--- Lines 898-928
+-- Lines 1005-1035
 function WeaponTweakData:_init_data_c45_npc()
 	self.c45_npc = {
 		sounds = {},
@@ -642,7 +670,7 @@ function WeaponTweakData:_init_data_c45_npc()
 	self.c45_primary_npc.use_data.selection_index = 2
 end
 
--- Lines 933-963
+-- Lines 1040-1070
 function WeaponTweakData:_init_data_m4_npc()
 	self.m4_npc = {
 		sounds = {},
@@ -669,7 +697,7 @@ function WeaponTweakData:_init_data_m4_npc()
 	self.m4_secondary_npc.use_data.selection_index = 1
 end
 
--- Lines 968-1000
+-- Lines 1075-1107
 function WeaponTweakData:_init_data_mp5_npc()
 	self.mp5_npc = {
 		sounds = {},
@@ -697,7 +725,7 @@ function WeaponTweakData:_init_data_mp5_npc()
 	self.ump_npc = deep_clone(self.mp5_npc)
 end
 
--- Lines 1004-1115
+-- Lines 1111-1222
 function WeaponTweakData:_init_data_tiger_main_gun_module_npc(difficulty_index)
 	self.tiger_main_gun_module = {
 		sounds = {},
@@ -828,7 +856,7 @@ function WeaponTweakData:_init_data_tiger_main_gun_module_npc(difficulty_index)
 	self.tiger_main_gun_module.fire_anim_sequence = "fire"
 end
 
--- Lines 1119-1202
+-- Lines 1226-1309
 function WeaponTweakData:_init_data_tiger_machinegun_module_npc(difficulty_index)
 	self.tiger_machinegun_module = {
 		sounds = {},
@@ -936,7 +964,7 @@ function WeaponTweakData:_init_data_tiger_machinegun_module_npc(difficulty_index
 	end
 end
 
--- Lines 1206-1286
+-- Lines 1313-1393
 function WeaponTweakData:_init_data_junker_machinegun_module_npc(difficulty_index)
 	self.junker_machinegun_module = {
 		sounds = {},
@@ -958,7 +986,7 @@ function WeaponTweakData:_init_data_junker_machinegun_module_npc(difficulty_inde
 		},
 		SUPPRESSION = 1,
 		SPREAD = 0.1,
-		FIRE_RANGE = 100000,
+		FIRE_RANGE = 42000,
 		AUTO_RELOAD = true,
 		ECM_HACKABLE = false,
 		HACKABLE_WITH_ECM = false,
@@ -979,8 +1007,8 @@ function WeaponTweakData:_init_data_junker_machinegun_module_npc(difficulty_inde
 	self.junker_machinegun_module.HEALTH_INIT = 5000
 	self.junker_machinegun_module.SHIELD_HEALTH_INIT = 1000
 	self.junker_machinegun_module.SHIELD_DAMAGE_CLAMP = 75
-	self.junker_machinegun_module.MAX_TARGETING_PITCH = 60
-	self.junker_machinegun_module.MAX_TARGETING_SPIN = 30
+	self.junker_machinegun_module.MAX_TARGETING_PITCH = 20
+	self.junker_machinegun_module.MAX_TARGETING_SPIN = 10
 	self.junker_machinegun_module.DEATH_VERIFICATION = {
 		0.4,
 		0.75
@@ -1044,7 +1072,7 @@ function WeaponTweakData:_init_data_junker_machinegun_module_npc(difficulty_inde
 	end
 end
 
--- Lines 1292-1320
+-- Lines 1399-1427
 function WeaponTweakData:_init_data_ger_luger_npc()
 	self.ger_luger_npc = {
 		sounds = {},
@@ -1069,7 +1097,7 @@ function WeaponTweakData:_init_data_ger_luger_npc()
 	self.ger_luger_npc.suppression = 1
 end
 
--- Lines 1325-1353
+-- Lines 1432-1460
 function WeaponTweakData:_init_data_ger_stg44_npc()
 	self.ger_stg44_npc = {
 		sounds = {},
@@ -1096,7 +1124,7 @@ function WeaponTweakData:_init_data_ger_stg44_npc()
 	self.ger_stg44_npc.suppression = 1
 end
 
--- Lines 1359-1385
+-- Lines 1466-1492
 function WeaponTweakData:_init_data_usa_garand_npc()
 	self.usa_garand_npc = {
 		sounds = {},
@@ -1120,7 +1148,7 @@ function WeaponTweakData:_init_data_usa_garand_npc()
 	self.usa_garand_npc.suppression = 1
 end
 
--- Lines 1389-1416
+-- Lines 1496-1523
 function WeaponTweakData:_init_data_usa_m1911_npc()
 	self.usa_m1911_npc = {
 		sounds = {},
@@ -1145,7 +1173,7 @@ function WeaponTweakData:_init_data_usa_m1911_npc()
 	self.usa_m1911_npc.suppression = 1
 end
 
--- Lines 1420-1451
+-- Lines 1527-1558
 function WeaponTweakData:_init_data_thompson_npc()
 	self.thompson_npc = {
 		sounds = {},
@@ -1174,7 +1202,7 @@ function WeaponTweakData:_init_data_thompson_npc()
 	self.thompson_npc.suppression = 1
 end
 
--- Lines 1455-1484
+-- Lines 1562-1591
 function WeaponTweakData:_init_data_usa_sten_npc()
 	self.usa_sten_npc = {
 		sounds = {},
@@ -1202,7 +1230,7 @@ function WeaponTweakData:_init_data_usa_sten_npc()
 	self.usa_sten_npc.suppression = 1
 end
 
--- Lines 1488-1514
+-- Lines 1595-1621
 function WeaponTweakData:_init_data_ger_geco_npc()
 	self.ger_geco_npc = {
 		sounds = {},
@@ -1212,7 +1240,7 @@ function WeaponTweakData:_init_data_ger_geco_npc()
 		FIRE_MODE = "single"
 	}
 	self.ger_geco_npc.sounds.prefix = ""
-	self.ger_geco_npc.sounds.single = "shotgun_fire_npc_single"
+	self.ger_geco_npc.sounds.single = "double_barrel_fire_npc_single"
 	self.ger_geco_npc.use_data.selection_index = 2
 	self.ger_geco_npc.DAMAGE = 3
 	self.ger_geco_npc.muzzleflash = "effects/vanilla/weapons/762_auto"
@@ -1226,7 +1254,7 @@ function WeaponTweakData:_init_data_ger_geco_npc()
 	self.ger_geco_npc.is_shotgun = true
 end
 
--- Lines 1518-1551
+-- Lines 1625-1658
 function WeaponTweakData:_init_data_ger_mp38_npc()
 	self.ger_mp38_npc = {
 		sounds = {}
@@ -1256,7 +1284,7 @@ function WeaponTweakData:_init_data_ger_mp38_npc()
 	self.ger_mp38_npc.suppression = 1
 end
 
--- Lines 1553-1582
+-- Lines 1660-1689
 function WeaponTweakData:_init_data_carbine_npc()
 	self.carbine_npc = {
 		sounds = {},
@@ -1282,7 +1310,7 @@ function WeaponTweakData:_init_data_carbine_npc()
 	self.carbine_npc.suppression = 1
 end
 
--- Lines 1585-1611
+-- Lines 1692-1718
 function WeaponTweakData:_init_data_kar98_npc()
 	self.ger_kar98_npc = {
 		sounds = {},
@@ -1305,7 +1333,7 @@ function WeaponTweakData:_init_data_kar98_npc()
 	self.ger_kar98_npc.armor_piercing = true
 end
 
--- Lines 1614-1640
+-- Lines 1721-1747
 function WeaponTweakData:_init_data_sniper_kar98_npc()
 	self.sniper_kar98_npc = {
 		sounds = {},
@@ -1328,7 +1356,7 @@ function WeaponTweakData:_init_data_sniper_kar98_npc()
 	self.sniper_kar98_npc.armor_piercing = true
 end
 
--- Lines 1643-1667
+-- Lines 1750-1774
 function WeaponTweakData:_init_data_spotting_optics_npc()
 	self.spotting_optics_npc = {
 		sounds = {},
@@ -1350,7 +1378,7 @@ function WeaponTweakData:_init_data_spotting_optics_npc()
 	self.spotting_optics_npc.armor_piercing = true
 end
 
--- Lines 1670-1723
+-- Lines 1777-1830
 function WeaponTweakData:_init_data_m42_flammenwerfer_npc(difficulty_index)
 	self.m42_flammenwerfer_npc = {
 		sounds = {},
@@ -1396,7 +1424,7 @@ function WeaponTweakData:_init_data_m42_flammenwerfer_npc(difficulty_index)
 	self.m42_flammenwerfer_npc.suppression = 0.45
 end
 
--- Lines 1726-1757
+-- Lines 1833-1864
 function WeaponTweakData:_init_data_panzerfaust_60_npc()
 	self.panzerfaust_60_npc = {
 		sounds = {},
@@ -1424,7 +1452,7 @@ function WeaponTweakData:_init_data_panzerfaust_60_npc()
 	self.panzerfaust_60_npc.suppression = 2
 end
 
--- Lines 1760-1944
+-- Lines 1867-2051
 function WeaponTweakData:_init_data_player_weapons(tweak_data)
 	local autohit_rifle_default, autohit_pistol_default, autohit_shotgun_default, autohit_lmg_default, autohit_snp_default, autohit_smg_default, autohit_minigun_default, aim_assist_rifle_default, aim_assist_pistol_default, aim_assist_shotgun_default, aim_assist_lmg_default, aim_assist_snp_default, aim_assist_smg_default, aim_assist_minigun_default = nil
 
@@ -1600,7 +1628,7 @@ function WeaponTweakData:_init_data_player_weapons(tweak_data)
 	self:_init_new_weapons(autohit_data)
 end
 
--- Lines 1946-2300
+-- Lines 2053-2407
 function WeaponTweakData:_init_data_turrets()
 	self.turret_m2 = {
 		heat_material = "blinn2",
@@ -1844,7 +1872,7 @@ function WeaponTweakData:_init_data_turrets()
 		camera_limit_vertical = 45,
 		camera_speed_limit = 1.8,
 		fire_range = 1000000,
-		damage = 840,
+		damage = 50,
 		sound_fire_start = "aa_gun",
 		sound_fire_stop = "aa_gun_stop",
 		sound_movement_start = "aa_gun_movement_loop_start",
@@ -1950,7 +1978,7 @@ function WeaponTweakData:_init_data_turrets()
 		camera_limit_vertical = 35,
 		camera_speed_limit = 0.5,
 		fire_range = 1000000,
-		damage = 840,
+		damage = 50,
 		sound_fire_start = "aa_gun",
 		sound_fire_stop = "aa_gun_stop",
 		sound_movement_start = "aa_gun_movement_loop_start",
@@ -2037,7 +2065,7 @@ function WeaponTweakData:_init_data_turrets()
 	}
 end
 
--- Lines 2303-2351
+-- Lines 2410-2458
 function WeaponTweakData:_init_stats()
 	self.stats = {
 		alert_size = {
@@ -2200,7 +2228,7 @@ function WeaponTweakData:_init_stats()
 	end
 end
 
--- Lines 2353-2365
+-- Lines 2460-2472
 function WeaponTweakData:_pickup_chance(max_ammo, selection_index)
 	local low, high = nil
 
@@ -2218,7 +2246,7 @@ function WeaponTweakData:_pickup_chance(max_ammo, selection_index)
 	}
 end
 
--- Lines 2367-2458
+-- Lines 2474-2576
 function WeaponTweakData:_init_new_weapons(weapon_data)
 	local total_damage_primary = 300
 	local total_damage_secondary = 150
@@ -2304,9 +2332,10 @@ function WeaponTweakData:_init_new_weapons(weapon_data)
 	self:_init_mg42(weapon_data)
 	self:_init_mosin(weapon_data)
 	self:_init_sterling(weapon_data)
+	self:_init_geco(weapon_data)
 end
 
--- Lines 2460-2584
+-- Lines 2578-2702
 function WeaponTweakData:_init_flamethrower_mk2(weapon_data)
 	self.flamethrower_mk2 = {
 		inventory_texture = "ui/temp/customization_temp_df",
@@ -2419,168 +2448,7 @@ function WeaponTweakData:_init_flamethrower_mk2(weapon_data)
 	}
 end
 
--- Lines 2586-2732
-function WeaponTweakData:_init_m1911(weapon_data)
-	self.m1911 = {
-		inventory_texture = "ui/temp/customization_temp_df",
-		category = WeaponTweakData.WEAPON_CATEGORY_PISTOL,
-		dismember_chance = 0,
-		damage_melee = 66,
-		damage_melee_effect_mul = weapon_data.damage_melee_effect_multiplier_default,
-		sounds = {}
-	}
-	self.m1911.sounds.fire = "colt_m1911_fire_1p"
-	self.m1911.sounds.dryfire = "secondary_dryfire"
-	self.m1911.sounds.enter_steelsight = nil
-	self.m1911.sounds.leave_steelsight = nil
-	self.m1911.FIRE_MODE = "single"
-	self.m1911.fire_mode_data = {
-		fire_rate = 0.12
-	}
-	self.m1911.single = {
-		fire_rate = 0.12
-	}
-	self.m1911.timers = {
-		reload_not_empty = 1.25,
-		reload_empty = 1.65,
-		unequip = 0.5,
-		equip = 0.25
-	}
-	self.m1911.name_id = "bm_w_m1911"
-	self.m1911.desc_id = "bm_w_m1911_desc"
-	self.m1911.description_id = "des_m1911"
-	self.m1911.muzzleflash = "effects/vanilla/weapons/9mm_auto_fps"
-	self.m1911.muzzleflash_silenced = "effects/vanilla/weapons/9mm_auto_silence_fps"
-	self.m1911.shell_ejection = "effects/vanilla/weapons/shells/shell_9mm"
-	self.m1911.use_data = {
-		selection_index = 1
-	}
-	self.m1911.damage_profile = {
-		{
-			damage = 62,
-			range = 1000
-		},
-		{
-			damage = 31,
-			range = 2500
-		}
-	}
-	self.m1911.headshot_multiplier = 3.5
-	self.m1911.CLIP_AMMO_MAX = 7
-	self.m1911.NR_CLIPS_MAX = 7
-	self.m1911.AMMO_MAX = self.m1911.CLIP_AMMO_MAX * self.m1911.NR_CLIPS_MAX
-	self.m1911.AMMO_PICKUP = self:_pickup_chance(self.m1911.AMMO_MAX, 1)
-	self.m1911.ammo_pickup_base = 10
-	self.m1911.spread = {
-		standing = 2.5,
-		crouching = 2.25,
-		steelsight = 1.25,
-		moving_standing = 3.75,
-		moving_crouching = 3.38,
-		moving_steelsight = 1.56,
-		per_shot = 0.24,
-		per_shot_steelsight = 0.16,
-		recovery = 8,
-		recovery_wait_multiplier = 1
-	}
-	self.m1911.kick = {
-		standing = {
-			1,
-			1.2,
-			-0.5,
-			0.5
-		},
-		crouching = {
-			1,
-			1.2,
-			-0.4,
-			0.4
-		},
-		steelsight = {
-			1.2,
-			1.45,
-			-0.25,
-			0.25
-		},
-		crouching_steelsight = {
-			1.2,
-			1.3,
-			-0.2,
-			0.2
-		}
-	}
-	self.m1911.gun_kick = {
-		hip_fire = {
-			25,
-			50,
-			-30,
-			25
-		},
-		steelsight = {
-			25,
-			32,
-			-20,
-			20
-		},
-		position_ratio = -0.05
-	}
-	self.m1911.crosshair = {
-		standing = {},
-		crouching = {},
-		steelsight = {}
-	}
-	self.m1911.crosshair.standing.offset = 0.175
-	self.m1911.crosshair.standing.moving_offset = 0.6
-	self.m1911.crosshair.standing.kick_offset = 0.4
-	self.m1911.crosshair.crouching.offset = 0.1
-	self.m1911.crosshair.crouching.moving_offset = 0.6
-	self.m1911.crosshair.crouching.kick_offset = 0.3
-	self.m1911.crosshair.steelsight.hidden = true
-	self.m1911.crosshair.steelsight.offset = 0
-	self.m1911.crosshair.steelsight.moving_offset = 0
-	self.m1911.crosshair.steelsight.kick_offset = 0.1
-	self.m1911.shake = {
-		fire_multiplier = 1,
-		fire_steelsight_multiplier = 1
-	}
-	self.m1911.autohit = weapon_data.autohit_pistol_default
-	self.m1911.aim_assist = weapon_data.aim_assist_pistol_default
-	self.m1911.weapon_hold = "m1911"
-	self.m1911.animations = {
-		equip_id = "equip_m1911",
-		magazine_empty = "last_recoil",
-		recoil_steelsight = true
-	}
-	self.m1911.transition_duration = 0
-	self.m1911.gui = {
-		rotation_offset = -4,
-		distance_offset = -50,
-		height_offset = -6,
-		display_offset = 12,
-		initial_rotation = {}
-	}
-	self.m1911.gui.initial_rotation.yaw = -90
-	self.m1911.gui.initial_rotation.pitch = 0
-	self.m1911.gui.initial_rotation.roll = 0
-	self.m1911.gui.icon_large = "weapon_pis_m1911_large"
-	self.m1911.hud = {
-		icon = "weapon_panel_pis_m1911"
-	}
-	self.m1911.stats = {
-		zoom = 3,
-		total_ammo_mod = 21,
-		spread_moving = 9,
-		alert_size = 7,
-		spread = 6,
-		recoil = 4,
-		value = 1,
-		extra_ammo = 6,
-		suppression = 14,
-		concealment = 29
-	}
-end
-
--- Lines 2734-2879
+-- Lines 2705-2850
 function WeaponTweakData:_init_c96(weapon_data)
 	self.c96 = {
 		inventory_texture = "ui/temp/customization_temp_df",
@@ -2741,7 +2609,7 @@ function WeaponTweakData:_init_c96(weapon_data)
 	}
 end
 
--- Lines 2881-3024
+-- Lines 3004-3147
 function WeaponTweakData:_init_webley(weapon_data)
 	self.webley = {
 		inventory_texture = "ui/temp/customization_temp_df",
@@ -2901,173 +2769,155 @@ function WeaponTweakData:_init_webley(weapon_data)
 	}
 end
 
--- Lines 3026-3185
-function WeaponTweakData:_init_thompson(weapon_data)
-	self.thompson = {
+-- Lines 3150-3296
+function WeaponTweakData:_init_m1911(weapon_data)
+	self.m1911 = {
 		inventory_texture = "ui/temp/customization_temp_df",
-		category = WeaponTweakData.WEAPON_CATEGORY_SMG,
-		dismember_chance = 0.5,
-		damage_melee = 83,
+		category = WeaponTweakData.WEAPON_CATEGORY_PISTOL,
+		dismember_chance = 0,
+		damage_melee = 66,
 		damage_melee_effect_mul = weapon_data.damage_melee_effect_multiplier_default,
 		sounds = {}
 	}
-	self.thompson.sounds.fire_single = "thompson_fire_1p_single"
-	self.thompson.sounds.fire_auto = "thompson_fire_1p"
-	self.thompson.sounds.stop_fire = "thompson_fire_1p_stop"
-	self.thompson.sounds.dryfire = "primary_dryfire"
-	self.thompson.timers = {
-		reload_not_empty = 1.55,
-		reload_empty = 2.5,
-		unequip = 0.75,
-		equip = 0.4
+	self.m1911.sounds.fire = "colt_m1911_fire_1p"
+	self.m1911.sounds.dryfire = "secondary_dryfire"
+	self.m1911.sounds.enter_steelsight = nil
+	self.m1911.sounds.leave_steelsight = nil
+	self.m1911.FIRE_MODE = "single"
+	self.m1911.fire_mode_data = {
+		fire_rate = 0.12
 	}
-	self.thompson.name_id = "bm_w_thompson"
-	self.thompson.desc_id = "bm_w_thompson_desc"
-	self.thompson.description_id = "des_thompson"
-	self.thompson.muzzleflash = "effects/vanilla/weapons/9mm_auto_fps"
-	self.thompson.muzzleflash_silenced = "effects/vanilla/weapons/9mm_auto_silence_fps"
-	self.thompson.shell_ejection = "effects/vanilla/weapons/shells/shell_9mm"
-	self.thompson.use_data = {
-		selection_index = 2
+	self.m1911.single = {
+		fire_rate = 0.12
 	}
-	self.thompson.damage_profile = {
+	self.m1911.timers = {
+		reload_not_empty = 1.25,
+		reload_empty = 1.65,
+		unequip = 0.5,
+		equip = 0.25
+	}
+	self.m1911.name_id = "bm_w_m1911"
+	self.m1911.desc_id = "bm_w_m1911_desc"
+	self.m1911.description_id = "des_m1911"
+	self.m1911.muzzleflash = "effects/vanilla/weapons/9mm_auto_fps"
+	self.m1911.muzzleflash_silenced = "effects/vanilla/weapons/9mm_auto_silence_fps"
+	self.m1911.shell_ejection = "effects/vanilla/weapons/shells/shell_9mm"
+	self.m1911.use_data = {
+		selection_index = 1
+	}
+	self.m1911.damage_profile = {
 		{
-			damage = 83,
+			damage = 62,
 			range = 1000
 		},
 		{
-			damage = 42,
+			damage = 31,
 			range = 2500
 		}
 	}
-	self.thompson.headshot_multiplier = 3.5
-	self.thompson.CLIP_AMMO_MAX = 20
-	self.thompson.NR_CLIPS_MAX = 10
-	self.thompson.AMMO_MAX = self.thompson.CLIP_AMMO_MAX * self.thompson.NR_CLIPS_MAX
-	self.thompson.AMMO_PICKUP = self:_pickup_chance(self.thompson.AMMO_MAX, 2)
-	self.thompson.ammo_pickup_base = 20
-	self.thompson.FIRE_MODE = "auto"
-	self.thompson.fire_mode_data = {
-		fire_rate = 0.1
+	self.m1911.headshot_multiplier = 3.5
+	self.m1911.CLIP_AMMO_MAX = 7
+	self.m1911.NR_CLIPS_MAX = 7
+	self.m1911.AMMO_MAX = self.m1911.CLIP_AMMO_MAX * self.m1911.NR_CLIPS_MAX
+	self.m1911.AMMO_PICKUP = self:_pickup_chance(self.m1911.AMMO_MAX, 1)
+	self.m1911.ammo_pickup_base = 10
+	self.m1911.spread = {
+		standing = 2.5,
+		crouching = 2.25,
+		steelsight = 1.25,
+		moving_standing = 3.75,
+		moving_crouching = 3.38,
+		moving_steelsight = 1.56,
+		per_shot = 0.24,
+		per_shot_steelsight = 0.16,
+		recovery = 8,
+		recovery_wait_multiplier = 1
 	}
-	self.thompson.CAN_TOGGLE_FIREMODE = true
-	self.thompson.auto = {
-		fire_rate = 0.1
-	}
-	self.thompson.spread = {
-		standing = 4.5,
-		crouching = 3.6,
-		steelsight = 2.25,
-		moving_standing = 5.63,
-		moving_crouching = 4.5,
-		moving_steelsight = 2.53,
-		per_shot = 0.09,
-		per_shot_steelsight = 0.05,
-		recovery = 10,
-		recovery_wait_multiplier = 3
-	}
-	self.thompson.kick = {
+	self.m1911.kick = {
 		standing = {
 			1,
 			1.2,
-			-1,
-			1.5
+			-0.5,
+			0.5
 		},
 		crouching = {
 			1,
-			1.15,
-			-0.9,
-			1.4
+			1.2,
+			-0.4,
+			0.4
 		},
 		steelsight = {
-			0.8,
-			1,
-			-0.6,
-			1
+			1.2,
+			1.45,
+			-0.25,
+			0.25
 		},
 		crouching_steelsight = {
-			0.8,
-			0.9,
-			-0.55,
-			0.9
+			1.2,
+			1.3,
+			-0.2,
+			0.2
 		}
 	}
-	self.thompson.minimum_view_kick = {
-		standing = {
-			0,
-			0.3
-		},
-		crouching = {
-			0,
-			0.5
-		},
-		steelsight = {
-			0,
-			0.5
-		},
-		crouching_steelsight = {
-			0,
-			0.5
-		}
-	}
-	self.thompson.gun_kick = {
+	self.m1911.gun_kick = {
 		hip_fire = {
-			-20,
-			30,
-			-35,
-			35
+			25,
+			50,
+			-30,
+			25
 		},
 		steelsight = {
-			20,
-			28,
+			25,
+			32,
 			-20,
 			20
 		},
-		position_ratio = 0.23
+		position_ratio = -0.05
 	}
-	self.thompson.crosshair = {
+	self.m1911.crosshair = {
 		standing = {},
 		crouching = {},
 		steelsight = {}
 	}
-	self.thompson.crosshair.standing.offset = 0.16
-	self.thompson.crosshair.standing.moving_offset = 0.8
-	self.thompson.crosshair.standing.kick_offset = 0.6
-	self.thompson.crosshair.crouching.offset = 0.08
-	self.thompson.crosshair.crouching.moving_offset = 0.7
-	self.thompson.crosshair.crouching.kick_offset = 0.4
-	self.thompson.crosshair.steelsight.hidden = true
-	self.thompson.crosshair.steelsight.offset = 0
-	self.thompson.crosshair.steelsight.moving_offset = 0
-	self.thompson.crosshair.steelsight.kick_offset = 0.1
-	self.thompson.shake = {
-		fire_multiplier = 0.5,
-		fire_steelsight_multiplier = -0.5
+	self.m1911.crosshair.standing.offset = 0.175
+	self.m1911.crosshair.standing.moving_offset = 0.6
+	self.m1911.crosshair.standing.kick_offset = 0.4
+	self.m1911.crosshair.crouching.offset = 0.1
+	self.m1911.crosshair.crouching.moving_offset = 0.6
+	self.m1911.crosshair.crouching.kick_offset = 0.3
+	self.m1911.crosshair.steelsight.hidden = true
+	self.m1911.crosshair.steelsight.offset = 0
+	self.m1911.crosshair.steelsight.moving_offset = 0
+	self.m1911.crosshair.steelsight.kick_offset = 0.1
+	self.m1911.shake = {
+		fire_multiplier = 1,
+		fire_steelsight_multiplier = 1
 	}
-	self.thompson.autohit = weapon_data.autohit_rifle_default
-	self.thompson.aim_assist = weapon_data.aim_assist_rifle_default
-	self.thompson.weapon_hold = "thompson"
-	self.thompson.animations = {
-		equip_id = "equip_m4",
+	self.m1911.autohit = weapon_data.autohit_pistol_default
+	self.m1911.aim_assist = weapon_data.aim_assist_pistol_default
+	self.m1911.weapon_hold = "m1911"
+	self.m1911.animations = {
+		equip_id = "equip_m1911",
 		magazine_empty = "last_recoil",
 		recoil_steelsight = true
 	}
-	self.thompson.gui = {
-		rotation_offset = -5,
-		distance_offset = 12,
-		height_offset = -4,
-		display_offset = -1,
+	self.m1911.transition_duration = 0
+	self.m1911.gui = {
+		rotation_offset = -4,
+		distance_offset = -50,
+		height_offset = -6,
+		display_offset = 12,
 		initial_rotation = {}
 	}
-	self.thompson.gui.initial_rotation.yaw = -90
-	self.thompson.gui.initial_rotation.pitch = 0
-	self.thompson.gui.initial_rotation.roll = 0
-	self.thompson.gui.icon_large = "weapon_smg_thompson_large"
-	self.thompson.hud = {
-		icon = "weapon_panel_smg_thompson"
+	self.m1911.gui.initial_rotation.yaw = -90
+	self.m1911.gui.initial_rotation.pitch = 0
+	self.m1911.gui.initial_rotation.roll = 0
+	self.m1911.gui.icon_large = "weapon_pis_m1911_large"
+	self.m1911.hud = {
+		icon = "weapon_panel_pis_m1911"
 	}
-	self.thompson.stats = {
-		zoom = 4,
+	self.m1911.stats = {
+		zoom = 3,
 		total_ammo_mod = 21,
 		spread_moving = 9,
 		alert_size = 7,
@@ -3075,12 +2925,337 @@ function WeaponTweakData:_init_thompson(weapon_data)
 		recoil = 4,
 		value = 1,
 		extra_ammo = 6,
-		suppression = 10,
-		concealment = 17
+		suppression = 14,
+		concealment = 29
 	}
 end
 
--- Lines 3187-3348
+-- Lines 3299-3453
+function WeaponTweakData:_init_m1912_winchester(weapon_data)
+	self.m1912 = {
+		inventory_texture = "ui/temp/customization_temp_df",
+		category = WeaponTweakData.WEAPON_CATEGORY_SHOTGUN,
+		use_shotgun_reload = true,
+		dismember_chance = 0.75,
+		damage_melee = 100,
+		damage_melee_effect_mul = weapon_data.damage_melee_effect_multiplier_default,
+		sounds = {}
+	}
+	self.m1912.sounds.fire = "shotgun_fire_1p_single"
+	self.m1912.sounds.dryfire = "primary_dryfire"
+	self.m1912.timers = {
+		shotgun_reload_enter = 0.5333333333333333,
+		shotgun_reload_exit_empty = 0.4,
+		shotgun_reload_exit_not_empty = 0.4,
+		shotgun_reload_shell = 0.6666666666666666,
+		shotgun_reload_first_shell_offset = 0.13333333333333333,
+		unequip = 0.85,
+		equip = 0.6
+	}
+	self.m1912.name_id = "bm_w_m1912"
+	self.m1912.desc_id = "bm_w_m1912_desc"
+	self.m1912.description_id = "des_m1912"
+	self.m1912.muzzleflash = "effects/vanilla/weapons/12g_auto_fps"
+	self.m1912.shell_ejection = "effects/vanilla/weapons/shells/shell_slug_semi"
+	self.m1912.use_data = {
+		selection_index = 2,
+		align_place = "right_hand"
+	}
+	self.m1912.damage_profile = {
+		{
+			damage = 200,
+			range = 1000
+		},
+		{
+			damage = 20,
+			range = 2000
+		}
+	}
+	self.m1912.headshot_multiplier = 3
+	self.m1912.rays = 12
+	self.m1912.CLIP_AMMO_MAX = 6
+	self.m1912.NR_CLIPS_MAX = 5
+	self.m1912.AMMO_MAX = self.m1912.CLIP_AMMO_MAX * self.m1912.NR_CLIPS_MAX
+	self.m1912.AMMO_PICKUP = self:_pickup_chance(self.m1912.AMMO_MAX, 1)
+	self.m1912.ammo_pickup_base = 3
+	self.m1912.FIRE_MODE = "single"
+	self.m1912.fire_mode_data = {
+		fire_rate = 0.8
+	}
+	self.m1912.CAN_TOGGLE_FIREMODE = false
+	self.m1912.single = {
+		fire_rate = 0.8
+	}
+	self.m1912.spread = {
+		standing = 3,
+		crouching = 3,
+		steelsight = 3,
+		moving_standing = 3,
+		moving_crouching = 3,
+		moving_steelsight = 3,
+		per_shot = 0,
+		per_shot_steelsight = 0,
+		recovery = 12,
+		recovery_wait_multiplier = 0.5
+	}
+	self.m1912.kick = {
+		standing = {
+			3.6,
+			4.2,
+			-2,
+			2
+		},
+		crouching = {
+			3.2,
+			3.8,
+			-2,
+			2
+		},
+		steelsight = {
+			3.4,
+			3.8,
+			-2,
+			2
+		},
+		crouching_steelsight = {
+			3.2,
+			3.4,
+			-1.8,
+			1.8
+		}
+	}
+	self.m1912.gun_kick = {
+		hip_fire = {
+			60,
+			80,
+			-55,
+			55
+		},
+		steelsight = {
+			48,
+			58,
+			-45,
+			-45
+		},
+		position_ratio = -0.075
+	}
+	self.m1912.crosshair = {
+		standing = {},
+		crouching = {},
+		steelsight = {}
+	}
+	self.m1912.crosshair.standing.offset = 0.7
+	self.m1912.crosshair.standing.moving_offset = 0.7
+	self.m1912.crosshair.standing.kick_offset = 0.8
+	self.m1912.crosshair.crouching.offset = 0.65
+	self.m1912.crosshair.crouching.moving_offset = 0.65
+	self.m1912.crosshair.crouching.kick_offset = 0.75
+	self.m1912.crosshair.steelsight.hidden = true
+	self.m1912.crosshair.steelsight.offset = 0
+	self.m1912.crosshair.steelsight.moving_offset = 0
+	self.m1912.crosshair.steelsight.kick_offset = 0
+	self.m1912.shake = {
+		fire_multiplier = 2,
+		fire_steelsight_multiplier = -2
+	}
+	self.m1912.autohit = weapon_data.autohit_shotgun_default
+	self.m1912.aim_assist = weapon_data.aim_assist_shotgun_default
+	self.m1912.weapon_hold = "m1912"
+	self.m1912.animations = {
+		equip_id = "equip_r870_shotgun",
+		recoil_steelsight = true
+	}
+	self.m1912.panic_suppression_chance = 0.2
+	self.m1912.gui = {
+		rotation_offset = -39,
+		distance_offset = 85,
+		height_offset = 0,
+		display_offset = -10,
+		initial_rotation = {}
+	}
+	self.m1912.gui.initial_rotation.yaw = -90
+	self.m1912.gui.initial_rotation.pitch = 0
+	self.m1912.gui.initial_rotation.roll = 0
+	self.m1912.gui.icon_large = "weapon_sho_1912_large"
+	self.m1912.hud = {
+		icon = "weapon_panel_sho_1912"
+	}
+	self.m1912.stats = {
+		zoom = 3,
+		total_ammo_mod = 21,
+		spread_moving = 9,
+		alert_size = 7,
+		spread = 6,
+		recoil = 4,
+		value = 1,
+		extra_ammo = 6,
+		suppression = 6,
+		concealment = 12
+	}
+end
+
+-- Lines 3457-3604
+function WeaponTweakData:_init_geco(weapon_data)
+	self.geco = {
+		inventory_texture = "ui/temp/customization_temp_df",
+		category = WeaponTweakData.WEAPON_CATEGORY_SHOTGUN,
+		use_shotgun_reload = false,
+		dismember_chance = 1,
+		damage_melee = 100,
+		damage_melee_effect_mul = weapon_data.damage_melee_effect_multiplier_default,
+		sounds = {}
+	}
+	self.geco.sounds.fire = "double_barrel_fire_1p_single"
+	self.geco.sounds.dryfire = "primary_dryfire"
+	self.geco.timers = {
+		reload_not_empty = 2.1,
+		reload_empty = 2.1,
+		unequip = 0.85,
+		equip = 0.75
+	}
+	self.geco.name_id = "bm_w_geco"
+	self.geco.desc_id = "bm_w_geco_desc"
+	self.geco.description_id = "des_geco"
+	self.geco.muzzleflash = "effects/vanilla/weapons/12g_auto_fps"
+	self.geco.shell_ejection = "effects/vanilla/weapons/shells/shell_empty"
+	self.geco.use_data = {
+		selection_index = 2,
+		align_place = "right_hand"
+	}
+	self.geco.damage_profile = {
+		{
+			damage = 250,
+			range = 1000
+		},
+		{
+			damage = 20,
+			range = 1750
+		}
+	}
+	self.geco.headshot_multiplier = 3
+	self.geco.rays = 12
+	self.geco.CLIP_AMMO_MAX = 2
+	self.geco.NR_CLIPS_MAX = 15
+	self.geco.AMMO_MAX = self.geco.CLIP_AMMO_MAX * self.geco.NR_CLIPS_MAX
+	self.geco.AMMO_PICKUP = self:_pickup_chance(self.geco.AMMO_MAX, 1)
+	self.geco.ammo_pickup_base = 3
+	self.geco.FIRE_MODE = "single"
+	self.geco.fire_mode_data = {
+		fire_rate = 0.2
+	}
+	self.geco.CAN_TOGGLE_FIREMODE = false
+	self.geco.single = {
+		fire_rate = 0.2
+	}
+	self.geco.spread = {
+		standing = 4,
+		crouching = 4,
+		steelsight = 4,
+		moving_standing = 4,
+		moving_crouching = 4,
+		moving_steelsight = 4,
+		per_shot = 0,
+		per_shot_steelsight = 0,
+		recovery = 12,
+		recovery_wait_multiplier = 0.5
+	}
+	self.geco.kick = {
+		standing = {
+			7.9,
+			9.2,
+			-4.4,
+			4.4
+		},
+		crouching = {
+			7,
+			8.4,
+			-4.4,
+			4.4
+		},
+		steelsight = {
+			7.5,
+			8.4,
+			-4.4,
+			4.4
+		},
+		crouching_steelsight = {
+			7,
+			7.5,
+			-4,
+			4
+		}
+	}
+	self.geco.gun_kick = {
+		hip_fire = {
+			132,
+			176,
+			-121,
+			121
+		},
+		steelsight = {
+			106,
+			128,
+			-99,
+			-99
+		},
+		position_ratio = -0.075
+	}
+	self.geco.crosshair = {
+		standing = {},
+		crouching = {},
+		steelsight = {}
+	}
+	self.geco.crosshair.standing.offset = 0.7
+	self.geco.crosshair.standing.moving_offset = 0.7
+	self.geco.crosshair.standing.kick_offset = 0.8
+	self.geco.crosshair.crouching.offset = 0.65
+	self.geco.crosshair.crouching.moving_offset = 0.65
+	self.geco.crosshair.crouching.kick_offset = 0.75
+	self.geco.crosshair.steelsight.hidden = true
+	self.geco.crosshair.steelsight.offset = 0
+	self.geco.crosshair.steelsight.moving_offset = 0
+	self.geco.crosshair.steelsight.kick_offset = 0
+	self.geco.shake = {
+		fire_multiplier = 2,
+		fire_steelsight_multiplier = -2
+	}
+	self.geco.autohit = weapon_data.autohit_shotgun_default
+	self.geco.aim_assist = weapon_data.aim_assist_shotgun_default
+	self.geco.weapon_hold = "geco"
+	self.geco.animations = {
+		equip_id = "equip_geco",
+		recoil_steelsight = true
+	}
+	self.geco.panic_suppression_chance = 0.2
+	self.geco.gui = {
+		rotation_offset = -15,
+		distance_offset = 50,
+		height_offset = 0,
+		display_offset = -8,
+		initial_rotation = {}
+	}
+	self.geco.gui.initial_rotation.yaw = -90
+	self.geco.gui.initial_rotation.pitch = 0
+	self.geco.gui.initial_rotation.roll = 0
+	self.geco.gui.icon_large = "weapon_sho_1912_large"
+	self.geco.hud = {
+		icon = "weapon_panel_sho_1912"
+	}
+	self.geco.stats = {
+		zoom = 3,
+		total_ammo_mod = 21,
+		spread_moving = 9,
+		alert_size = 7,
+		spread = 6,
+		recoil = 9,
+		value = 1,
+		extra_ammo = 6,
+		suppression = 6,
+		concealment = 12
+	}
+end
+
+-- Lines 3608-3769
 function WeaponTweakData:_init_sten_mk2(weapon_data)
 	self.sten = {
 		inventory_texture = "ui/temp/customization_temp_df",
@@ -3261,7 +3436,685 @@ function WeaponTweakData:_init_sten_mk2(weapon_data)
 	}
 end
 
--- Lines 3350-3521
+-- Lines 3772-3931
+function WeaponTweakData:_init_thompson(weapon_data)
+	self.thompson = {
+		inventory_texture = "ui/temp/customization_temp_df",
+		category = WeaponTweakData.WEAPON_CATEGORY_SMG,
+		dismember_chance = 0.5,
+		damage_melee = 83,
+		damage_melee_effect_mul = weapon_data.damage_melee_effect_multiplier_default,
+		sounds = {}
+	}
+	self.thompson.sounds.fire_single = "thompson_fire_1p_single"
+	self.thompson.sounds.fire_auto = "thompson_fire_1p"
+	self.thompson.sounds.stop_fire = "thompson_fire_1p_stop"
+	self.thompson.sounds.dryfire = "primary_dryfire"
+	self.thompson.timers = {
+		reload_not_empty = 1.55,
+		reload_empty = 2.5,
+		unequip = 0.75,
+		equip = 0.4
+	}
+	self.thompson.name_id = "bm_w_thompson"
+	self.thompson.desc_id = "bm_w_thompson_desc"
+	self.thompson.description_id = "des_thompson"
+	self.thompson.muzzleflash = "effects/vanilla/weapons/9mm_auto_fps"
+	self.thompson.muzzleflash_silenced = "effects/vanilla/weapons/9mm_auto_silence_fps"
+	self.thompson.shell_ejection = "effects/vanilla/weapons/shells/shell_9mm"
+	self.thompson.use_data = {
+		selection_index = 2
+	}
+	self.thompson.damage_profile = {
+		{
+			damage = 83,
+			range = 1000
+		},
+		{
+			damage = 42,
+			range = 2500
+		}
+	}
+	self.thompson.headshot_multiplier = 3.5
+	self.thompson.CLIP_AMMO_MAX = 20
+	self.thompson.NR_CLIPS_MAX = 10
+	self.thompson.AMMO_MAX = self.thompson.CLIP_AMMO_MAX * self.thompson.NR_CLIPS_MAX
+	self.thompson.AMMO_PICKUP = self:_pickup_chance(self.thompson.AMMO_MAX, 2)
+	self.thompson.ammo_pickup_base = 20
+	self.thompson.FIRE_MODE = "auto"
+	self.thompson.fire_mode_data = {
+		fire_rate = 0.1
+	}
+	self.thompson.CAN_TOGGLE_FIREMODE = true
+	self.thompson.auto = {
+		fire_rate = 0.1
+	}
+	self.thompson.spread = {
+		standing = 4.5,
+		crouching = 3.6,
+		steelsight = 2.25,
+		moving_standing = 5.63,
+		moving_crouching = 4.5,
+		moving_steelsight = 2.53,
+		per_shot = 0.09,
+		per_shot_steelsight = 0.05,
+		recovery = 10,
+		recovery_wait_multiplier = 3
+	}
+	self.thompson.kick = {
+		standing = {
+			1,
+			1.2,
+			-1,
+			1.5
+		},
+		crouching = {
+			1,
+			1.15,
+			-0.9,
+			1.4
+		},
+		steelsight = {
+			0.8,
+			1,
+			-0.6,
+			1
+		},
+		crouching_steelsight = {
+			0.8,
+			0.9,
+			-0.55,
+			0.9
+		}
+	}
+	self.thompson.minimum_view_kick = {
+		standing = {
+			0,
+			0.3
+		},
+		crouching = {
+			0,
+			0.5
+		},
+		steelsight = {
+			0,
+			0.5
+		},
+		crouching_steelsight = {
+			0,
+			0.5
+		}
+	}
+	self.thompson.gun_kick = {
+		hip_fire = {
+			-20,
+			30,
+			-35,
+			35
+		},
+		steelsight = {
+			20,
+			28,
+			-20,
+			20
+		},
+		position_ratio = 0.23
+	}
+	self.thompson.crosshair = {
+		standing = {},
+		crouching = {},
+		steelsight = {}
+	}
+	self.thompson.crosshair.standing.offset = 0.16
+	self.thompson.crosshair.standing.moving_offset = 0.8
+	self.thompson.crosshair.standing.kick_offset = 0.6
+	self.thompson.crosshair.crouching.offset = 0.08
+	self.thompson.crosshair.crouching.moving_offset = 0.7
+	self.thompson.crosshair.crouching.kick_offset = 0.4
+	self.thompson.crosshair.steelsight.hidden = true
+	self.thompson.crosshair.steelsight.offset = 0
+	self.thompson.crosshair.steelsight.moving_offset = 0
+	self.thompson.crosshair.steelsight.kick_offset = 0.1
+	self.thompson.shake = {
+		fire_multiplier = 0.5,
+		fire_steelsight_multiplier = -0.5
+	}
+	self.thompson.autohit = weapon_data.autohit_rifle_default
+	self.thompson.aim_assist = weapon_data.aim_assist_rifle_default
+	self.thompson.weapon_hold = "thompson"
+	self.thompson.animations = {
+		equip_id = "equip_m4",
+		magazine_empty = "last_recoil",
+		recoil_steelsight = true
+	}
+	self.thompson.gui = {
+		rotation_offset = -5,
+		distance_offset = 12,
+		height_offset = -4,
+		display_offset = -1,
+		initial_rotation = {}
+	}
+	self.thompson.gui.initial_rotation.yaw = -90
+	self.thompson.gui.initial_rotation.pitch = 0
+	self.thompson.gui.initial_rotation.roll = 0
+	self.thompson.gui.icon_large = "weapon_smg_thompson_large"
+	self.thompson.hud = {
+		icon = "weapon_panel_smg_thompson"
+	}
+	self.thompson.stats = {
+		zoom = 4,
+		total_ammo_mod = 21,
+		spread_moving = 9,
+		alert_size = 7,
+		spread = 6,
+		recoil = 4,
+		value = 1,
+		extra_ammo = 6,
+		suppression = 10,
+		concealment = 17
+	}
+end
+
+-- Lines 3934-4086
+function WeaponTweakData:_init_mp38(weapon_data)
+	self.mp38 = {
+		inventory_texture = "ui/temp/customization_temp_df",
+		category = WeaponTweakData.WEAPON_CATEGORY_SMG,
+		dismember_chance = 0.25,
+		damage_melee = 83,
+		damage_melee_effect_mul = weapon_data.damage_melee_effect_multiplier_default,
+		sounds = {}
+	}
+	self.mp38.sounds.fire_single = "mp38_fire_1p_single"
+	self.mp38.sounds.fire_auto = "mp38_fire_1p"
+	self.mp38.sounds.stop_fire = "mp38_fire_1p_stop"
+	self.mp38.sounds.dryfire = "primary_dryfire"
+	self.mp38.timers = {
+		reload_not_empty = 1.66,
+		reload_empty = 2.76,
+		unequip = 0.75,
+		equip = 0.4
+	}
+	self.mp38.name_id = "bm_w_mp38"
+	self.mp38.desc_id = "bm_w_mp38_desc"
+	self.mp38.description_id = "des_mp38"
+	self.mp38.muzzleflash = "effects/vanilla/weapons/9mm_auto_fps"
+	self.mp38.muzzleflash_silenced = "effects/vanilla/weapons/9mm_auto_silence_fps"
+	self.mp38.shell_ejection = "effects/vanilla/weapons/shells/shell_9mm"
+	self.mp38.use_data = {
+		selection_index = 2
+	}
+	self.mp38.damage_profile = {
+		{
+			damage = 75,
+			range = 1500
+		},
+		{
+			damage = 45,
+			range = 3000
+		}
+	}
+	self.mp38.headshot_multiplier = 3.5
+	self.mp38.CLIP_AMMO_MAX = 32
+	self.mp38.NR_CLIPS_MAX = 6
+	self.mp38.AMMO_MAX = self.mp38.CLIP_AMMO_MAX * self.mp38.NR_CLIPS_MAX
+	self.mp38.AMMO_PICKUP = self:_pickup_chance(self.mp38.AMMO_MAX, 2)
+	self.mp38.ammo_pickup_base = 19
+	self.mp38.FIRE_MODE = "auto"
+	self.mp38.fire_mode_data = {
+		fire_rate = 0.125
+	}
+	self.mp38.CAN_TOGGLE_FIREMODE = false
+	self.mp38.auto = {
+		fire_rate = 0.125
+	}
+	self.mp38.spread = {
+		standing = 2.86,
+		crouching = 2.29,
+		steelsight = 1.43,
+		moving_standing = 3.57,
+		moving_crouching = 2.86,
+		moving_steelsight = 1.61,
+		per_shot = 0.12,
+		per_shot_steelsight = 0.048,
+		recovery = 10,
+		recovery_wait_multiplier = 2
+	}
+	self.mp38.kick = {
+		standing = {
+			2.4,
+			2.6,
+			-2.35,
+			2.35
+		},
+		crouching = {
+			2.2,
+			2.3,
+			-2.2,
+			2.2
+		},
+		steelsight = {
+			1.8,
+			2.1,
+			-2.1,
+			2.1
+		},
+		crouching_steelsight = {
+			1.8,
+			2,
+			-1.9,
+			1.9
+		}
+	}
+	self.mp38.gun_kick = {
+		hip_fire = {
+			-10,
+			40,
+			-30,
+			35
+		},
+		steelsight = {
+			-10,
+			22,
+			-25,
+			25
+		},
+		position_ratio = -0.06
+	}
+	self.mp38.crosshair = {
+		standing = {},
+		crouching = {},
+		steelsight = {}
+	}
+	self.mp38.crosshair.standing.offset = 0.16
+	self.mp38.crosshair.standing.moving_offset = 0.8
+	self.mp38.crosshair.standing.kick_offset = 0.6
+	self.mp38.crosshair.crouching.offset = 0.08
+	self.mp38.crosshair.crouching.moving_offset = 0.7
+	self.mp38.crosshair.crouching.kick_offset = 0.4
+	self.mp38.crosshair.steelsight.hidden = true
+	self.mp38.crosshair.steelsight.offset = 0
+	self.mp38.crosshair.steelsight.moving_offset = 0
+	self.mp38.crosshair.steelsight.kick_offset = 0.1
+	self.mp38.shake = {
+		fire_multiplier = 1,
+		fire_steelsight_multiplier = -1
+	}
+	self.mp38.autohit = weapon_data.autohit_rifle_default
+	self.mp38.aim_assist = weapon_data.aim_assist_rifle_default
+	self.mp38.weapon_hold = "mp38"
+	self.mp38.animations = {
+		equip_id = "equip_m4",
+		recoil_steelsight = true
+	}
+	self.mp38.gui = {
+		rotation_offset = -14,
+		distance_offset = 0,
+		height_offset = -4,
+		display_offset = -2,
+		initial_rotation = {}
+	}
+	self.mp38.gui.initial_rotation.yaw = -90
+	self.mp38.gui.initial_rotation.pitch = 0
+	self.mp38.gui.initial_rotation.roll = 0
+	self.mp38.gui.icon_large = "weapon_smg_mp38_large"
+	self.mp38.hud = {
+		icon = "weapon_panel_smg_mp38"
+	}
+	self.mp38.stats = {
+		zoom = 4,
+		total_ammo_mod = 21,
+		spread_moving = 9,
+		alert_size = 7,
+		spread = 6,
+		recoil = 10,
+		value = 1,
+		extra_ammo = 6,
+		suppression = 10,
+		concealment = 17
+	}
+end
+
+-- Lines 4089-4240
+function WeaponTweakData:_init_sterling(weapon_data)
+	self.sterling = {
+		inventory_texture = "ui/temp/customization_temp_df",
+		category = WeaponTweakData.WEAPON_CATEGORY_SMG,
+		damage_melee = 83,
+		damage_melee_effect_mul = weapon_data.damage_melee_effect_multiplier_default,
+		sounds = {}
+	}
+	self.sterling.sounds.fire_single = "sterling_fire_1p_single"
+	self.sterling.sounds.fire_auto = "sterling_fire_1p"
+	self.sterling.sounds.stop_fire = "sterling_fire_1p_stop"
+	self.sterling.sounds.dryfire = "primary_dryfire"
+	self.sterling.timers = {
+		reload_not_empty = 2.2,
+		reload_empty = 2.9,
+		unequip = 0.55,
+		equip = 0.65
+	}
+	self.sterling.name_id = "bm_w_sterling"
+	self.sterling.desc_id = "bm_w_sterling_desc"
+	self.sterling.description_id = "des_sterling"
+	self.sterling.muzzleflash = "effects/vanilla/weapons/9mm_auto_fps"
+	self.sterling.muzzleflash_silenced = "effects/vanilla/weapons/9mm_auto_silence_fps"
+	self.sterling.shell_ejection = "effects/vanilla/weapons/shells/shell_9mm"
+	self.sterling.use_data = {
+		selection_index = 2
+	}
+	self.sterling.damage_profile = {
+		{
+			damage = 74,
+			range = 1500
+		},
+		{
+			damage = 48,
+			range = 3000
+		}
+	}
+	self.sterling.headshot_multiplier = 3.25
+	self.sterling.CLIP_AMMO_MAX = 20
+	self.sterling.NR_CLIPS_MAX = 10
+	self.sterling.AMMO_MAX = self.sterling.CLIP_AMMO_MAX * self.sterling.NR_CLIPS_MAX
+	self.sterling.AMMO_PICKUP = self:_pickup_chance(self.sterling.AMMO_MAX, 2)
+	self.sterling.ammo_pickup_base = 20
+	self.sterling.FIRE_MODE = "auto"
+	self.sterling.fire_mode_data = {
+		fire_rate = 0.11
+	}
+	self.sterling.CAN_TOGGLE_FIREMODE = true
+	self.sterling.auto = {
+		fire_rate = 0.11
+	}
+	self.sterling.spread = {
+		standing = 2.86,
+		crouching = 2.29,
+		steelsight = 1.43,
+		moving_standing = 3.57,
+		moving_crouching = 2.86,
+		moving_steelsight = 1.61,
+		per_shot = 0.096,
+		per_shot_steelsight = 0.032,
+		recovery = 8,
+		recovery_wait_multiplier = 1.25
+	}
+	self.sterling.kick = {
+		standing = {
+			1.6,
+			1.85,
+			-2.4,
+			2.4
+		},
+		crouching = {
+			1.55,
+			1.7,
+			-2.1,
+			2.1
+		},
+		steelsight = {
+			1.3,
+			1.45,
+			-1.65,
+			1.65
+		},
+		crouching_steelsight = {
+			1.25,
+			1.5,
+			-1.55,
+			1.55
+		}
+	}
+	self.sterling.recenter_speed = 1100
+	self.sterling.recenter_speed_steelsight = 1100
+	self.sterling.gun_kick = {
+		hip_fire = {
+			-30,
+			40,
+			-35,
+			35
+		},
+		steelsight = {
+			12,
+			15,
+			-32,
+			-15
+		},
+		position_ratio = 0.15
+	}
+	self.sterling.crosshair = {
+		standing = {},
+		crouching = {},
+		steelsight = {}
+	}
+	self.sterling.crosshair.standing.offset = 0.5
+	self.sterling.crosshair.standing.moving_offset = 0.8
+	self.sterling.crosshair.standing.kick_offset = 0.7
+	self.sterling.crosshair.crouching.offset = 0.3
+	self.sterling.crosshair.crouching.moving_offset = 0.6
+	self.sterling.crosshair.crouching.kick_offset = 0.5
+	self.sterling.crosshair.steelsight.hidden = true
+	self.sterling.crosshair.steelsight.offset = 0
+	self.sterling.crosshair.steelsight.moving_offset = 0
+	self.sterling.crosshair.steelsight.kick_offset = 0.3
+	self.sterling.shake = {
+		fire_multiplier = 1,
+		fire_steelsight_multiplier = -1
+	}
+	self.sterling.autohit = weapon_data.autohit_smg_default
+	self.sterling.aim_assist = weapon_data.aim_assist_smg_default
+	self.sterling.weapon_hold = "sterling"
+	self.sterling.animations = {
+		equip_id = "equip_sterling",
+		magazine_empty = "last_recoil",
+		recoil_steelsight = true
+	}
+	self.sterling.panic_suppression_chance = 0.2
+	self.sterling.gui = {
+		rotation_offset = -2,
+		distance_offset = 25,
+		height_offset = -4,
+		display_offset = -2,
+		initial_rotation = {}
+	}
+	self.sterling.gui.initial_rotation.yaw = -90
+	self.sterling.gui.initial_rotation.pitch = 0
+	self.sterling.gui.initial_rotation.roll = 0
+	self.sterling.gui.icon_large = "weapon_smg_sterling_large"
+	self.sterling.hud = {
+		icon = "weapon_panel_smg_sterling"
+	}
+	self.sterling.stats = {
+		zoom = 1,
+		total_ammo_mod = 21,
+		spread_moving = 9,
+		alert_size = 7,
+		spread = 6,
+		recoil = 4,
+		value = 7,
+		extra_ammo = 6,
+		suppression = 12,
+		concealment = 20
+	}
+end
+
+-- Lines 4243-4399
+function WeaponTweakData:_init_m1_carbine(weapon_data)
+	self.carbine = {
+		inventory_texture = "ui/temp/customization_temp_df",
+		category = WeaponTweakData.WEAPON_CATEGORY_ASSAULT_RIFLE,
+		dismember_chance = 0.25,
+		damage_melee = 100,
+		damage_melee_effect_mul = weapon_data.damage_melee_effect_multiplier_default,
+		sounds = {}
+	}
+	self.carbine.sounds.fire_single = "m1_carbine_fire_1p"
+	self.carbine.sounds.dryfire = "primary_dryfire"
+	self.carbine.timers = {
+		reload_not_empty = 2,
+		reload_empty = 2.8,
+		unequip = 0.75,
+		equip = 0.4
+	}
+	self.carbine.name_id = "bm_w_carbine"
+	self.carbine.desc_id = "bm_w_carbine_desc"
+	self.carbine.description_id = "des_carbine"
+	self.carbine.muzzleflash = "effects/vanilla/weapons/9mm_auto_fps"
+	self.carbine.muzzleflash_silenced = "effects/vanilla/weapons/9mm_auto_silence_fps"
+	self.carbine.shell_ejection = "effects/vanilla/weapons/shells/shell_9mm"
+	self.carbine.use_data = {
+		selection_index = 2
+	}
+	self.carbine.damage_profile = {
+		{
+			damage = 92,
+			range = 2000
+		},
+		{
+			damage = 55,
+			range = 4000
+		}
+	}
+	self.carbine.headshot_multiplier = 4
+	self.carbine.CLIP_AMMO_MAX = 15
+	self.carbine.NR_CLIPS_MAX = 10
+	self.carbine.AMMO_MAX = self.carbine.CLIP_AMMO_MAX * self.carbine.NR_CLIPS_MAX
+	self.carbine.AMMO_PICKUP = self:_pickup_chance(self.carbine.AMMO_MAX, 2)
+	self.carbine.ammo_pickup_base = 15
+	self.carbine.FIRE_MODE = "single"
+	self.carbine.fire_mode_data = {
+		fire_rate = 0.125
+	}
+	self.carbine.CAN_TOGGLE_FIREMODE = false
+	self.carbine.spread = {
+		standing = 2.5,
+		crouching = 1.75,
+		steelsight = 0.5,
+		moving_standing = 3.75,
+		moving_crouching = 2.63,
+		moving_steelsight = 0.63,
+		per_shot = 0.2,
+		per_shot_steelsight = 0.08,
+		recovery = 7,
+		recovery_wait_multiplier = 1.5
+	}
+	self.carbine.kick = {
+		standing = {
+			2.2,
+			2.4,
+			-2,
+			2
+		},
+		crouching = {
+			2.1,
+			2.2,
+			-1.9,
+			1.8
+		},
+		steelsight = {
+			2,
+			2.15,
+			-1.2,
+			1.2
+		},
+		crouching_steelsight = {
+			1.8,
+			2.1,
+			-1.05,
+			1.05
+		},
+		recenter_speed = 400,
+		recenter_speed_steelsight = 400
+	}
+	self.carbine.minimum_view_kick = {
+		standing = {
+			0,
+			0.6
+		},
+		crouching = {
+			0,
+			0.65
+		},
+		steelsight = {
+			0,
+			0.55
+		},
+		crouching_steelsight = {
+			0,
+			0.5
+		}
+	}
+	self.carbine.gun_kick = {
+		hip_fire = {
+			24,
+			35,
+			-24,
+			24
+		},
+		steelsight = {
+			18,
+			24,
+			-24,
+			-5
+		},
+		position_ratio = -0.1
+	}
+	self.carbine.crosshair = {
+		standing = {},
+		crouching = {},
+		steelsight = {}
+	}
+	self.carbine.crosshair.standing.offset = 0.16
+	self.carbine.crosshair.standing.moving_offset = 0.8
+	self.carbine.crosshair.standing.kick_offset = 0.6
+	self.carbine.crosshair.crouching.offset = 0.08
+	self.carbine.crosshair.crouching.moving_offset = 0.7
+	self.carbine.crosshair.crouching.kick_offset = 0.4
+	self.carbine.crosshair.steelsight.hidden = true
+	self.carbine.crosshair.steelsight.offset = 0
+	self.carbine.crosshair.steelsight.moving_offset = 0
+	self.carbine.crosshair.steelsight.kick_offset = 0.1
+	self.carbine.shake = {
+		fire_multiplier = 1,
+		fire_steelsight_multiplier = -1
+	}
+	self.carbine.autohit = weapon_data.autohit_rifle_default
+	self.carbine.aim_assist = weapon_data.aim_assist_rifle_default
+	self.carbine.weapon_hold = "carbine"
+	self.carbine.animations = {
+		magazine_empty = "last_recoil",
+		equip_id = "equip_m4",
+		recoil_steelsight = true
+	}
+	self.carbine.gui = {
+		rotation_offset = -15,
+		distance_offset = 10,
+		height_offset = -6,
+		display_offset = -2,
+		initial_rotation = {}
+	}
+	self.carbine.gui.initial_rotation.yaw = -90
+	self.carbine.gui.initial_rotation.pitch = 0
+	self.carbine.gui.initial_rotation.roll = 0
+	self.carbine.gui.icon_large = "weapon_ass_carbine_large"
+	self.carbine.hud = {
+		icon = "weapon_panel_ass_carbine"
+	}
+	self.carbine.stats = {
+		zoom = 4,
+		total_ammo_mod = 21,
+		spread_moving = 9,
+		alert_size = 7,
+		spread = 6,
+		recoil = 9,
+		value = 1,
+		extra_ammo = 6,
+		suppression = 10,
+		concealment = 17
+	}
+end
+
+-- Lines 4402-4573
 function WeaponTweakData:_init_m1_garand(weapon_data)
 	self.garand = {
 		inventory_texture = "ui/temp/customization_temp_df",
@@ -3446,7 +4299,185 @@ function WeaponTweakData:_init_m1_garand(weapon_data)
 	self.garand_golden.dlc = DLCTweakData.DLC_NAME_PREORDER
 end
 
--- Lines 3523-3683
+-- Lines 4576-4734
+function WeaponTweakData:_init_mp44(weapon_data)
+	self.mp44 = {
+		inventory_texture = "ui/temp/customization_temp_df",
+		category = WeaponTweakData.WEAPON_CATEGORY_ASSAULT_RIFLE,
+		dismember_chance = 0.25,
+		damage_melee = 100,
+		damage_melee_effect_mul = weapon_data.damage_melee_effect_multiplier_default,
+		sounds = {}
+	}
+	self.mp44.sounds.fire_single = "stg44_fire_1p_single"
+	self.mp44.sounds.fire_auto = "stg44_fire_1p"
+	self.mp44.sounds.stop_fire = "stg44_fire_1p_stop"
+	self.mp44.sounds.dryfire = "primary_dryfire"
+	self.mp44.timers = {
+		reload_not_empty = 2,
+		reload_empty = 2.6,
+		unequip = 0.75,
+		equip = 0.4
+	}
+	self.mp44.name_id = "bm_w_mp44"
+	self.mp44.desc_id = "bm_w_mp44_desc"
+	self.mp44.description_id = "des_mp44"
+	self.mp44.muzzleflash = "effects/vanilla/weapons/9mm_auto_fps"
+	self.mp44.muzzleflash_silenced = "effects/vanilla/weapons/9mm_auto_silence_fps"
+	self.mp44.shell_ejection = "effects/vanilla/weapons/shells/shell_9mm"
+	self.mp44.use_data = {
+		selection_index = 2
+	}
+	self.mp44.damage_profile = {
+		{
+			damage = 99,
+			range = 2500
+		},
+		{
+			damage = 64,
+			range = 5000
+		}
+	}
+	self.mp44.headshot_multiplier = 3.5
+	self.mp44.CLIP_AMMO_MAX = 15
+	self.mp44.NR_CLIPS_MAX = 10
+	self.mp44.AMMO_MAX = self.mp44.CLIP_AMMO_MAX * self.mp44.NR_CLIPS_MAX
+	self.mp44.AMMO_PICKUP = self:_pickup_chance(self.mp44.AMMO_MAX, 2)
+	self.mp44.ammo_pickup_base = 15
+	self.mp44.FIRE_MODE = "auto"
+	self.mp44.fire_mode_data = {
+		fire_rate = 0.11
+	}
+	self.mp44.CAN_TOGGLE_FIREMODE = true
+	self.mp44.auto = {
+		fire_rate = 0.11
+	}
+	self.mp44.spread = {
+		standing = 3.57,
+		crouching = 2.5,
+		steelsight = 0.71,
+		moving_standing = 5.36,
+		moving_crouching = 3.75,
+		moving_steelsight = 0.89,
+		per_shot = 0.096,
+		per_shot_steelsight = 0.016,
+		recovery = 10,
+		recovery_wait_multiplier = 2
+	}
+	self.mp44.kick = {
+		standing = {
+			1.7,
+			2,
+			-2.2,
+			2.2
+		},
+		crouching = {
+			1.7,
+			1.9,
+			-2.1,
+			2.1
+		},
+		steelsight = {
+			1.5,
+			1.75,
+			-1.4,
+			1.4
+		},
+		crouching_steelsight = {
+			1.45,
+			1.7,
+			-1.2,
+			1.2
+		}
+	}
+	self.mp44.minimum_kick = {
+		standing = {
+			0,
+			0.8
+		},
+		crouching = {
+			0,
+			0.8
+		},
+		steelsight = {
+			0,
+			0.85
+		},
+		crouching_steelsight = {
+			0,
+			0.8
+		}
+	}
+	self.mp44.gun_kick = {
+		hip_fire = {
+			-20,
+			20,
+			10,
+			40
+		},
+		steelsight = {
+			16,
+			22,
+			-22,
+			18
+		},
+		position_ratio = -0.015
+	}
+	self.mp44.crosshair = {
+		standing = {},
+		crouching = {},
+		steelsight = {}
+	}
+	self.mp44.crosshair.standing.offset = 0.16
+	self.mp44.crosshair.standing.moving_offset = 0.8
+	self.mp44.crosshair.standing.kick_offset = 0.6
+	self.mp44.crosshair.crouching.offset = 0.08
+	self.mp44.crosshair.crouching.moving_offset = 0.7
+	self.mp44.crosshair.crouching.kick_offset = 0.4
+	self.mp44.crosshair.steelsight.hidden = true
+	self.mp44.crosshair.steelsight.offset = 0
+	self.mp44.crosshair.steelsight.moving_offset = 0
+	self.mp44.crosshair.steelsight.kick_offset = 0.1
+	self.mp44.shake = {
+		fire_multiplier = 1,
+		fire_steelsight_multiplier = -1
+	}
+	self.mp44.autohit = weapon_data.autohit_rifle_default
+	self.mp44.aim_assist = weapon_data.aim_assist_rifle_default
+	self.mp44.weapon_hold = "mp44"
+	self.mp44.animations = {
+		equip_id = "equip_m4",
+		recoil_steelsight = true
+	}
+	self.mp44.gui = {
+		rotation_offset = -18,
+		distance_offset = 45,
+		height_offset = -4,
+		display_offset = -10,
+		initial_rotation = {}
+	}
+	self.mp44.gui.initial_rotation.yaw = -90
+	self.mp44.gui.initial_rotation.pitch = 0
+	self.mp44.gui.initial_rotation.roll = 0
+	self.mp44.gui.icon_large = "weapon_ass_mp44_large"
+	self.mp44.hud = {
+		icon = "weapon_panel_ass_mp44"
+	}
+	self.mp44.stats = {
+		zoom = 4,
+		total_ammo_mod = 21,
+		recoil = 9,
+		alert_size = 7,
+		spread = 6,
+		spread_moving = 9,
+		value = 1,
+		extra_ammo = 6,
+		suppression = 10,
+		concealment = 17
+	}
+end
+
+-- Lines 4737-4897
 function WeaponTweakData:_init_m1918_bar(weapon_data)
 	self.m1918 = {
 		inventory_texture = "ui/temp/customization_temp_df",
@@ -3619,7 +4650,175 @@ function WeaponTweakData:_init_m1918_bar(weapon_data)
 	}
 end
 
--- Lines 3685-3849
+-- Lines 5065-5222
+function WeaponTweakData:_init_mg42(weapon_data)
+	self.mg42 = {
+		inventory_texture = "ui/temp/customization_temp_df",
+		category = WeaponTweakData.WEAPON_CATEGORY_LMG,
+		damage_melee = 100,
+		damage_melee_effect_mul = weapon_data.damage_melee_effect_multiplier_default,
+		dismember_chance = 0.7,
+		sounds = {}
+	}
+	self.mg42.sounds.fire_single = "mg42_fire_1p_single"
+	self.mg42.sounds.fire_auto = "mg42_fire_1p"
+	self.mg42.sounds.stop_fire = "mg42_fire_1p_stop"
+	self.mg42.sounds.dryfire = "primary_dryfire"
+	self.mg42.timers = {
+		reload_not_empty = 4,
+		reload_empty = 4,
+		unequip = 0.9,
+		equip = 0.9,
+		deploy_bipod = 1
+	}
+	self.mg42.bipod_camera_spin_limit = 40
+	self.mg42.bipod_camera_pitch_limit = 15
+	self.mg42.bipod_weapon_translation = Vector3(-8.5, 20, -7.5)
+	self.mg42.name_id = "bm_w_mg42"
+	self.mg42.desc_id = "bm_w_mg42_desc"
+	self.mg42.description_id = "des_mg42"
+	self.mg42.muzzleflash = "effects/vanilla/weapons/762_auto_fps"
+	self.mg42.shell_ejection = "effects/vanilla/weapons/shells/shell_556_lmg"
+	self.mg42.use_data = {
+		selection_index = 2
+	}
+	self.mg42.damage_profile = {
+		{
+			damage = 100,
+			range = 2500
+		},
+		{
+			damage = 60,
+			range = 5000
+		}
+	}
+	self.mg42.headshot_multiplier = 3
+	self.mg42.CLIP_AMMO_MAX = 50
+	self.mg42.NR_CLIPS_MAX = 4
+	self.mg42.AMMO_MAX = self.mg42.CLIP_AMMO_MAX * self.mg42.NR_CLIPS_MAX
+	self.mg42.AMMO_PICKUP = self:_pickup_chance(self.mg42.AMMO_MAX, 1)
+	self.mg42.ammo_pickup_base = 20
+	self.mg42.FIRE_MODE = "auto"
+	self.mg42.fire_mode_data = {
+		fire_rate = 0.05
+	}
+	self.mg42.CAN_TOGGLE_FIREMODE = false
+	self.mg42.auto = {
+		fire_rate = 0.05
+	}
+	self.mg42.spread = {
+		standing = 5.83,
+		crouching = 2.92,
+		steelsight = 2.08,
+		moving_standing = 11.67,
+		moving_crouching = 5.83,
+		moving_steelsight = 3.13,
+		per_shot = 0.12,
+		per_shot_steelsight = 0.036
+	}
+	self.mg42.kick = {
+		standing = {
+			-1.2,
+			3.4,
+			-0.8,
+			1.9
+		},
+		crouching = {
+			-1.1,
+			3.2,
+			-0.7,
+			1.7
+		},
+		steelsight = {
+			-0.5,
+			1.6,
+			-0.65,
+			0.65
+		},
+		crouching_steelsight = {
+			-0.4,
+			1.4,
+			-0.45,
+			0.45
+		}
+	}
+	self.mg42.gun_kick = {
+		hip_fire = {
+			-15,
+			35,
+			-10,
+			20
+		},
+		steelsight = {
+			-8,
+			28,
+			-25,
+			25
+		},
+		position_ratio = 0.02
+	}
+	self.mg42.crosshair = {
+		standing = {},
+		crouching = {},
+		steelsight = {}
+	}
+	self.mg42.crosshair.standing.offset = 0.16
+	self.mg42.crosshair.standing.moving_offset = 1
+	self.mg42.crosshair.standing.kick_offset = 0.8
+	self.mg42.crosshair.crouching.offset = 0.1
+	self.mg42.crosshair.crouching.moving_offset = 0.6
+	self.mg42.crosshair.crouching.kick_offset = 0.4
+	self.mg42.crosshair.steelsight.hidden = true
+	self.mg42.crosshair.steelsight.offset = 0
+	self.mg42.crosshair.steelsight.moving_offset = 0
+	self.mg42.crosshair.steelsight.kick_offset = 0.14
+	self.mg42.shake = {
+		fire_multiplier = 0.5,
+		fire_steelsight_multiplier = -0.5
+	}
+	self.mg42.autohit = weapon_data.autohit_lmg_default
+	self.mg42.aim_assist = weapon_data.aim_assist_lmg_default
+	self.mg42.weapon_hold = "mg42"
+	self.mg42.animations = {
+		equip_id = "equip_mg42",
+		recoil_steelsight = true,
+		bipod_enter = "bipod_enter",
+		bipod_exit = "bipod_exit",
+		bipod_recoil = "bipod_recoil",
+		bipod_recoil_enter = "bipod_recoil",
+		bipod_recoil_loop = "bipod_recoil_loop",
+		bipod_recoil_exit = "bipod_recoil_exit"
+	}
+	self.mg42.panic_suppression_chance = 0.2
+	self.mg42.gui = {
+		rotation_offset = -25,
+		distance_offset = 80,
+		height_offset = -8,
+		display_offset = -8,
+		initial_rotation = {}
+	}
+	self.mg42.gui.initial_rotation.yaw = -90
+	self.mg42.gui.initial_rotation.pitch = 0
+	self.mg42.gui.initial_rotation.roll = 0
+	self.mg42.gui.icon_large = "weapon_lmg_mg42_large"
+	self.mg42.hud = {
+		icon = "weapon_panel_lmg_mg42"
+	}
+	self.mg42.stats = {
+		zoom = 1,
+		total_ammo_mod = 21,
+		recoil = 5,
+		alert_size = 8,
+		spread = 6,
+		spread_moving = 9,
+		value = 9,
+		extra_ammo = 6,
+		suppression = 4,
+		concealment = 2
+	}
+end
+
+-- Lines 5225-5389
 function WeaponTweakData:_init_m1903_springfield(weapon_data)
 	self.m1903 = {
 		inventory_texture = "ui/temp/customization_temp_df",
@@ -3802,853 +5001,7 @@ function WeaponTweakData:_init_m1903_springfield(weapon_data)
 	}
 end
 
--- Lines 3851-4005
-function WeaponTweakData:_init_m1912_winchester(weapon_data)
-	self.m1912 = {
-		inventory_texture = "ui/temp/customization_temp_df",
-		category = WeaponTweakData.WEAPON_CATEGORY_SHOTGUN,
-		use_shotgun_reload = true,
-		dismember_chance = 0.75,
-		damage_melee = 100,
-		damage_melee_effect_mul = weapon_data.damage_melee_effect_multiplier_default,
-		sounds = {}
-	}
-	self.m1912.sounds.fire = "shotgun_fire_1p_single"
-	self.m1912.sounds.dryfire = "primary_dryfire"
-	self.m1912.timers = {
-		shotgun_reload_enter = 0.5333333333333333,
-		shotgun_reload_exit_empty = 0.4,
-		shotgun_reload_exit_not_empty = 0.4,
-		shotgun_reload_shell = 0.6666666666666666,
-		shotgun_reload_first_shell_offset = 0.13333333333333333,
-		unequip = 0.85,
-		equip = 0.6
-	}
-	self.m1912.name_id = "bm_w_m1912"
-	self.m1912.desc_id = "bm_w_m1912_desc"
-	self.m1912.description_id = "des_m1912"
-	self.m1912.muzzleflash = "effects/vanilla/weapons/12g_auto_fps"
-	self.m1912.shell_ejection = "effects/vanilla/weapons/shells/shell_slug_semi"
-	self.m1912.use_data = {
-		selection_index = 2,
-		align_place = "right_hand"
-	}
-	self.m1912.damage_profile = {
-		{
-			damage = 200,
-			range = 1000
-		},
-		{
-			damage = 20,
-			range = 2000
-		}
-	}
-	self.m1912.headshot_multiplier = 3
-	self.m1912.rays = 12
-	self.m1912.CLIP_AMMO_MAX = 6
-	self.m1912.NR_CLIPS_MAX = 5
-	self.m1912.AMMO_MAX = self.m1912.CLIP_AMMO_MAX * self.m1912.NR_CLIPS_MAX
-	self.m1912.AMMO_PICKUP = self:_pickup_chance(self.m1912.AMMO_MAX, 1)
-	self.m1912.ammo_pickup_base = 3
-	self.m1912.FIRE_MODE = "single"
-	self.m1912.fire_mode_data = {
-		fire_rate = 0.8
-	}
-	self.m1912.CAN_TOGGLE_FIREMODE = false
-	self.m1912.single = {
-		fire_rate = 0.8
-	}
-	self.m1912.spread = {
-		standing = 3,
-		crouching = 3,
-		steelsight = 3,
-		moving_standing = 3,
-		moving_crouching = 3,
-		moving_steelsight = 3,
-		per_shot = 0,
-		per_shot_steelsight = 0,
-		recovery = 12,
-		recovery_wait_multiplier = 0.5
-	}
-	self.m1912.kick = {
-		standing = {
-			3.6,
-			4.2,
-			-2,
-			2
-		},
-		crouching = {
-			3.2,
-			3.8,
-			-2,
-			2
-		},
-		steelsight = {
-			3.4,
-			3.8,
-			-2,
-			2
-		},
-		crouching_steelsight = {
-			3.2,
-			3.4,
-			-1.8,
-			1.8
-		}
-	}
-	self.m1912.gun_kick = {
-		hip_fire = {
-			60,
-			80,
-			-55,
-			55
-		},
-		steelsight = {
-			48,
-			58,
-			-45,
-			-45
-		},
-		position_ratio = -0.075
-	}
-	self.m1912.crosshair = {
-		standing = {},
-		crouching = {},
-		steelsight = {}
-	}
-	self.m1912.crosshair.standing.offset = 0.7
-	self.m1912.crosshair.standing.moving_offset = 0.7
-	self.m1912.crosshair.standing.kick_offset = 0.8
-	self.m1912.crosshair.crouching.offset = 0.65
-	self.m1912.crosshair.crouching.moving_offset = 0.65
-	self.m1912.crosshair.crouching.kick_offset = 0.75
-	self.m1912.crosshair.steelsight.hidden = true
-	self.m1912.crosshair.steelsight.offset = 0
-	self.m1912.crosshair.steelsight.moving_offset = 0
-	self.m1912.crosshair.steelsight.kick_offset = 0
-	self.m1912.shake = {
-		fire_multiplier = 2,
-		fire_steelsight_multiplier = -2
-	}
-	self.m1912.autohit = weapon_data.autohit_shotgun_default
-	self.m1912.aim_assist = weapon_data.aim_assist_shotgun_default
-	self.m1912.weapon_hold = "m1912"
-	self.m1912.animations = {
-		equip_id = "equip_r870_shotgun",
-		recoil_steelsight = true
-	}
-	self.m1912.panic_suppression_chance = 0.2
-	self.m1912.gui = {
-		rotation_offset = -39,
-		distance_offset = 85,
-		height_offset = 0,
-		display_offset = -10,
-		initial_rotation = {}
-	}
-	self.m1912.gui.initial_rotation.yaw = -90
-	self.m1912.gui.initial_rotation.pitch = 0
-	self.m1912.gui.initial_rotation.roll = 0
-	self.m1912.gui.icon_large = "weapon_sho_1912_large"
-	self.m1912.hud = {
-		icon = "weapon_panel_sho_1912"
-	}
-	self.m1912.stats = {
-		zoom = 3,
-		total_ammo_mod = 21,
-		spread_moving = 9,
-		alert_size = 7,
-		spread = 6,
-		recoil = 4,
-		value = 1,
-		extra_ammo = 6,
-		suppression = 6,
-		concealment = 12
-	}
-end
-
--- Lines 4007-4159
-function WeaponTweakData:_init_mp38(weapon_data)
-	self.mp38 = {
-		inventory_texture = "ui/temp/customization_temp_df",
-		category = WeaponTweakData.WEAPON_CATEGORY_SMG,
-		dismember_chance = 0.25,
-		damage_melee = 83,
-		damage_melee_effect_mul = weapon_data.damage_melee_effect_multiplier_default,
-		sounds = {}
-	}
-	self.mp38.sounds.fire_single = "mp38_fire_1p_single"
-	self.mp38.sounds.fire_auto = "mp38_fire_1p"
-	self.mp38.sounds.stop_fire = "mp38_fire_1p_stop"
-	self.mp38.sounds.dryfire = "primary_dryfire"
-	self.mp38.timers = {
-		reload_not_empty = 1.66,
-		reload_empty = 2.76,
-		unequip = 0.75,
-		equip = 0.4
-	}
-	self.mp38.name_id = "bm_w_mp38"
-	self.mp38.desc_id = "bm_w_mp38_desc"
-	self.mp38.description_id = "des_mp38"
-	self.mp38.muzzleflash = "effects/vanilla/weapons/9mm_auto_fps"
-	self.mp38.muzzleflash_silenced = "effects/vanilla/weapons/9mm_auto_silence_fps"
-	self.mp38.shell_ejection = "effects/vanilla/weapons/shells/shell_9mm"
-	self.mp38.use_data = {
-		selection_index = 2
-	}
-	self.mp38.damage_profile = {
-		{
-			damage = 75,
-			range = 1500
-		},
-		{
-			damage = 45,
-			range = 3000
-		}
-	}
-	self.mp38.headshot_multiplier = 3.5
-	self.mp38.CLIP_AMMO_MAX = 32
-	self.mp38.NR_CLIPS_MAX = 6
-	self.mp38.AMMO_MAX = self.mp38.CLIP_AMMO_MAX * self.mp38.NR_CLIPS_MAX
-	self.mp38.AMMO_PICKUP = self:_pickup_chance(self.mp38.AMMO_MAX, 2)
-	self.mp38.ammo_pickup_base = 19
-	self.mp38.FIRE_MODE = "auto"
-	self.mp38.fire_mode_data = {
-		fire_rate = 0.125
-	}
-	self.mp38.CAN_TOGGLE_FIREMODE = false
-	self.mp38.auto = {
-		fire_rate = 0.125
-	}
-	self.mp38.spread = {
-		standing = 2.86,
-		crouching = 2.29,
-		steelsight = 1.43,
-		moving_standing = 3.57,
-		moving_crouching = 2.86,
-		moving_steelsight = 1.61,
-		per_shot = 0.12,
-		per_shot_steelsight = 0.048,
-		recovery = 10,
-		recovery_wait_multiplier = 2
-	}
-	self.mp38.kick = {
-		standing = {
-			2.4,
-			2.6,
-			-2.35,
-			2.35
-		},
-		crouching = {
-			2.2,
-			2.3,
-			-2.2,
-			2.2
-		},
-		steelsight = {
-			1.8,
-			2.1,
-			-2.1,
-			2.1
-		},
-		crouching_steelsight = {
-			1.8,
-			2,
-			-1.9,
-			1.9
-		}
-	}
-	self.mp38.gun_kick = {
-		hip_fire = {
-			-10,
-			40,
-			-30,
-			35
-		},
-		steelsight = {
-			-10,
-			22,
-			-25,
-			25
-		},
-		position_ratio = -0.06
-	}
-	self.mp38.crosshair = {
-		standing = {},
-		crouching = {},
-		steelsight = {}
-	}
-	self.mp38.crosshair.standing.offset = 0.16
-	self.mp38.crosshair.standing.moving_offset = 0.8
-	self.mp38.crosshair.standing.kick_offset = 0.6
-	self.mp38.crosshair.crouching.offset = 0.08
-	self.mp38.crosshair.crouching.moving_offset = 0.7
-	self.mp38.crosshair.crouching.kick_offset = 0.4
-	self.mp38.crosshair.steelsight.hidden = true
-	self.mp38.crosshair.steelsight.offset = 0
-	self.mp38.crosshair.steelsight.moving_offset = 0
-	self.mp38.crosshair.steelsight.kick_offset = 0.1
-	self.mp38.shake = {
-		fire_multiplier = 1,
-		fire_steelsight_multiplier = -1
-	}
-	self.mp38.autohit = weapon_data.autohit_rifle_default
-	self.mp38.aim_assist = weapon_data.aim_assist_rifle_default
-	self.mp38.weapon_hold = "mp38"
-	self.mp38.animations = {
-		equip_id = "equip_m4",
-		recoil_steelsight = true
-	}
-	self.mp38.gui = {
-		rotation_offset = -14,
-		distance_offset = 0,
-		height_offset = -4,
-		display_offset = -2,
-		initial_rotation = {}
-	}
-	self.mp38.gui.initial_rotation.yaw = -90
-	self.mp38.gui.initial_rotation.pitch = 0
-	self.mp38.gui.initial_rotation.roll = 0
-	self.mp38.gui.icon_large = "weapon_smg_mp38_large"
-	self.mp38.hud = {
-		icon = "weapon_panel_smg_mp38"
-	}
-	self.mp38.stats = {
-		zoom = 4,
-		total_ammo_mod = 21,
-		spread_moving = 9,
-		alert_size = 7,
-		spread = 6,
-		recoil = 10,
-		value = 1,
-		extra_ammo = 6,
-		suppression = 10,
-		concealment = 17
-	}
-end
-
--- Lines 4161-4317
-function WeaponTweakData:_init_m1_carbine(weapon_data)
-	self.carbine = {
-		inventory_texture = "ui/temp/customization_temp_df",
-		category = WeaponTweakData.WEAPON_CATEGORY_ASSAULT_RIFLE,
-		dismember_chance = 0.25,
-		damage_melee = 100,
-		damage_melee_effect_mul = weapon_data.damage_melee_effect_multiplier_default,
-		sounds = {}
-	}
-	self.carbine.sounds.fire_single = "m1_carbine_fire_1p"
-	self.carbine.sounds.dryfire = "primary_dryfire"
-	self.carbine.timers = {
-		reload_not_empty = 2,
-		reload_empty = 2.8,
-		unequip = 0.75,
-		equip = 0.4
-	}
-	self.carbine.name_id = "bm_w_carbine"
-	self.carbine.desc_id = "bm_w_carbine_desc"
-	self.carbine.description_id = "des_carbine"
-	self.carbine.muzzleflash = "effects/vanilla/weapons/9mm_auto_fps"
-	self.carbine.muzzleflash_silenced = "effects/vanilla/weapons/9mm_auto_silence_fps"
-	self.carbine.shell_ejection = "effects/vanilla/weapons/shells/shell_9mm"
-	self.carbine.use_data = {
-		selection_index = 2
-	}
-	self.carbine.damage_profile = {
-		{
-			damage = 92,
-			range = 2000
-		},
-		{
-			damage = 55,
-			range = 4000
-		}
-	}
-	self.carbine.headshot_multiplier = 4
-	self.carbine.CLIP_AMMO_MAX = 15
-	self.carbine.NR_CLIPS_MAX = 10
-	self.carbine.AMMO_MAX = self.carbine.CLIP_AMMO_MAX * self.carbine.NR_CLIPS_MAX
-	self.carbine.AMMO_PICKUP = self:_pickup_chance(self.carbine.AMMO_MAX, 2)
-	self.carbine.ammo_pickup_base = 15
-	self.carbine.FIRE_MODE = "single"
-	self.carbine.fire_mode_data = {
-		fire_rate = 0.125
-	}
-	self.carbine.CAN_TOGGLE_FIREMODE = false
-	self.carbine.spread = {
-		standing = 2.5,
-		crouching = 1.75,
-		steelsight = 0.5,
-		moving_standing = 3.75,
-		moving_crouching = 2.63,
-		moving_steelsight = 0.63,
-		per_shot = 0.2,
-		per_shot_steelsight = 0.08,
-		recovery = 7,
-		recovery_wait_multiplier = 1.5
-	}
-	self.carbine.kick = {
-		standing = {
-			2.2,
-			2.4,
-			-2,
-			2
-		},
-		crouching = {
-			2.1,
-			2.2,
-			-1.9,
-			1.8
-		},
-		steelsight = {
-			2,
-			2.15,
-			-1.2,
-			1.2
-		},
-		crouching_steelsight = {
-			1.8,
-			2.1,
-			-1.05,
-			1.05
-		},
-		recenter_speed = 400,
-		recenter_speed_steelsight = 400
-	}
-	self.carbine.minimum_view_kick = {
-		standing = {
-			0,
-			0.6
-		},
-		crouching = {
-			0,
-			0.65
-		},
-		steelsight = {
-			0,
-			0.55
-		},
-		crouching_steelsight = {
-			0,
-			0.5
-		}
-	}
-	self.carbine.gun_kick = {
-		hip_fire = {
-			24,
-			35,
-			-24,
-			24
-		},
-		steelsight = {
-			18,
-			24,
-			-24,
-			-5
-		},
-		position_ratio = -0.1
-	}
-	self.carbine.crosshair = {
-		standing = {},
-		crouching = {},
-		steelsight = {}
-	}
-	self.carbine.crosshair.standing.offset = 0.16
-	self.carbine.crosshair.standing.moving_offset = 0.8
-	self.carbine.crosshair.standing.kick_offset = 0.6
-	self.carbine.crosshair.crouching.offset = 0.08
-	self.carbine.crosshair.crouching.moving_offset = 0.7
-	self.carbine.crosshair.crouching.kick_offset = 0.4
-	self.carbine.crosshair.steelsight.hidden = true
-	self.carbine.crosshair.steelsight.offset = 0
-	self.carbine.crosshair.steelsight.moving_offset = 0
-	self.carbine.crosshair.steelsight.kick_offset = 0.1
-	self.carbine.shake = {
-		fire_multiplier = 1,
-		fire_steelsight_multiplier = -1
-	}
-	self.carbine.autohit = weapon_data.autohit_rifle_default
-	self.carbine.aim_assist = weapon_data.aim_assist_rifle_default
-	self.carbine.weapon_hold = "carbine"
-	self.carbine.animations = {
-		magazine_empty = "last_recoil",
-		equip_id = "equip_m4",
-		recoil_steelsight = true
-	}
-	self.carbine.gui = {
-		rotation_offset = -15,
-		distance_offset = 10,
-		height_offset = -6,
-		display_offset = -2,
-		initial_rotation = {}
-	}
-	self.carbine.gui.initial_rotation.yaw = -90
-	self.carbine.gui.initial_rotation.pitch = 0
-	self.carbine.gui.initial_rotation.roll = 0
-	self.carbine.gui.icon_large = "weapon_ass_carbine_large"
-	self.carbine.hud = {
-		icon = "weapon_panel_ass_carbine"
-	}
-	self.carbine.stats = {
-		zoom = 4,
-		total_ammo_mod = 21,
-		spread_moving = 9,
-		alert_size = 7,
-		spread = 6,
-		recoil = 9,
-		value = 1,
-		extra_ammo = 6,
-		suppression = 10,
-		concealment = 17
-	}
-end
-
--- Lines 4319-4477
-function WeaponTweakData:_init_mp44(weapon_data)
-	self.mp44 = {
-		inventory_texture = "ui/temp/customization_temp_df",
-		category = WeaponTweakData.WEAPON_CATEGORY_ASSAULT_RIFLE,
-		dismember_chance = 0.25,
-		damage_melee = 100,
-		damage_melee_effect_mul = weapon_data.damage_melee_effect_multiplier_default,
-		sounds = {}
-	}
-	self.mp44.sounds.fire_single = "stg44_fire_1p_single"
-	self.mp44.sounds.fire_auto = "stg44_fire_1p"
-	self.mp44.sounds.stop_fire = "stg44_fire_1p_stop"
-	self.mp44.sounds.dryfire = "primary_dryfire"
-	self.mp44.timers = {
-		reload_not_empty = 2,
-		reload_empty = 2.6,
-		unequip = 0.75,
-		equip = 0.4
-	}
-	self.mp44.name_id = "bm_w_mp44"
-	self.mp44.desc_id = "bm_w_mp44_desc"
-	self.mp44.description_id = "des_mp44"
-	self.mp44.muzzleflash = "effects/vanilla/weapons/9mm_auto_fps"
-	self.mp44.muzzleflash_silenced = "effects/vanilla/weapons/9mm_auto_silence_fps"
-	self.mp44.shell_ejection = "effects/vanilla/weapons/shells/shell_9mm"
-	self.mp44.use_data = {
-		selection_index = 2
-	}
-	self.mp44.damage_profile = {
-		{
-			damage = 99,
-			range = 2500
-		},
-		{
-			damage = 64,
-			range = 5000
-		}
-	}
-	self.mp44.headshot_multiplier = 3.5
-	self.mp44.CLIP_AMMO_MAX = 15
-	self.mp44.NR_CLIPS_MAX = 10
-	self.mp44.AMMO_MAX = self.mp44.CLIP_AMMO_MAX * self.mp44.NR_CLIPS_MAX
-	self.mp44.AMMO_PICKUP = self:_pickup_chance(self.mp44.AMMO_MAX, 2)
-	self.mp44.ammo_pickup_base = 15
-	self.mp44.FIRE_MODE = "auto"
-	self.mp44.fire_mode_data = {
-		fire_rate = 0.11
-	}
-	self.mp44.CAN_TOGGLE_FIREMODE = true
-	self.mp44.auto = {
-		fire_rate = 0.11
-	}
-	self.mp44.spread = {
-		standing = 3.57,
-		crouching = 2.5,
-		steelsight = 0.71,
-		moving_standing = 5.36,
-		moving_crouching = 3.75,
-		moving_steelsight = 0.89,
-		per_shot = 0.096,
-		per_shot_steelsight = 0.016,
-		recovery = 10,
-		recovery_wait_multiplier = 2
-	}
-	self.mp44.kick = {
-		standing = {
-			1.7,
-			2,
-			-2.2,
-			2.2
-		},
-		crouching = {
-			1.7,
-			1.9,
-			-2.1,
-			2.1
-		},
-		steelsight = {
-			1.5,
-			1.75,
-			-1.4,
-			1.4
-		},
-		crouching_steelsight = {
-			1.45,
-			1.7,
-			-1.2,
-			1.2
-		}
-	}
-	self.mp44.minimum_kick = {
-		standing = {
-			0,
-			0.8
-		},
-		crouching = {
-			0,
-			0.8
-		},
-		steelsight = {
-			0,
-			0.85
-		},
-		crouching_steelsight = {
-			0,
-			0.8
-		}
-	}
-	self.mp44.gun_kick = {
-		hip_fire = {
-			-20,
-			20,
-			10,
-			40
-		},
-		steelsight = {
-			16,
-			22,
-			-22,
-			18
-		},
-		position_ratio = -0.015
-	}
-	self.mp44.crosshair = {
-		standing = {},
-		crouching = {},
-		steelsight = {}
-	}
-	self.mp44.crosshair.standing.offset = 0.16
-	self.mp44.crosshair.standing.moving_offset = 0.8
-	self.mp44.crosshair.standing.kick_offset = 0.6
-	self.mp44.crosshair.crouching.offset = 0.08
-	self.mp44.crosshair.crouching.moving_offset = 0.7
-	self.mp44.crosshair.crouching.kick_offset = 0.4
-	self.mp44.crosshair.steelsight.hidden = true
-	self.mp44.crosshair.steelsight.offset = 0
-	self.mp44.crosshair.steelsight.moving_offset = 0
-	self.mp44.crosshair.steelsight.kick_offset = 0.1
-	self.mp44.shake = {
-		fire_multiplier = 1,
-		fire_steelsight_multiplier = -1
-	}
-	self.mp44.autohit = weapon_data.autohit_rifle_default
-	self.mp44.aim_assist = weapon_data.aim_assist_rifle_default
-	self.mp44.weapon_hold = "mp44"
-	self.mp44.animations = {
-		equip_id = "equip_m4",
-		recoil_steelsight = true
-	}
-	self.mp44.gui = {
-		rotation_offset = -18,
-		distance_offset = 45,
-		height_offset = -4,
-		display_offset = -10,
-		initial_rotation = {}
-	}
-	self.mp44.gui.initial_rotation.yaw = -90
-	self.mp44.gui.initial_rotation.pitch = 0
-	self.mp44.gui.initial_rotation.roll = 0
-	self.mp44.gui.icon_large = "weapon_ass_mp44_large"
-	self.mp44.hud = {
-		icon = "weapon_panel_ass_mp44"
-	}
-	self.mp44.stats = {
-		zoom = 4,
-		total_ammo_mod = 21,
-		recoil = 9,
-		alert_size = 7,
-		spread = 6,
-		spread_moving = 9,
-		value = 1,
-		extra_ammo = 6,
-		suppression = 10,
-		concealment = 17
-	}
-end
-
--- Lines 4479-4636
-function WeaponTweakData:_init_mg42(weapon_data)
-	self.mg42 = {
-		inventory_texture = "ui/temp/customization_temp_df",
-		category = WeaponTweakData.WEAPON_CATEGORY_LMG,
-		damage_melee = 100,
-		damage_melee_effect_mul = weapon_data.damage_melee_effect_multiplier_default,
-		dismember_chance = 0.7,
-		sounds = {}
-	}
-	self.mg42.sounds.fire_single = "mg42_fire_1p_single"
-	self.mg42.sounds.fire_auto = "mg42_fire_1p"
-	self.mg42.sounds.stop_fire = "mg42_fire_1p_stop"
-	self.mg42.sounds.dryfire = "primary_dryfire"
-	self.mg42.timers = {
-		reload_not_empty = 4,
-		reload_empty = 4,
-		unequip = 0.9,
-		equip = 0.9,
-		deploy_bipod = 1
-	}
-	self.mg42.bipod_camera_spin_limit = 40
-	self.mg42.bipod_camera_pitch_limit = 15
-	self.mg42.bipod_weapon_translation = Vector3(-8.5, 20, -7.5)
-	self.mg42.name_id = "bm_w_mg42"
-	self.mg42.desc_id = "bm_w_mg42_desc"
-	self.mg42.description_id = "des_mg42"
-	self.mg42.muzzleflash = "effects/vanilla/weapons/762_auto_fps"
-	self.mg42.shell_ejection = "effects/vanilla/weapons/shells/shell_556_lmg"
-	self.mg42.use_data = {
-		selection_index = 2
-	}
-	self.mg42.damage_profile = {
-		{
-			damage = 100,
-			range = 2500
-		},
-		{
-			damage = 60,
-			range = 5000
-		}
-	}
-	self.mg42.headshot_multiplier = 3
-	self.mg42.CLIP_AMMO_MAX = 50
-	self.mg42.NR_CLIPS_MAX = 4
-	self.mg42.AMMO_MAX = self.mg42.CLIP_AMMO_MAX * self.mg42.NR_CLIPS_MAX
-	self.mg42.AMMO_PICKUP = self:_pickup_chance(self.mg42.AMMO_MAX, 1)
-	self.mg42.ammo_pickup_base = 20
-	self.mg42.FIRE_MODE = "auto"
-	self.mg42.fire_mode_data = {
-		fire_rate = 0.05
-	}
-	self.mg42.CAN_TOGGLE_FIREMODE = false
-	self.mg42.auto = {
-		fire_rate = 0.05
-	}
-	self.mg42.spread = {
-		standing = 5.83,
-		crouching = 2.92,
-		steelsight = 2.08,
-		moving_standing = 11.67,
-		moving_crouching = 5.83,
-		moving_steelsight = 3.13,
-		per_shot = 0.12,
-		per_shot_steelsight = 0.036
-	}
-	self.mg42.kick = {
-		standing = {
-			-1.2,
-			3.4,
-			-0.8,
-			1.9
-		},
-		crouching = {
-			-1.1,
-			3.2,
-			-0.7,
-			1.7
-		},
-		steelsight = {
-			-0.5,
-			1.6,
-			-0.65,
-			0.65
-		},
-		crouching_steelsight = {
-			-0.4,
-			1.4,
-			-0.45,
-			0.45
-		}
-	}
-	self.mg42.gun_kick = {
-		hip_fire = {
-			-15,
-			35,
-			-10,
-			20
-		},
-		steelsight = {
-			-8,
-			28,
-			-25,
-			25
-		},
-		position_ratio = 0.02
-	}
-	self.mg42.crosshair = {
-		standing = {},
-		crouching = {},
-		steelsight = {}
-	}
-	self.mg42.crosshair.standing.offset = 0.16
-	self.mg42.crosshair.standing.moving_offset = 1
-	self.mg42.crosshair.standing.kick_offset = 0.8
-	self.mg42.crosshair.crouching.offset = 0.1
-	self.mg42.crosshair.crouching.moving_offset = 0.6
-	self.mg42.crosshair.crouching.kick_offset = 0.4
-	self.mg42.crosshair.steelsight.hidden = true
-	self.mg42.crosshair.steelsight.offset = 0
-	self.mg42.crosshair.steelsight.moving_offset = 0
-	self.mg42.crosshair.steelsight.kick_offset = 0.14
-	self.mg42.shake = {
-		fire_multiplier = 0.5,
-		fire_steelsight_multiplier = -0.5
-	}
-	self.mg42.autohit = weapon_data.autohit_lmg_default
-	self.mg42.aim_assist = weapon_data.aim_assist_lmg_default
-	self.mg42.weapon_hold = "mg42"
-	self.mg42.animations = {
-		equip_id = "equip_mg42",
-		recoil_steelsight = true,
-		bipod_enter = "bipod_enter",
-		bipod_exit = "bipod_exit",
-		bipod_recoil = "bipod_recoil",
-		bipod_recoil_enter = "bipod_recoil",
-		bipod_recoil_loop = "bipod_recoil_loop",
-		bipod_recoil_exit = "bipod_recoil_exit"
-	}
-	self.mg42.panic_suppression_chance = 0.2
-	self.mg42.gui = {
-		rotation_offset = -25,
-		distance_offset = 80,
-		height_offset = -8,
-		display_offset = -8,
-		initial_rotation = {}
-	}
-	self.mg42.gui.initial_rotation.yaw = -90
-	self.mg42.gui.initial_rotation.pitch = 0
-	self.mg42.gui.initial_rotation.roll = 0
-	self.mg42.gui.icon_large = "weapon_lmg_mg42_large"
-	self.mg42.hud = {
-		icon = "weapon_panel_lmg_mg42"
-	}
-	self.mg42.stats = {
-		zoom = 1,
-		total_ammo_mod = 21,
-		recoil = 5,
-		alert_size = 8,
-		spread = 6,
-		spread_moving = 9,
-		value = 9,
-		extra_ammo = 6,
-		suppression = 4,
-		concealment = 2
-	}
-end
-
--- Lines 4638-4796
+-- Lines 5392-5550
 function WeaponTweakData:_init_mosin(weapon_data)
 	self.mosin = {
 		inventory_texture = "ui/temp/customization_temp_df",
@@ -4833,169 +5186,6 @@ function WeaponTweakData:_init_mosin(weapon_data)
 	}
 end
 
--- Lines 4798-4949
-function WeaponTweakData:_init_sterling(weapon_data)
-	self.sterling = {
-		inventory_texture = "ui/temp/customization_temp_df",
-		category = WeaponTweakData.WEAPON_CATEGORY_SMG,
-		damage_melee = 83,
-		damage_melee_effect_mul = weapon_data.damage_melee_effect_multiplier_default,
-		sounds = {}
-	}
-	self.sterling.sounds.fire_single = "sterling_fire_1p_single"
-	self.sterling.sounds.fire_auto = "sterling_fire_1p"
-	self.sterling.sounds.stop_fire = "sterling_fire_1p_stop"
-	self.sterling.sounds.dryfire = "primary_dryfire"
-	self.sterling.timers = {
-		reload_not_empty = 2.2,
-		reload_empty = 2.9,
-		unequip = 0.55,
-		equip = 0.65
-	}
-	self.sterling.name_id = "bm_w_sterling"
-	self.sterling.desc_id = "bm_w_sterling_desc"
-	self.sterling.description_id = "des_sterling"
-	self.sterling.muzzleflash = "effects/vanilla/weapons/9mm_auto_fps"
-	self.sterling.muzzleflash_silenced = "effects/vanilla/weapons/9mm_auto_silence_fps"
-	self.sterling.shell_ejection = "effects/vanilla/weapons/shells/shell_9mm"
-	self.sterling.use_data = {
-		selection_index = 2
-	}
-	self.sterling.damage_profile = {
-		{
-			damage = 74,
-			range = 1500
-		},
-		{
-			damage = 48,
-			range = 3000
-		}
-	}
-	self.sterling.headshot_multiplier = 3.25
-	self.sterling.CLIP_AMMO_MAX = 20
-	self.sterling.NR_CLIPS_MAX = 10
-	self.sterling.AMMO_MAX = self.sterling.CLIP_AMMO_MAX * self.sterling.NR_CLIPS_MAX
-	self.sterling.AMMO_PICKUP = self:_pickup_chance(self.sterling.AMMO_MAX, 2)
-	self.sterling.ammo_pickup_base = 20
-	self.sterling.FIRE_MODE = "auto"
-	self.sterling.fire_mode_data = {
-		fire_rate = 0.11
-	}
-	self.sterling.CAN_TOGGLE_FIREMODE = true
-	self.sterling.auto = {
-		fire_rate = 0.11
-	}
-	self.sterling.spread = {
-		standing = 2.86,
-		crouching = 2.29,
-		steelsight = 1.43,
-		moving_standing = 3.57,
-		moving_crouching = 2.86,
-		moving_steelsight = 1.61,
-		per_shot = 0.096,
-		per_shot_steelsight = 0.032,
-		recovery = 8,
-		recovery_wait_multiplier = 1.25
-	}
-	self.sterling.kick = {
-		standing = {
-			1.6,
-			1.85,
-			-2.4,
-			2.4
-		},
-		crouching = {
-			1.55,
-			1.7,
-			-2.1,
-			2.1
-		},
-		steelsight = {
-			1.3,
-			1.45,
-			-1.65,
-			1.65
-		},
-		crouching_steelsight = {
-			1.25,
-			1.5,
-			-1.55,
-			1.55
-		}
-	}
-	self.sterling.recenter_speed = 1100
-	self.sterling.recenter_speed_steelsight = 1100
-	self.sterling.gun_kick = {
-		hip_fire = {
-			-30,
-			40,
-			-35,
-			35
-		},
-		steelsight = {
-			12,
-			15,
-			-32,
-			-15
-		},
-		position_ratio = 0.15
-	}
-	self.sterling.crosshair = {
-		standing = {},
-		crouching = {},
-		steelsight = {}
-	}
-	self.sterling.crosshair.standing.offset = 0.5
-	self.sterling.crosshair.standing.moving_offset = 0.8
-	self.sterling.crosshair.standing.kick_offset = 0.7
-	self.sterling.crosshair.crouching.offset = 0.3
-	self.sterling.crosshair.crouching.moving_offset = 0.6
-	self.sterling.crosshair.crouching.kick_offset = 0.5
-	self.sterling.crosshair.steelsight.hidden = true
-	self.sterling.crosshair.steelsight.offset = 0
-	self.sterling.crosshair.steelsight.moving_offset = 0
-	self.sterling.crosshair.steelsight.kick_offset = 0.3
-	self.sterling.shake = {
-		fire_multiplier = 1,
-		fire_steelsight_multiplier = -1
-	}
-	self.sterling.autohit = weapon_data.autohit_smg_default
-	self.sterling.aim_assist = weapon_data.aim_assist_smg_default
-	self.sterling.weapon_hold = "sterling"
-	self.sterling.animations = {
-		equip_id = "equip_sterling",
-		magazine_empty = "last_recoil",
-		recoil_steelsight = true
-	}
-	self.sterling.panic_suppression_chance = 0.2
-	self.sterling.gui = {
-		rotation_offset = -2,
-		distance_offset = 25,
-		height_offset = -4,
-		display_offset = -2,
-		initial_rotation = {}
-	}
-	self.sterling.gui.initial_rotation.yaw = -90
-	self.sterling.gui.initial_rotation.pitch = 0
-	self.sterling.gui.initial_rotation.roll = 0
-	self.sterling.gui.icon_large = "weapon_smg_sterling_large"
-	self.sterling.hud = {
-		icon = "weapon_panel_smg_sterling"
-	}
-	self.sterling.stats = {
-		zoom = 1,
-		total_ammo_mod = 21,
-		spread_moving = 9,
-		alert_size = 7,
-		spread = 6,
-		recoil = 4,
-		value = 7,
-		extra_ammo = 6,
-		suppression = 12,
-		concealment = 20
-	}
-end
-
--- Lines 4953-4962
+-- Lines 5556-5565
 function WeaponTweakData:_init_data_offhand_weapons()
 end

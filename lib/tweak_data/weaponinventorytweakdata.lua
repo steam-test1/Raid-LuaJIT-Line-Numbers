@@ -1,6 +1,6 @@
 WeaponInventoryTweakData = WeaponInventoryTweakData or class()
 
--- Lines 3-56
+-- Lines 3-68
 function WeaponInventoryTweakData:init()
 	self.weapon_primaries_index = {
 		{
@@ -54,6 +54,10 @@ function WeaponInventoryTweakData:init()
 		{
 			weapon_id = "garand_golden",
 			slot = 13
+		},
+		{
+			weapon_id = "geco",
+			slot = 14
 		}
 	}
 	self.weapon_secondaries_index = {

@@ -1511,7 +1511,7 @@ function RaycastWeaponBase:add_ammo_ratio(ratio)
 	return true
 end
 
--- Lines 1539-1594
+-- Lines 1539-1589
 function RaycastWeaponBase:add_ammo(ratio, add_amount_override)
 	if self:ammo_max() then
 		return false, 0
@@ -1556,7 +1556,7 @@ function RaycastWeaponBase:add_ammo(ratio, add_amount_override)
 	return picked_up, add_amount
 end
 
--- Lines 1597-1611
+-- Lines 1592-1606
 function RaycastWeaponBase:add_ammo_from_bag(available)
 	if self:ammo_max() then
 		return 0
@@ -1573,7 +1573,7 @@ function RaycastWeaponBase:add_ammo_from_bag(available)
 	return can_have
 end
 
--- Lines 1613-1628
+-- Lines 1608-1623
 function RaycastWeaponBase:reduce_ammo_by_procentage_of_total(ammo_procentage)
 	local ammo_max = self:get_ammo_max()
 	local ammo_total = self:get_ammo_total()
@@ -1593,30 +1593,30 @@ function RaycastWeaponBase:reduce_ammo_by_procentage_of_total(ammo_procentage)
 	self:set_ammo_remaining_in_clip(math.round(math.min(ammo_after_reduction, ammo_remaining_in_clip)))
 end
 
--- Lines 1632-1633
+-- Lines 1627-1628
 function RaycastWeaponBase:on_equip()
 end
 
--- Lines 1635-1636
+-- Lines 1630-1631
 function RaycastWeaponBase:on_unequip()
 end
 
--- Lines 1638-1640
+-- Lines 1633-1635
 function RaycastWeaponBase:on_enabled()
 	self._enabled = true
 end
 
--- Lines 1642-1644
+-- Lines 1637-1639
 function RaycastWeaponBase:on_disabled()
 	self._enabled = false
 end
 
--- Lines 1646-1648
+-- Lines 1641-1643
 function RaycastWeaponBase:enabled()
 	return self._enabled
 end
 
--- Lines 1652-1663
+-- Lines 1647-1658
 function RaycastWeaponBase:play_tweak_data_sound(event, alternative_event)
 	local sounds = tweak_data.weapon[self._name_id].sounds
 	local event = sounds and (sounds[event] or sounds[alternative_event])
@@ -1626,12 +1626,12 @@ function RaycastWeaponBase:play_tweak_data_sound(event, alternative_event)
 	end
 end
 
--- Lines 1665-1668
+-- Lines 1660-1663
 function RaycastWeaponBase:play_sound(event)
 	local result = self._sound_fire:post_event(event)
 end
 
--- Lines 1672-1678
+-- Lines 1667-1673
 function RaycastWeaponBase:destroy(unit)
 	RaycastWeaponBase.super.pre_destroy(self, unit)
 
@@ -1640,7 +1640,7 @@ function RaycastWeaponBase:destroy(unit)
 	end
 end
 
--- Lines 1682-1706
+-- Lines 1677-1701
 function RaycastWeaponBase:_get_spread(user_unit)
 	if user_unit == managers.player:player_unit() and managers.player:upgrade_value("player", "warcry_nullify_spread", false) == true then
 		return 0
@@ -1666,25 +1666,25 @@ function RaycastWeaponBase:_get_spread(user_unit)
 	return self._spread * tweak_data.weapon[self._name_id].spread[current_state._moving and "moving_standing" or "standing"] * spread_multiplier
 end
 
--- Lines 1710-1712
+-- Lines 1705-1707
 function RaycastWeaponBase:set_visibility_state(state)
 	self._unit:set_visible(state)
 end
 
--- Lines 1716-1718
+-- Lines 1711-1713
 function RaycastWeaponBase:set_bullet_hit_slotmask(new_slotmask)
 	self._bullet_slotmask = new_slotmask
 end
 
--- Lines 1723-1724
+-- Lines 1718-1719
 function RaycastWeaponBase:flashlight_state_changed()
 end
 
--- Lines 1727-1728
+-- Lines 1722-1723
 function RaycastWeaponBase:set_flashlight_enabled(enabled)
 end
 
--- Lines 1732-1736
+-- Lines 1727-1731
 function RaycastWeaponBase:set_timer(timer)
 	self._timer = timer
 
@@ -1692,14 +1692,14 @@ function RaycastWeaponBase:set_timer(timer)
 	self._unit:set_animation_timer(timer)
 end
 
--- Lines 1741-1743
+-- Lines 1736-1738
 function RaycastWeaponBase:uses_ammo()
 	return true
 end
 
 InstantBulletBase = InstantBulletBase or class()
 
--- Lines 1751-1826
+-- Lines 1746-1821
 function InstantBulletBase:on_collision(col_ray, weapon_unit, user_unit, damage, blank, no_sound)
 	local weapon_type = weapon_unit and weapon_unit:weapon() and weapon_unit:weapon().type or nil
 	local hit_unit = col_ray.unit
@@ -1762,7 +1762,7 @@ function InstantBulletBase:on_collision(col_ray, weapon_unit, user_unit, damage,
 	return result
 end
 
--- Lines 1828-1838
+-- Lines 1823-1833
 function InstantBulletBase:_get_character_push_multiplier(weapon_unit, died)
 	return 2.5
 
@@ -1773,7 +1773,7 @@ function InstantBulletBase:_get_character_push_multiplier(weapon_unit, died)
 	return died and 2.5 or nil
 end
 
--- Lines 1840-1844
+-- Lines 1835-1839
 function InstantBulletBase:on_hit_player(col_ray, weapon_unit, user_unit, damage)
 	local armor_piercing = alive(weapon_unit) and weapon_unit:base():weapon_tweak_data().armor_piercing or nil
 	col_ray.unit = managers.player:player_unit()
@@ -1781,17 +1781,17 @@ function InstantBulletBase:on_hit_player(col_ray, weapon_unit, user_unit, damage
 	return self:give_impact_damage(col_ray, weapon_unit, user_unit, damage, armor_piercing)
 end
 
--- Lines 1849-1851
+-- Lines 1844-1846
 function InstantBulletBase:bullet_slotmask()
 	return managers.slot:get_mask("bullet_impact_targets_no_teamai")
 end
 
--- Lines 1853-1855
+-- Lines 1848-1850
 function InstantBulletBase:blank_slotmask()
 	return managers.slot:get_mask("bullet_blank_impact_targets")
 end
 
--- Lines 1859-1861
+-- Lines 1854-1856
 function InstantBulletBase:play_impact_sound_and_effects(col_ray, no_sound, weapon_type)
 	managers.game_play_central:play_impact_sound_and_effects({
 		col_ray = col_ray,
@@ -1800,7 +1800,7 @@ function InstantBulletBase:play_impact_sound_and_effects(col_ray, no_sound, weap
 	})
 end
 
--- Lines 1865-1877
+-- Lines 1860-1872
 function InstantBulletBase:give_impact_damage(col_ray, weapon_unit, user_unit, damage, armor_piercing)
 	local action_data = {
 		variant = "bullet",
@@ -1816,7 +1816,7 @@ function InstantBulletBase:give_impact_damage(col_ray, weapon_unit, user_unit, d
 	return defense_data
 end
 
--- Lines 1881-1890
+-- Lines 1876-1885
 function InstantBulletBase._get_vector_sync_yaw_pitch(dir, yaw_resolution, pitch_resolution)
 	mrotation.set_look_at(tmp_rot1, dir, math.UP)
 
@@ -1845,17 +1845,17 @@ InstantExplosiveBulletBase.EFFECT_PARAMS = {
 	idstr_effect = Idstring("")
 }
 
--- Lines 1910-1912
+-- Lines 1905-1907
 function InstantExplosiveBulletBase:bullet_slotmask()
 	return managers.slot:get_mask("bullet_impact_targets")
 end
 
--- Lines 1914-1916
+-- Lines 1909-1911
 function InstantExplosiveBulletBase:blank_slotmask()
 	return managers.slot:get_mask("bullet_blank_impact_targets")
 end
 
--- Lines 1918-1920
+-- Lines 1913-1915
 function InstantExplosiveBulletBase:play_impact_sound_and_effects(col_ray)
 	managers.game_play_central:play_impact_sound_and_effects({
 		no_decal = true,
@@ -1863,7 +1863,7 @@ function InstantExplosiveBulletBase:play_impact_sound_and_effects(col_ray)
 	})
 end
 
--- Lines 1922-1980
+-- Lines 1917-1975
 function InstantExplosiveBulletBase:on_collision(col_ray, weapon_unit, user_unit, damage, blank)
 	local hit_unit = col_ray.unit
 
@@ -1914,7 +1914,7 @@ function InstantExplosiveBulletBase:on_collision(col_ray, weapon_unit, user_unit
 	return nil
 end
 
--- Lines 1982-2040
+-- Lines 1977-2035
 function InstantExplosiveBulletBase:on_collision_server(position, normal, damage, user_unit, weapon_unit, owner_peer_id, owner_selection_index)
 	local slot_mask = managers.slot:get_mask("explosion_targets")
 
@@ -1979,7 +1979,7 @@ function InstantExplosiveBulletBase:on_collision_server(position, normal, damage
 	end
 end
 
--- Lines 2042-2045
+-- Lines 2037-2040
 function InstantExplosiveBulletBase:on_collision_client(position, normal, damage, user_unit)
 	managers.explosion:give_local_player_dmg(position, self.RANGE, damage * self.PLAYER_DMG_MUL)
 	managers.explosion:explode_on_client(position, normal, user_unit, damage, self.RANGE, self.CURVE_POW, self.EFFECT_PARAMS)
@@ -1997,14 +1997,14 @@ FlameBulletBase.EFFECT_PARAMS = {
 	pushunits = tweak_data.upgrades
 }
 
--- Lines 2066-2069
+-- Lines 2061-2064
 function FlameBulletBase:on_hit_player(col_ray, weapon_unit, user_unit, damage)
 	col_ray.unit = managers.player:player_unit()
 
 	return self:give_fire_damage(col_ray, weapon_unit, user_unit, damage, false)
 end
 
--- Lines 2071-2137
+-- Lines 2066-2132
 function FlameBulletBase:on_collision(col_ray, weapon_unit, user_unit, damage, blank)
 	local hit_unit = col_ray.unit
 	local play_impact_flesh = false
@@ -2061,7 +2061,7 @@ function FlameBulletBase:on_collision(col_ray, weapon_unit, user_unit, damage, b
 	return result
 end
 
--- Lines 2139-2169
+-- Lines 2134-2164
 function FlameBulletBase:give_fire_damage(col_ray, weapon_unit, user_unit, damage, armor_piercing)
 	local fire_dot_data = nil
 
@@ -2091,7 +2091,7 @@ function FlameBulletBase:give_fire_damage(col_ray, weapon_unit, user_unit, damag
 	return defense_data
 end
 
--- Lines 2171-2185
+-- Lines 2166-2180
 function FlameBulletBase:give_fire_damage_dot(col_ray, weapon_unit, attacker_unit, damage, is_fire_dot_damage)
 	local action_data = {
 		variant = "fire",
@@ -2112,7 +2112,7 @@ end
 
 DragonBreathBulletBase = DragonBreathBulletBase or class(InstantBulletBase)
 
--- Lines 2192-2252
+-- Lines 2187-2247
 function DragonBreathBulletBase:on_collision(col_ray, weapon_unit, user_unit, damage, blank)
 	local hit_unit = col_ray.unit
 	local play_impact_flesh = not hit_unit:character_damage() or not hit_unit:character_damage()._no_blood
@@ -2165,7 +2165,7 @@ function DragonBreathBulletBase:on_collision(col_ray, weapon_unit, user_unit, da
 	return result
 end
 
--- Lines 2254-2266
+-- Lines 2249-2261
 function DragonBreathBulletBase:give_impact_damage(col_ray, weapon_unit, user_unit, damage, armor_piercing)
 	local action_data = {
 		variant = "bullet",
@@ -2189,7 +2189,7 @@ DOTBulletBase.DOT_DATA = {
 	dot_tick_period = 0.5
 }
 
--- Lines 2274-2287
+-- Lines 2269-2282
 function DOTBulletBase:on_collision(col_ray, weapon_unit, user_unit, damage, blank)
 	local result = DOTBulletBase.super.on_collision(self, col_ray, weapon_unit, user_unit, damage, blank, self.NO_BULLET_INPACT_SOUND)
 	local hit_unit = col_ray.unit
@@ -2201,7 +2201,7 @@ function DOTBulletBase:on_collision(col_ray, weapon_unit, user_unit, damage, bla
 	return result
 end
 
--- Lines 2289-2299
+-- Lines 2284-2294
 function DOTBulletBase:_dot_data_by_weapon(weapon_unit)
 	if not alive(weapon_unit) then
 		return nil
@@ -2216,7 +2216,7 @@ function DOTBulletBase:_dot_data_by_weapon(weapon_unit)
 	return nil
 end
 
--- Lines 2302-2306
+-- Lines 2297-2301
 function DOTBulletBase:start_dot_damage(col_ray, weapon_unit, dot_data)
 	local hurt_animation = not dot_data.hurt_animation_chance or math.rand(1) < dot_data.hurt_animation_chance
 	dot_data = dot_data or self.DOT_DATA
@@ -2224,7 +2224,7 @@ function DOTBulletBase:start_dot_damage(col_ray, weapon_unit, dot_data)
 	managers.dot:add_doted_enemy(col_ray.unit, TimerManager:game():time(), weapon_unit, dot_data.dot_length, dot_data.dot_damage, hurt_animation, self.VARIANT)
 end
 
--- Lines 2308-2322
+-- Lines 2303-2317
 function DOTBulletBase:give_damage_dot(col_ray, weapon_unit, attacker_unit, damage, hurt_animation)
 	local action_data = {
 		variant = self.VARIANT,
@@ -2248,7 +2248,7 @@ PoisonBulletBase.VARIANT = "poison"
 ProjectilesPoisonBulletBase = ProjectilesPoisonBulletBase or class(PoisonBulletBase)
 ProjectilesPoisonBulletBase.NO_BULLET_INPACT_SOUND = true
 
--- Lines 2331-2354
+-- Lines 2326-2349
 function ProjectilesPoisonBulletBase:on_collision(col_ray, weapon_unit, user_unit, damage, blank)
 	local result = DOTBulletBase.super.on_collision(self, col_ray, weapon_unit, user_unit, damage, blank, self.NO_BULLET_INPACT_SOUND)
 	local hit_unit = col_ray.unit
